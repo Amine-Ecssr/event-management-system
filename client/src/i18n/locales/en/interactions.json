@@ -1,0 +1,35 @@
+{
+  "editInteraction": "Edit Interaction",
+  "addInteraction": "Add Interaction",
+  "interactionType": "Interaction Type",
+  "description": "Description",
+  "outcome": "Outcome",
+  "createdAt": "Date & Time",
+  "types": {
+    "meeting": "Meeting",
+    "call": "Call",
+    "email": "Email",
+    "visit": "Visit",
+    "other": "Other"
+  },
+  "placeholders": {
+    "description": "Enter interaction details...",
+    "outcome": "Enter outcome or follow-up actions..."
+  },
+  "attachments": {
+    "label": "Attachments (Optional)",
+    "existing": "Existing Attachments",
+    "title": "Attachments",
+    "dropzone": "Drop files here or click to browse",
+    "maxFileSize": "Max file size: {{size}}",
+    "filesSelected": "{{count}} file(s) selected",
+    "uploading": "Uploading files...",
+    "deleted": "Attachment deleted",
+    "files": "file",
+    "files_plural": "files",
+    "errors": {
+      "fileTooLarge": "File {{fileName}} is too large. Maximum size is 10MB.",
+      "invalidFileType": "File {{fileName}} has an invalid type. Allowed types: PDF, Word, Excel, PowerPoint, images, ZIP, text files."
+    }
+  }
+}

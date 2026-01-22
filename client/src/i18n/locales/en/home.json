@@ -1,0 +1,11 @@
+{
+  "showList": "SHOW LIST",
+  "hideList": "HIDE LIST",
+  "upcomingEvents": "Upcoming Events",
+  "deleteEventConfirm": "Are you sure you want to delete \"{{eventName}}\"? This action cannot be undone.",
+  "deleteAllEventsTitle": "Delete All Events",
+  "deleteAllEventsWarning": "This will permanently delete all events. This action cannot be undone.",
+  "deleteAllEventsConfirm": "To confirm, type",
+  "deleteAllEventsPhrase": "DELETE ALL EVENTS",
+  "deleteAllEventsPlaceholder": "Type DELETE ALL EVENTS"
+}

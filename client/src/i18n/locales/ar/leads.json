@@ -1,0 +1,183 @@
+{
+  "title": "إدارة العملاء المحتملين",
+  "subtitle": "تتبع وإدارة العملاء المحتملين",
+  "leads": "العملاء المحتملون",
+  "leadsList": "قائمة العملاء المحتملين",
+  "addLead": "إضافة عميل محتمل",
+  "editLead": "تعديل العميل المحتمل",
+  "newLead": "عميل محتمل جديد",
+  "searchPlaceholder": "البحث في العملاء المحتملين...",
+  "noLeadsFound": "لم يتم العثور على عملاء محتملين",
+  "noLeadsYet": "لا يوجد عملاء محتملون بعد. أضف عميلاً محتملاً لبدء تتبع التفاعلات.",
+  "viewLead": "عرض العميل المحتمل",
+  "deleteLead": "حذف العميل المحتمل",
+  "confirmDelete": "هل أنت متأكد من حذف هذا العميل المحتمل؟",
+
+  "viewModes": {
+    "grid": "عرض الشبكة",
+    "table": "عرض الجدول"
+  },
+
+  "fields": {
+    "name": "الاسم",
+    "email": "البريد الإلكتروني",
+    "phone": "الهاتف",
+    "type": "النوع",
+    "status": "الحالة",
+    "createdAt": "تاريخ الإنشاء"
+  },
+
+  "types": {
+    "lead": "عميل محتمل",
+    "partner": "شريك",
+    "customer": "عميل"
+  },
+
+  "statuses": {
+    "active": "نشط",
+    "in_progress": "قيد التقدم",
+    "inactive": "غير نشط"
+  },
+
+  "tabs": {
+    "overview": "نظرة عامة",
+    "interactions": "التفاعلات",
+    "tasks": "المهام"
+  },
+
+  "overview": {
+    "leadDetails": "تفاصيل العميل المحتمل",
+    "contactDetails": "معلومات الاتصال",
+    "summary": "ملخص",
+    "totalInteractions": "إجمالي التفاعلات",
+    "pendingTasks": "المهام المعلقة",
+    "lastInteraction": "آخر تفاعل"
+  },
+
+  "interactions": {
+    "title": "التفاعلات",
+    "timeline": "الجدول الزمني للتفاعلات",
+    "addInteraction": "إضافة تفاعل",
+    "editInteraction": "تعديل التفاعل",
+    "noInteractions": "لم يتم تسجيل أي تفاعلات",
+    "noInteractionsDesc": "ابدأ بتتبع اتصالاتك مع هذا العميل المحتمل بإضافة أول تفاعل.",
+    "addFirstInteraction": "إضافة أول تفاعل",
+    "interactionType": "النوع",
+    "description": "الوصف",
+    "outcome": "النتيجة",
+    "createdAt": "التاريخ",
+    "filterSearch": "تصفية وبحث",
+    "filterByType": "تصفية حسب النوع",
+    "allTypes": "جميع الأنواع",
+    "searchPlaceholder": "البحث في التفاعلات...",
+    "newestFirst": "الأحدث أولاً",
+    "oldestFirst": "الأقدم أولاً",
+    "clearFilters": "مسح التصفية",
+    "noResults": "لا توجد تفاعلات مطابقة",
+    "noResultsDesc": "حاول تعديل التصفية أو كلمات البحث.",
+    "types": {
+      "email": "بريد إلكتروني",
+      "phone_call": "مكالمة هاتفية",
+      "meeting": "اجتماع",
+      "other": "أخرى"
+    },
+    "attachments": {
+      "label": "المرفقات (اختياري)",
+      "existing": "المرفقات الموجودة",
+      "title": "المرفقات",
+      "dropzone": "اسحب الملفات هنا أو انقر للتصفح",
+      "maxFileSize": "الحد الأقصى لحجم الملف: {{size}}",
+      "filesSelected": "تم تحديد {{count}} ملف",
+      "uploading": "جاري رفع الملفات...",
+      "deleted": "تم حذف المرفق",
+      "files": "{{count}} ملف",
+      "files_plural": "{{count}} ملف",
+      "errors": {
+        "fileTooLarge": "الملف {{fileName}} كبير جداً. الحد الأقصى للحجم هو 10 ميجابايت.",
+        "invalidFileType": "الملف {{fileName}} من نوع غير صالح. الأنواع المسموحة: PDF، Word، Excel، PowerPoint، الصور، ZIP، الملفات النصية."
+      }
+    }
+  },
+
+  "tasks": {
+    "title": "المهام",
+    "addTask": "إضافة مهمة",
+    "editTask": "تعديل المهمة",
+    "noTasks": "لا توجد مهام لهذا العميل المحتمل",
+    "taskTitle": "عنوان المهمة",
+    "dueDate": "تاريخ الاستحقاق",
+    "assignee": "المسند إليه",
+    "assignedDepartment": "القسم المسند",
+    "selectDepartment": "اختر القسم",
+    "unassigned": "غير مسند",
+    "priority": "الأولوية",
+    "status": "الحالة",
+    "description": "الوصف",
+    "markComplete": "تحديد كمكتمل",
+    "markIncomplete": "تحديد كغير مكتمل",
+    "taskStatuses": {
+      "pending": "معلق",
+      "in_progress": "قيد التنفيذ",
+      "completed": "مكتمل"
+    },
+    "priorities": {
+      "low": "منخفضة",
+      "medium": "متوسطة",
+      "high": "عالية"
+    }
+  },
+
+  "assignees": {
+    "title": "المسندون",
+    "addAssignee": "إضافة مسند",
+    "editAssignee": "تعديل المسند",
+    "noAssignees": "لا يوجد مسندون بعد",
+    "selectAssignee": "اختر المسند",
+    "unassigned": "غير مسند"
+  },
+
+  "messages": {
+    "leadCreated": "تم إنشاء العميل المحتمل بنجاح",
+    "leadUpdated": "تم تحديث العميل المحتمل بنجاح",
+    "leadDeleted": "تم حذف العميل المحتمل بنجاح",
+    "interactionAdded": "تم إضافة التفاعل بنجاح",
+    "interactionUpdated": "تم تحديث التفاعل بنجاح",
+    "interactionDeleted": "تم حذف التفاعل بنجاح",
+    "taskCreated": "تم إنشاء المهمة بنجاح",
+    "taskUpdated": "تم تحديث المهمة بنجاح",
+    "taskDeleted": "تم حذف المهمة بنجاح",
+    "taskCompleted": "تم تحديد المهمة كمكتملة",
+    "taskReopened": "تم إعادة فتح المهمة"
+  },
+
+  "confirmations": {
+    "deleteLead": "هل أنت متأكد من حذف هذا العميل المحتمل؟",
+    "deleteInteraction": "هل أنت متأكد من حذف هذا التفاعل؟",
+    "deleteTask": "هل أنت متأكد من حذف هذه المهمة؟"
+  },
+
+  "placeholders": {
+    "namePlaceholder": "أدخل اسم العميل المحتمل...",
+    "emailPlaceholder": "أدخل البريد الإلكتروني...",
+    "phonePlaceholder": "أدخل رقم الهاتف...",
+    "selectType": "اختر النوع...",
+    "selectStatus": "اختر الحالة...",
+    "selectAssignee": "اختر المسند إليه...",
+    "interactionDescription": "صف التفاعل...",
+    "outcomePlaceholder": "ما كانت النتيجة؟",
+    "taskTitle": "مثال: إرسال بريد متابعة",
+    "taskDescription": "تفاصيل المهمة..."
+  },
+
+  "filters": {
+    "allTypes": "جميع الأنواع",
+    "allStatuses": "جميع الحالات",
+    "activeOnly": "النشطة فقط"
+  },
+
+  "empty": {
+    "noLeads": "لم يتم العثور على عملاء محتملين",
+    "noInteractions": "لا توجد تفاعلات لهذا العميل المحتمل",
+    "noTasks": "لا توجد مهام لهذا العميل المحتمل"
+  }
+}

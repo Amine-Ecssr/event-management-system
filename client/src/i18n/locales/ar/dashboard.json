@@ -1,0 +1,65 @@
+{
+  "welcome": {
+    "greeting": "مرحباً بعودتك",
+    "subtitle": "إليك ما يحدث مع فعالياتك ومهامك"
+  },
+  "stats": {
+    "totalEvents": "إجمالي الفعاليات",
+    "upcomingEvents": "الفعاليات القادمة",
+    "totalTasks": "إجمالي المهام",
+    "pendingTasks": "المهام المعلقة",
+    "completedTasks": "المهام المكتملة",
+    "activePartnerships": "الشراكات النشطة",
+    "totalContacts": "إجمالي جهات الاتصال"
+  },
+  "stakeholder": {
+    "dashboard": {
+      "title": "لوحة تحكم القسم",
+      "subtitle": "إدارة الفعاليات والمهام المعينة لك",
+      "welcomeSubtitle": "مرحباً {{name}}! إليك الفعاليات والمهام المعينة لك"
+    }
+  },
+  "quickActions": {
+    "title": "إجراءات سريعة",
+    "addEvent": "إضافة فعالية",
+    "addEventDesc": "إنشاء فعالية جديدة",
+    "viewCalendar": "عرض التقويم",
+    "viewCalendarDesc": "تصفح جميع الفعاليات",
+    "manageTasks": "إدارة المهام",
+    "manageTasksDesc": "عرض وإدارة المهام",
+    "viewArchive": "عرض الأرشيف",
+    "viewArchiveDesc": "تصفح الفعاليات السابقة",
+    "managePartnerships": "إدارة الشراكات",
+    "managePartnershipsDesc": "تتبع المنظمات الشريكة",
+    "manageContacts": "إدارة جهات الاتصال",
+    "manageContactsDesc": "تنظيم جهات الاتصال والمتحدثين",
+    "settings": "الإعدادات",
+    "settingsDesc": "تكوين إعدادات النظام"
+  },
+  "upcomingEvents": {
+    "title": "الفعاليات القادمة",
+    "viewAll": "عرض الكل",
+    "noEvents": "لا توجد فعاليات قادمة",
+    "next7Days": "الأيام الـ 7 القادمة",
+    "next30Days": "الأيام الـ 30 القادمة"
+  },
+  "recentTasks": {
+    "title": "المهام الأخيرة",
+    "subtitle": "المهام القادمة والمتأخرة",
+    "viewAll": "عرض جميع المهام",
+    "noTasks": "لا توجد مهام معينة",
+    "dueDate": "تاريخ الاستحقاق",
+    "overdue": "متأخر",
+    "status": {
+      "pending": "معلق",
+      "in_progress": "قيد التنفيذ",
+      "completed": "مكتمل",
+      "cancelled": "ملغي",
+      "waiting": "في الانتظار"
+    }
+  },
+  "calendar": {
+    "title": "هذا الشهر",
+    "viewFull": "عرض التقويم الكامل"
+  }
+}

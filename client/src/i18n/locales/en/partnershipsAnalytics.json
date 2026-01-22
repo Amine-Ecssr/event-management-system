@@ -1,0 +1,100 @@
+{
+  "title": "Partnerships Analytics",
+  "subtitle": "Track and analyze partnership performance",
+  "error": "Error loading dashboard",
+  
+  "activeAgreements": "Active Agreements",
+  "partnerOrganizations": "Partner Organizations",
+  "expiringThisMonth": "Expiring This Month",
+  "newThisMonth": "New This Month",
+  "totalActivities": "Total Activities",
+  "total": "total",
+  "thisQuarter": "this quarter",
+  "thisMonth": "this month",
+  
+  "agreementsExpiringQuarter": "agreements expiring this quarter",
+  "reviewRenewals": "Review and initiate renewal conversations",
+  "actionRequired": "Action Required",
+  
+  "insights": "Insights",
+  "activityTab": "Activity",
+  "renewals": "Renewals",
+  "pipeline": "Pipeline",
+  "partners": "Partners",
+  "trends": "Trends",
+  
+  "partnersByCountry": "Partners by Country",
+  "partnersByCountryDesc": "Geographic distribution of partner organizations",
+  "activityTypesTitle": "Activity Types",
+  "activityTypesDesc": "Breakdown of partnership activities by type",
+  "mostActivePartners": "Most Active Partners",
+  "mostActivePartnersDesc": "Partners ranked by activity level",
+  "agreementTypesDesc": "Distribution of agreements by type",
+  "trendsDesc": "Monthly new agreements, expirations, and activities",
+  "recentActivityDesc": "Latest partnership events and updates",
+  "renewalsDesc": "Agreements expiring soon that need attention",
+  
+  "activityBreakdown": "Activity Types",
+  "lastActivity": "Last Activity",
+  "country": "Country",
+  "activities": "Activities",
+  "totalActivitiesCount": "Total: {{count}} activities",
+  
+  "activityTypes": {
+    "jointEvent": "Joint Event",
+    "sponsorship": "Sponsorship",
+    "collaboration": "Collaboration",
+    "training": "Training",
+    "exchange": "Exchange",
+    "meeting": "Meeting",
+    "other": "Other"
+  },
+  
+  "stages": {
+    "draft": "Draft",
+    "pending": "Pending",
+    "active": "Active",
+    "expiring": "Expiring Soon",
+    "expired": "Expired"
+  },
+  
+  "noAgreements": "No agreements",
+  
+  "priority": {
+    "high": "Urgent",
+    "medium": "Soon",
+    "low": "Upcoming"
+  },
+  
+  "days": "days",
+  "contact": "Contact",
+  "noUpcomingRenewals": "No upcoming renewals in the next 90 days",
+  
+  "upcomingRenewals": "Upcoming Renewals",
+  "agreementTypes": "Agreement Types",
+  "agreements": "agreements",
+  "noData": "No data available",
+  
+  "partnerPerformance": "Partner Rankings",
+  "noPartners": "No partner data available",
+  "rank": "Rank",
+  "organization": "Organization",
+  "totalAgreements": "Total",
+  "activeAgreementsLabel": "Active",
+  "partnerSince": "Partner Since",
+  
+  "partnershipTrends": "Partnership Trends",
+  "newAgreements": "New Agreements",
+  "expirations": "Expirations",
+  "netChange": "Net Change",
+  "noTrendData": "No trend data available",
+  
+  "recentActivity": "Recent Activity",
+  "noActivity": "No recent activity",
+  "activity": {
+    "created": "Created",
+    "renewed": "Renewed",
+    "expired": "Expired",
+    "updated": "Updated"
+  }
+}

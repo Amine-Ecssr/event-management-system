@@ -1,0 +1,319 @@
+# Development Docker Compose configuration with hot reload
+
+services:
+  # Elasticsearch with ICU plugin for Arabic support
+  elasticsearch:
+    build:
+      context: ./elasticsearch
+      dockerfile: Dockerfile
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
+    container_name: ecssr-events-elasticsearch-dev
+    restart: unless-stopped
+    environment:
+      - node.name=eventcal-es-dev
+      - cluster.name=eventcal-cluster-dev
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      - xpack.security.enabled=true
+      - ELASTIC_PASSWORD=${ELASTICSEARCH_PASSWORD:-eventcal-dev-password-2024}
+      - xpack.security.http.ssl.enabled=false
+      - xpack.security.transport.ssl.enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - elasticsearch_data_dev:/usr/share/elasticsearch/data
+      - ./elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+      - ./elasticsearch/jvm.options.d/eventcal.options:/usr/share/elasticsearch/config/jvm.options.d/eventcal.options:ro
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    networks:
+      - dev-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf -u elastic:${ELASTICSEARCH_PASSWORD:-eventcal-dev-password-2024} http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+
+  # Kibana for Elasticsearch visualization (development only)
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.12.0
+    container_name: ecssr-events-kibana-dev
+    restart: unless-stopped
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=kibana_system
+      - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD:-kibana-dev-password-2024}
+      - SERVER_NAME=eventcal-kibana-dev
+      - SERVER_PUBLICBASEURL=http://localhost:5601
+      - XPACK_SECURITY_ENABLED=true
+      - XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=${KIBANA_ENCRYPTION_KEY:-eventcal32charencryptionkey2024!}
+    ports:
+      - "5601:5601"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:5601/api/status || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 90s
+    networks:
+      - dev-network
+
+  # PostgreSQL Database
+  db:
+    image: postgres:16-alpine
+    container_name: ecssr-events-db-dev
+    restart: unless-stopped
+    env_file:
+      - .env.development
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-ecssr_events_dev}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+      - ./init-keycloak-schema.sql:/docker-entrypoint-initdb.d/init-keycloak-schema.sql
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - dev-network
+
+  # Database Migrations
+  migrate:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    container_name: ecssr-events-migrate-dev
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-ecssr_events_dev}
+    command: npm run db:migrate
+    restart: "no"
+    networks:
+      - dev-network
+
+
+  # Keycloak (matches production image but runs locally)
+  keycloak:
+    image: quay.io/keycloak/keycloak:23.0
+    container_name: ecssr-events-keycloak-dev
+    restart: unless-stopped
+    command: start-dev
+    env_file:
+      - .env.development
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-ecssr_events_dev}
+      KC_DB_USERNAME: ${POSTGRES_USER:-postgres}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      KC_DB_SCHEMA: keycloak
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_HTTPS: "false"
+      KC_HTTP_ENABLED: "true"
+      KC_HEALTH_ENABLED: "true"
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://127.0.0.1:8080/health/ready || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 90s
+    networks:
+      - dev-network
+
+  # MinIO Object Storage for Archive Media
+  minio:
+    image: minio/minio:latest
+    container_name: ecssr-events-minio-dev
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-minioadmin}
+    volumes:
+      - minio_data_dev:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - dev-network
+
+  # Application Server (Development with hot reload)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: ecssr-events-app-dev
+    restart: unless-stopped
+    env_file:
+      - .env.development
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+      keycloak:
+        condition: service_started
+      elasticsearch:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      PORT: ${PORT:-5050}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-ecssr_events_dev}
+      
+      # Elasticsearch configuration
+      # For Serverless: Use ELASTICSEARCH_CLOUD_ID + ELASTICSEARCH_API_KEY
+      # For Traditional: Use ELASTICSEARCH_URL + USERNAME + PASSWORD
+      ELASTICSEARCH_CLOUD_ID: ${ELASTICSEARCH_CLOUD_ID:-}
+      ELASTICSEARCH_API_KEY: ${ELASTICSEARCH_API_KEY:-}
+      ELASTICSEARCH_URL: ${ELASTICSEARCH_URL:-http://elasticsearch:9200}
+      ELASTICSEARCH_USERNAME: ${ELASTICSEARCH_USERNAME:-elastic}
+      ELASTICSEARCH_PASSWORD: ${ELASTICSEARCH_PASSWORD:-eventcal-dev-password-2024}
+      ELASTICSEARCH_ENABLED: ${ELASTICSEARCH_ENABLED:-true}
+      ES_INDEX_PREFIX: ${ES_INDEX_PREFIX:-eventcal}
+      ES_INDEX_SUFFIX: ${ES_INDEX_SUFFIX:-dev}
+      SESSION_SECRET: ${SESSION_SECRET:-dev-secret-change-in-production}
+      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_REDIRECT_URI: http://localhost:5050/api/auth/callback
+      # Force Docker service name for scraper (not localhost)
+      SCRAPER_SERVICE_URL: http://scraper-service:3002
+      SCRAPER_SERVICE_TOKEN: ${SCRAPER_SERVICE_TOKEN:-dev-change-this-scraper-token}
+      SCRAPER_SERVICE_SECRET: ${SCRAPER_SERVICE_SECRET:-dev-change-this-scraper-secret}
+      
+      # Legacy admin credentials (for bootstrap)
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
+      
+      # Superadmin credentials
+      SUPERADMIN_EMAIL: ${SUPERADMIN_EMAIL:-admin@localhost.ae}
+      SUPERADMIN_PASSWORD: ${SUPERADMIN_PASSWORD:-admin123}
+      
+      # Email configuration (Resend)
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      FROM_EMAIL: ${FROM_EMAIL:-noreply@example.com}
+      
+      # Or SMTP configuration
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+      
+      # WhatsApp configuration
+      WHATSAPP_ENABLED: ${WHATSAPP_ENABLED:-false}
+      WHATSAPP_SERVICE_URL: ${WHATSAPP_SERVICE_URL:-http://whatsapp-service:3001}
+      WHATSAPP_AUTH_PHRASE: ${WHATSAPP_AUTH_PHRASE:-dev-change-me}
+      WHATSAPP_DEFAULT_GROUP: ${WHATSAPP_DEFAULT_GROUP:-ECSSR Events}
+      
+      # MinIO configuration for Archive Media
+      MINIO_ENDPOINT: ${MINIO_ENDPOINT:-minio}
+      MINIO_PORT: ${MINIO_PORT:-9000}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
+      MINIO_BUCKET: ${MINIO_BUCKET:-ecssr-archive}
+      MINIO_EVENTS_BUCKET: ${MINIO_EVENTS_BUCKET:-ecssr-events}
+      MINIO_USE_SSL: ${MINIO_USE_SSL:-false}
+      
+      # AI Image Generation (optional - for sample data)
+      AI_IMAGE_PROVIDER: ${AI_IMAGE_PROVIDER:-placeholder}
+      AI_IMAGE_API_KEY: ${AI_IMAGE_API_KEY:-}
+    ports:
+      - "${PORT:-5050}:${PORT:-5050}"
+    volumes:
+      # Bind mount for hot reload
+      - .:/app
+      - /app/node_modules
+      - uploads_data_dev:/app/uploads
+    networks:
+      - dev-network
+
+  # WhatsApp Service (Development)
+  whatsapp-service:
+    build:
+      context: ./whatsapp-service
+      dockerfile: Dockerfile
+    container_name: ecssr-whatsapp-service-dev
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      WHATSAPP_AUTH_PHRASE: ${WHATSAPP_AUTH_PHRASE:-dev-change-me}
+      WHATSAPP_DEFAULT_GROUP: ${WHATSAPP_DEFAULT_GROUP:-ECSSR Events}
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./whatsapp-service:/app
+      - /app/node_modules
+      - ./whatsapp-service/auth_info:/app/auth_info
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    networks:
+      - dev-network
+
+  scraper-service:
+    build:
+      context: .
+      dockerfile: scraper-service/Dockerfile
+    container_name: ecssr-scraper-service-dev
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 3002
+      SCRAPER_SERVICE_TOKEN: ${SCRAPER_SERVICE_TOKEN:-dev-change-this-scraper-token}
+      SCRAPER_SERVICE_SECRET: ${SCRAPER_SERVICE_SECRET:-dev-change-this-scraper-secret}
+    ports:
+      - "3002:3002"
+    volumes:
+      - ./scraper-service:/app/scraper-service
+      - ./shared:/app/shared
+    networks:
+      - dev-network
+
+volumes:
+  postgres_data_dev:
+    driver: local
+  uploads_data_dev:
+    driver: local
+  whatsapp_sessions_dev:
+    driver: local
+  minio_data_dev:
+    driver: local
+  elasticsearch_data_dev:
+    driver: local
+
+networks:
+  dev-network:
+    driver: bridge

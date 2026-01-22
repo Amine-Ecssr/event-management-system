@@ -1,0 +1,65 @@
+{
+  "welcome": {
+    "greeting": "Welcome back",
+    "subtitle": "Here's what's happening with your events and tasks"
+  },
+  "stats": {
+    "totalEvents": "Total Events",
+    "upcomingEvents": "Upcoming Events",
+    "totalTasks": "Total Tasks",
+    "pendingTasks": "Pending Tasks",
+    "completedTasks": "Completed Tasks",
+    "activePartnerships": "Active Partnerships",
+    "totalContacts": "Total Contacts"
+  },
+  "stakeholder": {
+    "dashboard": {
+      "title": "Department Dashboard",
+      "subtitle": "Manage your assigned events and tasks",
+      "welcomeSubtitle": "Welcome {{name}}! Here are your assigned events and tasks"
+    }
+  },
+  "quickActions": {
+    "title": "Quick Actions",
+    "addEvent": "Add Event",
+    "addEventDesc": "Create a new event",
+    "viewCalendar": "View Calendar",
+    "viewCalendarDesc": "Browse all events",
+    "manageTasks": "Manage Tasks",
+    "manageTasksDesc": "View and manage tasks",
+    "viewArchive": "View Archive",
+    "viewArchiveDesc": "Browse past events",
+    "managePartnerships": "Manage Partnerships",
+    "managePartnershipsDesc": "Track partner organizations",
+    "manageContacts": "Manage Contacts",
+    "manageContactsDesc": "Organize contacts and speakers",
+    "settings": "Settings",
+    "settingsDesc": "Configure system settings"
+  },
+  "upcomingEvents": {
+    "title": "Upcoming Events",
+    "viewAll": "View All",
+    "noEvents": "No upcoming events",
+    "next7Days": "Next 7 days",
+    "next30Days": "Next 30 days"
+  },
+  "recentTasks": {
+    "title": "Recent Tasks",
+    "subtitle": "Upcoming and overdue tasks",
+    "viewAll": "View All Tasks",
+    "noTasks": "No tasks assigned",
+    "dueDate": "Due",
+    "overdue": "Overdue",
+    "status": {
+      "pending": "Pending",
+      "in_progress": "In Progress",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "waiting": "Waiting"
+    }
+  },
+  "calendar": {
+    "title": "This Month",
+    "viewFull": "View Full Calendar"
+  }
+}

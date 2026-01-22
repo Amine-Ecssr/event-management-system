@@ -1,0 +1,196 @@
+{
+  "title": "Engagement Analytics",
+  "subtitle": "Comprehensive insights into contact and event engagement",
+  "description": "Track invitation-to-attendance conversion and contact engagement patterns",
+  "tabs": {
+    "overview": "Overview",
+    "contacts": "Individual Contacts",
+    "organizations": "Organizations"
+  },
+  "sections": {
+    "individualContactStatistics": "Individual Contact Statistics",
+    "individualContactStatisticsDesc": "Track individual contact engagement, including top attendees and personal conversion rates.",
+    "organizationEngagement": "Organization Engagement",
+    "organizationEngagementDesc": "View which organizations have higher conversion and attendance rates, ranked by engagement metrics."
+  },
+  "stats": {
+    "totalInvitations": "Total Invitations",
+    "emailsSentCount": "{{count}} emails sent",
+    "registrations": "Registrations",
+    "conversionRate": "{{rate}}% conversion",
+    "attendance": "Total Attendance",
+    "ofRegistered": "{{rate}}% of registered",
+    "overallConversion": "Overall Conversion",
+    "inviteToAttend": "invite → attend",
+    "activeContacts": "Active Contacts",
+    "ofTotal": "of {{total}} total"
+  },
+  "trends": {
+    "title": "Monthly Engagement Trends",
+    "subtitle": "invitations vs attendance"
+  },
+  "distribution": {
+    "title": "Contact Engagement Distribution",
+    "subtitle": "Breakdown by engagement level"
+  },
+  "tiers": {
+    "highlyEngaged": "Highly Engaged (5+)",
+    "moderatelyEngaged": "Moderately Engaged (2-4)",
+    "lowEngaged": "Low Engaged (1)",
+    "notEngaged": "Not Engaged"
+  },
+  "category": {
+    "title": "Engagement by Event Category",
+    "subtitle": "Compare invitations and attendance across categories"
+  },
+  "topEvents": {
+    "title": "Top Performing Events",
+    "subtitle": "Ranked by attendance rate",
+    "attendedCount": "{{attended}} / {{invited}} attended"
+  },
+  "eventType": {
+    "title": "Performance by Event Type",
+    "subtitle": "Local vs International, Internal vs External",
+    "rateAndEvents": "{{rate}}% rate • {{count}} events"
+  },
+  "eventTypes": {
+    "local": "Local",
+    "international": "International"
+  },
+  "eventScopes": {
+    "internal": "Internal",
+    "external": "External"
+  },
+  "geographic": {
+    "title": "Geographic Engagement",
+    "subtitle": "Contact engagement by country"
+  },
+  "detailedAnalytics": {
+    "title": "Detailed Engagement Analytics",
+    "subtitle": "Organization and individual-level conversion and attendance insights"
+  },
+  "conversionFunnel": {
+    "title": "Conversion Funnel",
+    "description": "Track the journey from invitation to attendance",
+    "emailSent": "Email Sent",
+    "registered": "Registered",
+    "rsvp": "RSVP",
+    "attended": "Attended"
+  },
+  "engagementByCategory": {
+    "title": "Engagement by Event Category",
+    "description": "Compare engagement metrics across different event categories",
+    "tableHeaders": {
+      "category": "Category",
+      "events": "Events",
+      "registrationRate": "Registration %",
+      "rsvpRate": "RSVP %",
+      "attendanceRate": "Attendance %"
+    }
+  },
+  "seasonalTrends": {
+    "title": "Seasonal Engagement Trends",
+    "description": "Track engagement patterns throughout the year"
+  },
+  "contactEngagementLevels": {
+    "title": "Contact Engagement Levels",
+    "description": "Distribution of contacts by engagement frequency",
+    "highlyEngaged": "Highly Engaged (5+ events)",
+    "moderatelyEngaged": "Moderately Engaged (2-4 events)",
+    "lowEngaged": "Low Engaged (1 event)",
+    "notEngaged": "Not Engaged"
+  },
+  "geographicDistribution": {
+    "title": "Geographic Distribution",
+    "description": "Top countries by contact engagement",
+    "contacts": "Contacts",
+    "attendances": "Attendances"
+  },
+  "topPerformingEvents": {
+    "title": "Top Performing Events",
+    "description": "Events with highest attendance rates",
+    "tableHeaders": {
+      "event": "Event",
+      "category": "Category",
+      "date": "Date",
+      "invitees": "Invitees",
+      "attendees": "Attendees",
+      "rate": "Rate"
+    }
+  },
+  "eventTypePerformance": {
+    "title": "Performance by Event Type & Scope",
+    "description": "Compare local vs international and internal vs external events",
+    "tableHeaders": {
+      "type": "Type",
+      "scope": "Scope",
+      "events": "Events",
+      "invitees": "Invitees",
+      "attendees": "Attendees",
+      "attendanceRate": "Attendance %"
+    }
+  },
+  "chart": {
+    "invitees": "Invitees",
+    "attendees": "Attendees",
+    "events": "Events"
+  },
+  "contactStatistics": {
+    "totalContacts": "Total Contacts",
+    "withEvents": "with events",
+    "withoutEvents": "without",
+    "averageAttendance": "Average Attendance",
+    "eventsPerActiveContact": "events per active contact",
+    "registrationRate": "Registration Rate",
+    "ofInvitees": "of {{total}} invitees",
+    "rsvpConversion": "RSVP Conversion",
+    "confirmedRsvps": "confirmed RSVPs",
+    "topAttendees": "Top Attendees",
+    "noAttendeesYet": "No attendees yet"
+  },
+  "organizationStatistics": {
+    "totalOrganizations": "Total Organizations",
+    "withEventAttendance": "with event attendance",
+    "avgAttendanceRate": "Avg Attendance Rate",
+    "acrossAllOrganizations": "across all organizations",
+    "topOrganization": "Top Organization",
+    "totalAttendances": "total attendances",
+    "engagementRankings": "Organization Engagement Rankings",
+    "tableHeaders": {
+      "rank": "Rank",
+      "organization": "Organization",
+      "contacts": "Contacts",
+      "active": "Active",
+      "attendances": "Attendances",
+      "avgPerContact": "Avg/Contact",
+      "rate": "Rate",
+      "topAttendee": "Top Attendee"
+    },
+    "events": "events",
+    "noStatisticsAvailable": "No organization statistics available"
+  },
+  "errors": {
+    "failedToLoadEngagement": "Failed to load engagement analytics. Please try refreshing the page.",
+    "failedToLoadContacts": "Failed to load contact statistics. Please try refreshing the page.",
+    "failedToLoadOrganizations": "Failed to load organization statistics. Please try refreshing the page."
+  },
+  "months": {
+    "jan": "Jan",
+    "feb": "Feb",
+    "mar": "Mar",
+    "apr": "Apr",
+    "may": "May",
+    "jun": "Jun",
+    "jul": "Jul",
+    "aug": "Aug",
+    "sep": "Sep",
+    "oct": "Oct",
+    "nov": "Nov",
+    "dec": "Dec"
+  },
+  "alerts": {
+    "contactsNotEngaged": "contacts have not attended any events",
+    "considerReEngagement": "Consider targeted re-engagement campaigns",
+    "needsAttention": "Needs Attention"
+  }
+}

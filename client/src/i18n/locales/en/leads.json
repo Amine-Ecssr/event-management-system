@@ -1,0 +1,182 @@
+{
+  "title": "Lead Management",
+  "subtitle": "Track and manage leads and prospects",
+  "leads": "Leads",
+  "leadsList": "Leads List",
+  "addLead": "Add Lead",
+  "editLead": "Edit Lead",
+  "newLead": "New Lead",
+  "searchPlaceholder": "Search leads...",
+  "noLeadsFound": "No leads found",
+  "noLeadsYet": "No leads yet. Add a lead to start tracking interactions.",
+  "viewLead": "View Lead",
+  "deleteLead": "Delete Lead",
+  "confirmDelete": "Are you sure you want to delete this lead?",
+
+  "viewModes": {
+    "grid": "Grid View",
+    "table": "Table View"
+  },
+
+  "fields": {
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "type": "Type",
+    "status": "Status",
+    "createdAt": "Created At"
+  },
+
+  "types": {
+    "lead": "Lead",
+    "partner": "Partner",
+    "customer": "Customer"
+  },
+
+  "statuses": {
+    "active": "Active",
+    "in_progress": "In Progress",
+    "inactive": "Inactive"
+  },
+
+  "tabs": {
+    "overview": "Overview",
+    "interactions": "Interactions",
+    "tasks": "Tasks"
+  },
+
+  "overview": {
+    "leadDetails": "Lead Details",
+    "contactDetails": "Contact Details",
+    "summary": "Summary",
+    "totalInteractions": "Total Interactions",
+    "pendingTasks": "Pending Tasks",
+    "lastInteraction": "Last Interaction"
+  },
+
+  "interactions": {
+    "title": "Interactions",
+    "timeline": "Interaction Timeline",
+    "addInteraction": "Add Interaction",
+    "editInteraction": "Edit Interaction",
+    "noInteractions": "No interactions recorded",
+    "noInteractionsDesc": "Start tracking your communications with this lead by adding your first interaction.",
+    "addFirstInteraction": "Add First Interaction",
+    "interactionType": "Type",
+    "description": "Description",
+    "outcome": "Outcome",
+    "createdAt": "Date",
+    "filterSearch": "Filter & Search",
+    "filterByType": "Filter by type",
+    "allTypes": "All Types",
+    "searchPlaceholder": "Search interactions...",
+    "newestFirst": "Newest First",
+    "oldestFirst": "Oldest First",
+    "clearFilters": "Clear Filters",
+    "noResults": "No matching interactions",
+    "noResultsDesc": "Try adjusting your filters or search terms.",
+    "types": {
+      "email": "Email",
+      "phone_call": "Phone Call",
+      "meeting": "Meeting",
+      "other": "Other"
+    },
+    "attachments": {
+      "label": "Attachments (Optional)",
+      "existing": "Existing Attachments",
+      "title": "Attachments",
+      "dropzone": "Drop files here or click to browse",
+      "maxFileSize": "Max file size: {{size}}",
+      "filesSelected": "{{count}} file(s) selected",
+      "uploading": "Uploading files...",
+      "deleted": "Attachment deleted",
+      "files": "{{count}} file",
+      "files_plural": "{{count}} files",
+      "errors": {
+        "fileTooLarge": "File {{fileName}} is too large. Maximum size is 10MB.",
+        "invalidFileType": "File {{fileName}} has an invalid type. Allowed types: PDF, Word, Excel, PowerPoint, images, ZIP, text files."
+      }
+    }
+  },
+
+  "tasks": {
+    "title": "Tasks",
+    "addTask": "Add Task",
+    "editTask": "Edit Task",
+    "noTasks": "No tasks for this lead",
+    "taskTitle": "Task Title",
+    "dueDate": "Due Date",
+    "assignee": "Assignee",
+    "assignedDepartment": "Assigned Department",
+    "selectDepartment": "Select Department",
+    "unassigned": "Unassigned",
+    "priority": "Priority",
+    "status": "Status",
+    "description": "Description",
+    "markComplete": "Mark Complete",
+    "markIncomplete": "Mark Incomplete",
+    "taskStatuses": {
+      "pending": "Pending",
+      "in_progress": "In Progress",
+      "completed": "Completed"
+    },
+    "priorities": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    }
+  },
+
+  "assignees": {
+    "title": "Assignees",
+    "addAssignee": "Add Assignee",
+    "editAssignee": "Edit Assignee",
+    "noAssignees": "No assignees yet",
+    "selectAssignee": "Select Assignee",
+    "unassigned": "Unassigned"
+  },
+
+  "messages": {
+    "leadCreated": "Lead created successfully",
+    "leadUpdated": "Lead updated successfully",
+    "leadDeleted": "Lead deleted successfully",
+    "interactionAdded": "Interaction added successfully",
+    "interactionUpdated": "Interaction updated successfully",
+    "interactionDeleted": "Interaction deleted successfully",
+    "taskCreated": "Task created successfully",
+    "taskUpdated": "Task updated successfully",
+    "taskDeleted": "Task deleted successfully",
+    "taskCompleted": "Task marked as completed",
+    "taskReopened": "Task reopened"
+  },
+  "confirmations": {
+    "deleteLead": "Are you sure you want to delete this lead?",
+    "deleteInteraction": "Are you sure you want to delete this interaction?",
+    "deleteTask": "Are you sure you want to delete this task?"
+  },
+
+  "placeholders": {
+    "namePlaceholder": "Enter lead name...",
+    "emailPlaceholder": "Enter email address...",
+    "phonePlaceholder": "Enter phone number...",
+    "selectType": "Select type...",
+    "selectStatus": "Select status...",
+    "selectAssignee": "Select assignee...",
+    "interactionDescription": "Describe the interaction...",
+    "outcomePlaceholder": "What was the outcome?",
+    "taskTitle": "e.g., Send follow-up message",
+    "taskDescription": "Task details..."
+  },
+
+  "filters": {
+    "allTypes": "All Types",
+    "allStatuses": "All Statuses",
+    "activeOnly": "Active Only"
+  },
+
+  "empty": {
+    "noLeads": "No leads found",
+    "noInteractions": "No interactions for this lead",
+    "noTasks": "No tasks for this lead"
+  }
+}

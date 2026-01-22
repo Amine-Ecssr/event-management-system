@@ -1,0 +1,87 @@
+{
+  "title": "لوحة التحكم التنفيذية",
+  "subtitle": "نظرة عامة على المؤشرات الرئيسية ومقاييس الأداء",
+  
+  "kpis": {
+    "totalEvents": "إجمالي الفعاليات",
+    "activeEvents": "{{count}} نشط",
+    "upcomingEvents": "الفعاليات القادمة",
+    "totalTasks": "إجمالي المهام",
+    "completedTasks": "{{count}} مكتمل",
+    "pendingTasks": "{{count}} قيد الانتظار",
+    "overdueTasks": "المهام المتأخرة",
+    "requireAttention": "تتطلب اهتماماً فورياً",
+    "totalPartners": "إجمالي الشركاء",
+    "activeAgreements": "{{count}} اتفاقية نشطة",
+    "totalContacts": "إجمالي جهات الاتصال",
+    "totalOrganizations": "المؤسسات",
+    "totalLeads": "{{count}} إجمالي العملاء المحتملين",
+    "openLeads": "العملاء المحتملين المفتوحين"
+  },
+  
+  "filters": {
+    "selectPeriod": "اختر الفترة",
+    "week": "آخر 7 أيام",
+    "month": "آخر 30 يوم",
+    "quarter": "آخر 90 يوم",
+    "year": "السنة الماضية"
+  },
+  
+  "tabs": {
+    "events": "الفعاليات",
+    "tasks": "المهام",
+    "departments": "الأقسام",
+    "byCategory": "حسب الفئة",
+    "byType": "حسب النوع",
+    "byMonth": "حسب الشهر",
+    "byStatus": "حسب الحالة",
+    "byPriority": "حسب الأولوية",
+    "byDepartment": "حسب القسم",
+    "completion": "معدل الإنجاز"
+  },
+  
+  "charts": {
+    "activityTrends": "اتجاهات النشاط",
+    "eventsByCategory": "الفعاليات حسب الفئة",
+    "eventsByType": "الفعاليات حسب النوع",
+    "eventsByMonth": "الفعاليات حسب الشهر",
+    "eventsOverview": "نظرة عامة على الفعاليات",
+    "tasksByStatus": "المهام حسب الحالة",
+    "tasksByPriority": "المهام حسب الأولوية",
+    "tasksByDepartment": "المهام حسب القسم",
+    "tasksOverview": "نظرة عامة على المهام",
+    "taskCount": "عدد المهام",
+    "completionRate": "معدل الإنجاز",
+    "overallRate": "الإجمالي",
+    "rate": "المعدل",
+    "currentYear": "هذا العام",
+    "previousYear": "العام الماضي",
+    "departmentPerformance": "أداء الأقسام"
+  },
+  
+  "entities": {
+    "events": "الفعاليات",
+    "tasks": "المهام",
+    "partnerships": "الشراكات",
+    "contacts": "جهات الاتصال"
+  },
+  
+  "table": {
+    "department": "القسم",
+    "events": "الفعاليات",
+    "completed": "مكتمل",
+    "pending": "قيد الانتظار",
+    "completionRate": "معدل الإنجاز",
+    "noData": "لا توجد بيانات متاحة"
+  },
+  
+  "overdue": {
+    "title": "تنبيه المهام المتأخرة",
+    "description": "يوجد {{count}} مهمة متأخرة تتطلب اهتماماً فورياً."
+  },
+  
+  "errors": {
+    "title": "خطأ في تحميل لوحة التحكم",
+    "loadFailed": "فشل في تحميل بيانات لوحة التحكم. يرجى المحاولة مرة أخرى لاحقاً."
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "title": "Contacts Analytics",
+  "subtitle": "Insights into your contacts database, speakers, and lead management",
+  "error": "Error loading contacts analytics dashboard",
+  
+  "totalContacts": "Total Contacts",
+  "eligibleSpeakers": "Eligible Speakers",
+  "totalLeads": "Total Leads",
+  "dataQuality": "Data Quality",
+  "thisMonth": "this month",
+  "ofContacts": "of contacts",
+  "active": "active",
+  "completeness": "completeness score",
+  
+  "selectYear": "Year",
+  "overview": "Overview",
+  "speakers": "Speakers",
+  "leads": "Leads",
+  "interactions": "Interactions",
+  
+  "contactGrowth": "Contact Growth",
+  "noGrowthData": "No growth data available",
+  "newContacts": "New Contacts",
+  "speakersAdded": "New Speakers",
+  
+  "speakerMetrics": "Speaker Metrics",
+  "utilizationRate": "Utilization Rate",
+  "utilizationDescription": "Percentage of eligible speakers who participated in events",
+  "avgEventsPerSpeaker": "Avg Events/Speaker",
+  "topSpeakers": "Top Speakers",
+  "noSpeakerActivity": "No speaker activity this year",
+  "speakerStats": "Speaker Statistics",
+  "totalEligible": "Total Eligible",
+  "utilized": "Utilized",
+  
+  "leadFunnel": "Lead Funnel",
+  "conversionRate": "Conversion Rate",
+  "conversionDescription": "Leads moved to inactive (completed/converted)",
+  "leadsByType": "Leads by Type",
+  "noLeads": "No leads data available",
+  "leadStats": "Lead Statistics",
+  "leadStatus": {
+    "active": "Active",
+    "inProgress": "In Progress",
+    "inactive": "Inactive"
+  },
+  
+  "interactionTrends": "Interaction Trends",
+  "total": "Total",
+  "avgPerLead": "Avg/Lead",
+  "noInteractionData": "No interaction data available",
+  "interactionType": {
+    "email": "Email",
+    "phone": "Phone",
+    "phone_call": "Phone Call",
+    "meeting": "Meeting",
+    "other": "Other"
+  },
+  
+  "hasEmail": "Has Email",
+  "hasPhone": "Has Phone",
+  "hasOrganization": "Has Organization",
+  "quality": {
+    "excellent": "Excellent",
+    "good": "Good",
+    "fair": "Fair",
+    "needsImprovement": "Needs Improvement"
+  },
+  "completenessScore": "Completeness Score",
+  
+  "distribution": "Contact Distribution",
+  "byOrganization": "Organization",
+  "byCountry": "Country",
+  "byPosition": "Position",
+  "noOrgData": "No organization data available",
+  "noCountryData": "No country data available",
+  "noPositionData": "No position data available",
+  "contacts": "Contacts",
+  
+  "growthPositive": "Contact Growth",
+  "growthNegative": "Contact Decline",
+  "growthPositiveDesc": "Your contact database grew {{rate}}% compared to last month",
+  "growthNegativeDesc": "Contact additions decreased by {{rate}}% compared to last month"
+}

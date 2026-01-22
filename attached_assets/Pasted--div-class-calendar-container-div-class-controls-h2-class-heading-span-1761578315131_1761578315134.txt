@@ -1,0 +1,642 @@
+<div class="calendar-container">
+				<div class="controls">
+					<h2 class="heading">
+						<span class="date"><strong>September</strong> 2025</span>
+					</h2>
+
+					<div class="pagination">
+						
+								<a class="chevron -left" rel="nofollow" href="/en/abu-dhabi-events/?month=8&amp;year=2025"></a>
+								<a class="chevron -right" rel="nofollow" href="/en/abu-dhabi-events/?month=10&amp;year=2025"></a>
+							
+					</div>
+					
+					<a target="_blank" class="export calendar-button -desktop-only" rel="nofollow" download="ADMO Calendar September 2025.pdf" href="/en/abu-dhabi-events/2025/9/export/">
+						Export
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M5.07755943,15 L5.07755943,18.8601296 L18.9224406,18.8601296 L18.9224406,15 L21,15 L21,21 L3,21 L3,15 L5.07755943,15 Z M12.5547576,3 L12.5547576,13.2000859 L16.5345216,9.50394247 L18,10.9631483 L11.4999884,17 L5,10.9631483 L6.46550152,9.50394247 L10.4451962,13.2000859 L10.4451962,3 L12.5547576,3 Z"></path></svg>
+					</a>
+
+					<button class="js-toggle-calendar-off toggle-calendar-off calendar-button -calendartoggle -mobile-only">
+						<svg height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="m9 11h-2v2h2zm4 0h-2v2h2zm4 0h-2v2h2zm4-7h-3v-2h-2v2h-8v-2h-2v2h-3v18h18zm-2 16h-14v-11h14z"></path></svg>
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon fill="currentColor" points="18.5 7.944 20.056 9.5 19.278 10.278 12.778 16.778 12 17.556 11.222 16.778 4.722 10.278 3.944 9.5 5.5 7.944 6.278 8.722 11.999 14.445 17.722 8.722"></polygon></svg>
+
+					</button>
+					<button class="js-toggle-calendar-on toggle-calendar-on calendar-button -calendartoggle -mobile-only">
+						<svg height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="m9 11h-2v2h2zm4 0h-2v2h2zm4 0h-2v2h2zm4-7h-3v-2h-2v2h-8v-2h-2v2h-3v18h18zm-2 16h-14v-11h14z"></path></svg>
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon fill="currentColor" points="18.5 7.944 20.056 9.5 19.278 10.278 12.778 16.778 12 17.556 11.222 16.778 4.722 10.278 3.944 9.5 5.5 7.944 6.278 8.722 11.999 14.445 17.722 8.722"></polygon></svg>
+
+					</button>
+				</div>
+
+				<div class="calendar-table">
+					
+					
+						<div class="week week-day-labels">
+							
+								<div data-day-num="1" class="day-cell"></div>
+							
+								<div data-day-num="2" class="day-cell"></div>
+							
+								<div data-day-num="3" class="day-cell"></div>
+							
+								<div data-day-num="4" class="day-cell"></div>
+							
+								<div data-day-num="5" class="day-cell"></div>
+							
+								<div data-day-num="6" class="day-cell"></div>
+							
+								<div data-day-num="7" class="day-cell"></div>
+							
+							
+								<div class="week-day">Mon</div>
+							
+								<div class="week-day">Tue</div>
+							
+								<div class="week-day">Wed</div>
+							
+								<div class="week-day">Thu</div>
+							
+								<div class="week-day">Fri</div>
+							
+								<div class="week-day">Sat</div>
+							
+								<div class="week-day">Sun</div>
+							
+						</div>
+					
+
+					
+					
+						<div class="week">
+							
+								<div data-day-num="1" class="day-cell"></div>
+							
+								<div data-day-num="2" class="day-cell"></div>
+							
+								<div data-day-num="3" class="day-cell"></div>
+							
+								<div data-day-num="4" class="day-cell"></div>
+							
+								<div data-day-num="5" class="day-cell"></div>
+							
+								<div data-day-num="6" class="day-cell"></div>
+							
+								<div data-day-num="7" class="day-cell"></div>
+							
+							
+								<div data-day-num="1" class="day" data-filter-date="2025-09-01">
+									<h3 class="day-label -current-month"><span>1</span></h3>
+									<span class="event-markers -mobile-only">
+										<span class="marker -boundary"></span>
+										
+											<span class="marker filterable -not-date-filterable" data-event-id="im:a75779d8-0ce0-4922-bae3-fa3eb5caf37c" data-date="2025-09-01" data-sector="im:6ff8e059-0f96-4cbc-ab7f-db17dcad6729" data-location="im:535b80ad-ff68-4c04-94c1-188db06ccb3f" data-organizers="im:c2186197-af80-4695-b311-2e10c5ce7006">•</span>
+										
+										<span class="marker -boundary"></span>
+									</span>
+									
+										
+											<span data-span="7" data-event-id="im:a75779d8-0ce0-4922-bae3-fa3eb5caf37c" data-date="2025-08-30 2025-08-31 2025-09-01 2025-09-02 2025-09-03 2025-09-04 2025-09-05 2025-09-06 2025-09-07" data-sector="im:6ff8e059-0f96-4cbc-ab7f-db17dcad6729" data-location="im:535b80ad-ff68-4c04-94c1-188db06ccb3f" data-organizers="im:c2186197-af80-4695-b311-2e10c5ce7006" class="event filterable -desktop-only event-end">
+												<a href="/en/abu-dhabi-events/abu-dhabi-international-hunting-and-equestrian-exhibition/">Abu Dhabi International Hunting and Equestrian Exhibition</a>
+											</span>
+										
+									
+								</div>
+							
+								<div data-day-num="2" class="day" data-filter-date="2025-09-02">
+									<h3 class="day-label -current-month"><span>2</span></h3>
+									<span class="event-markers -mobile-only">
+										<span class="marker -boundary"></span>
+										
+											<span class="marker filterable -not-date-filterable" data-event-id="im:a75779d8-0ce0-4922-bae3-fa3eb5caf37c" data-date="2025-09-02" data-sector="im:6ff8e059-0f96-4cbc-ab7f-db17dcad6729" data-location="im:535b80ad-ff68-4c04-94c1-188db06ccb3f" data-organizers="im:c2186197-af80-4695-b311-2e10c5ce7006">•</span>
+										
+										<span class="marker -boundary"></span>
+									</span>
+									
+										
+									
+								</div>
+							
+								<div data-day-num="3" class="day" data-filter-date="2025-09-03">
+									<h3 class="day-label -current-month"><span>3</span></h3>
+									<span class="event-markers -mobile-only">
+										<span class="marker -boundary"></span>
+										
+											<span class="marker filterable -not-date-filterable" data-event-id="im:a75779d8-0ce0-4922-bae3-fa3eb5caf37c" data-date="2025-09-03" data-sector="im:6ff8e059-0f96-4cbc-ab7f-db17dcad6729" data-location="im:535b80ad-ff68-4c04-94c1-188db06ccb3f" data-organizers="im:c2186197-af80-4695-b311-2e10c5ce7006">•</span>
+										
+										<span class="marker -boundary"></span>
+									</span>
+									
+										
+									
+								</div>
+							
+								<div data-day-num="4" class="day" data-filter-date="2025-09-04">
+									<h3 class="day-label -current-month"><span>4</span></h3>
+									<span class="event-markers -mobile-only">
+										<span class="marker -boundary"></span>
+										
+											<span class="marker filterable -not-date-filterable" data-event-id="im:a75779d8-0ce0-4922-bae3-fa3eb5caf37c" data-date="2025-09-04" data-sector="im:6ff8e059-0f96-4cbc-ab7f-db17dcad6729" data-location="im:535b80ad-ff68-4c04-94c1-188db06ccb3f" data-organizers="im:c2186197-af80-4695-b311-2e10c5ce7006">•</span>
+										
+										<span class="marker -boundary"></span>
+									</span>
+									
+										
+									
+								</div>
+							
+								<div data-day-num="5" class="day" data-filter-date="2025-09-05">
+									<h3 class="day-label -current-month"><span>5</span></h3>
+									<span class="event-markers -mobile-only">
+										<span class="marker -boundary"></span>
+										
+											<span class="marker filterable -not-date-filterable" data-event-id="im:a75779d8-0ce0-4922-bae3-fa3eb5caf37c" data-date="2025-09-05" data-sector="im:6ff8e059-0f96-4cbc-ab7f-db17dcad6729" data-location="im:535b80ad-ff68-4c04-94c1-188db06ccb3f" data-organizers="im:c2186197-af80-4695-b311-2e10c5ce7006">•</span>
+										
+										<span class="marker -boundary"></span>
+									</span>
+									
+										
+									
+								</div>
+							
+								<div data-day-num="6" class="day" data-filter-date="2025-09-06">
+									<h3 class="day-label -current-month"><span>6</span></h3>
+									<span class="event-markers -mobile-only">
+										<span class="marker -boundary"></span>
+										
+											<span class="marker filterable -not-date-filterable" data-event-id="im:a75779d8-0ce0-4922-bae3-fa3eb5caf37c" data-date="2025-09-06" data-sector="im:6ff8e059-0f96-4cbc-ab7f-db17dcad6729" data-location="im:535b80ad-ff68-4c04-94c1-188db06ccb3f" data-organizers="im:c2186197-af80-4695-b311-2e10c5ce7006">•</span>
+										
+										<span class="marker -boundary"></span>
+									</span>
+									
+										
+									
+								</div>
+							
+								<div data-day-num="7" class="day" data-filter-date="2025-09-07">
+									<h3 class="day-label -current-month"><span>7</span></h3>
+									<span class="event-markers -mobile-only">
+										<span class="marker -boundary"></span>
+										
+											<span class="marker filterable -not-date-filterable" data-event-id="im:a75779d8-0ce0-4922-bae3-fa3eb5caf37c" data-date="2025-09-07" data-sector="im:6ff8e059-0f96-4cbc-ab7f-db17dcad6729" data-location="im:535b80ad-ff68-4c04-94c1-188db06ccb3f" data-organizers="im:c2186197-af80-4695-b311-2e10c5ce7006">•</span>
+										
+										<span class="marker -boundary"></span>
+									</span>
+									
+										
+									
+								</div>
+							
+						</div>
+					
+						<div class="week">
+							
+								<div data-day-num="1" class="day-cell"></div>
+							
+								<div data-day-num="2" class="day-cell"></div>
+							
+								<div data-day-num="3" class="day-cell"></div>
+							
+								<div data-day-num="4" class="day-cell"></div>
+							
+								<div data-day-num="5" class="day-cell"></div>
+							
+								<div data-day-num="6" class="day-cell"></div>
+							
+								<div data-day-num="7" class="day-cell"></div>
+							
+							
+								<div data-day-num="1" class="day" data-filter-date="2025-09-08">
+									<h3 class="day-label -current-month"><span>8</span></h3>
+									<span class="event-markers -mobile-only">
+										<span class="marker -boundary"></span>
+										
+										<span class="marker -boundary"></span>
+									</span>
+									
+								</div>
+							
+								<div data-day-num="2" class="day" data-filter-date="2025-09-09">
+									<h3 class="day-label -current-month"><span>9</span></h3>
+									<span class="event-markers -mobile-only">
+										<span class="marker -boundary"></span>
+										
+										<span class="marker -boundary"></span>
+									</span>
+									
+								</div>
+							
+								<div data-day-num="3" class="day" data-filter-date="2025-09-10">
+									<h3 class="day-label -current-month"><span>10</span></h3>
+									<span class="event-markers -mobile-only">
+										<span class="marker -boundary"></span>
+										
+										<span class="marker -boundary"></span>
+									</span>
+									
+								</div>
+							
+								<div data-day-num="4" class="day" data-filter-date="2025-09-11">
+									<h3 class="day-label -current-month"><span>11</span></h3>
+									<span class="event-markers -mobile-only">
+										<span class="marker -boundary"></span>
+										
+										<span class="marker -boundary"></span>
+									</span>
+									
+								</div>
+							
+								<div data-day-num="5" class="day" data-filter-date="2025-09-12">
+									<h3 class="day-label -current-month"><span>12</span></h3>
+									<span class="event-markers -mobile-only">
+										<span class="marker -boundary"></span>
+										
+										<span class="marker -boundary"></span>
+									</span>
+									
+								</div>
+							
+								<div data-day-num="6" class="day" data-filter-date="2025-09-13">
+									<h3 class="day-label -current-month"><span>13</span></h3>
+									<span class="event-markers -mobile-only">
+										<span class="marker -boundary"></span>
+										
+										<span class="marker -boundary"></span>
+									</span>
+									
+								</div>
+							
+								<div data-day-num="7" class="day" data-filter-date="2025-09-14">
+									<h3 class="day-label -current-month"><span>14</span></h3>
+									<span class="event-markers -mobile-only">
+										<span class="marker -boundary"></span>
+										
+										<span class="marker -boundary"></span>
+									</span>
+									
+								</div>
+							
+						</div>
+					
+						<div class="week">
+							
+								<div data-day-num="1" class="day-cell"></div>
+							
+								<div data-day-num="2" class="day-cell"></div>
+							
+								<div data-day-num="3" class="day-cell"></div>
+							
+								<div data-day-num="4" class="day-cell"></div>
+							
+								<div data-day-num="5" class="day-cell"></div>
+							
+								<div data-day-num="6" class="day-cell"></div>
+							
+								<div data-day-num="7" class="day-cell"></div>
+							
+							
+								<div data-day-num="1" class="day" data-filter-date="2025-09-15">
+									<h3 class="day-label -current-month"><span>15</span></h3>
+									<span class="event-markers -mobile-only">
+										<span class="marker -boundary"></span>
+										
+										<span class="marker -boundary"></span>
+									</span>
+									
+								</div>
+							
+								<div data-day-num="2" class="day" data-filter-date="2025-09-16">
+									<h3 class="day-label -current-month"><span>16</span></h3>
+									<span class="event-markers -mobile-only">
+										<span class="marker -boundary"></span>
+										
+										<span class="marker -boundary"></span>
+									</span>
+									
+								</div>
+							
+								<div data-day-num="3" class="day" data-filter-date="2025-09-17">
+									<h3 class="day-label -current-month"><span>17</span></h3>
+									<span class="event-markers -mobile-only">
+										<span class="marker -boundary"></span>
+										
+										<span class="marker -boundary"></span>
+									</span>
+									
+								</div>
+							
+								<div data-day-num="4" class="day" data-filter-date="2025-09-18">
+									<h3 class="day-label -current-month"><span>18</span></h3>
+									<span class="event-markers -mobile-only">
+										<span class="marker -boundary"></span>
+										
+										<span class="marker -boundary"></span>
+									</span>
+									
+								</div>
+							
+								<div data-day-num="5" class="day" data-filter-date="2025-09-19">
+									<h3 class="day-label -current-month"><span>19</span></h3>
+									<span class="event-markers -mobile-only">
+										<span class="marker -boundary"></span>
+										
+										<span class="marker -boundary"></span>
+									</span>
+									
+								</div>
+							
+								<div data-day-num="6" class="day" data-filter-date="2025-09-20">
+									<h3 class="day-label -current-month"><span>20</span></h3>
+									<span class="event-markers -mobile-only">
+										<span class="marker -boundary"></span>
+										
+										<span class="marker -boundary"></span>
+									</span>
+									
+								</div>
+							
+								<div data-day-num="7" class="day" data-filter-date="2025-09-21">
+									<h3 class="day-label -current-month"><span>21</span></h3>
+									<span class="event-markers -mobile-only">
+										<span class="marker -boundary"></span>
+										
+										<span class="marker -boundary"></span>
+									</span>
+									
+								</div>
+							
+						</div>
+					
+						<div class="week">
+							
+								<div data-day-num="1" class="day-cell"></div>
+							
+								<div data-day-num="2" class="day-cell"></div>
+							
+								<div data-day-num="3" class="day-cell"></div>
+							
+								<div data-day-num="4" class="day-cell"></div>
+							
+								<div data-day-num="5" class="day-cell"></div>
+							
+								<div data-day-num="6" class="day-cell"></div>
+							
+								<div data-day-num="7" class="day-cell"></div>
+							
+							
+								<div data-day-num="1" class="day" data-filter-date="2025-09-22">
+									<h3 class="day-label -current-month"><span>22</span></h3>
+									<span class="event-markers -mobile-only">
+										<span class="marker -boundary"></span>
+										
+										<span class="marker -boundary"></span>
+									</span>
+									
+								</div>
+							
+								<div data-day-num="2" class="day" data-filter-date="2025-09-23">
+									<h3 class="day-label -current-month"><span>23</span></h3>
+									<span class="event-markers -mobile-only">
+										<span class="marker -boundary"></span>
+										
+										<span class="marker -boundary"></span>
+									</span>
+									
+								</div>
+							
+								<div data-day-num="3" class="day" data-filter-date="2025-09-24">
+									<h3 class="day-label -current-month"><span>24</span></h3>
+									<span class="event-markers -mobile-only">
+										<span class="marker -boundary"></span>
+										
+											<span class="marker filterable -not-date-filterable" data-event-id="im:88501fb3-3153-4068-abf8-f073162239ee" data-date="2025-09-24" data-sector="im:98a15358-e1c5-4a47-a815-46b12877de29" data-location="im:535b80ad-ff68-4c04-94c1-188db06ccb3f" data-organizers="im:6338f948-a3c7-4bc4-9e25-fb85b151a752">•</span>
+										
+										<span class="marker -boundary"></span>
+									</span>
+									
+										
+											<span data-span="5" data-event-id="im:88501fb3-3153-4068-abf8-f073162239ee" data-date="2025-09-24 2025-09-25 2025-09-26 2025-09-27 2025-09-28 2025-09-29 2025-09-30 2025-10-01 2025-10-02 2025-10-03 2025-10-04 2025-10-05 2025-10-06 2025-10-07 2025-10-08 2025-10-09 2025-10-10 2025-10-11 2025-10-12 2025-10-13 2025-10-14 2025-10-15 2025-10-16 2025-10-17 2025-10-18 2025-10-19 2025-10-20 2025-10-21 2025-10-22 2025-10-23 2025-10-24 2025-10-25 2025-10-26 2025-10-27 2025-10-28 2025-10-29 2025-10-30 2025-10-31 2025-11-01 2025-11-02 2025-11-03 2025-11-04 2025-11-05 2025-11-06 2025-11-07 2025-11-08 2025-11-09 2025-11-10 2025-11-11 2025-11-12 2025-11-13 2025-11-14 2025-11-15 2025-11-16 2025-11-17 2025-11-18 2025-11-19 2025-11-20 2025-11-21 2025-11-22 2025-11-23 2025-11-24 2025-11-25 2025-11-26 2025-11-27 2025-11-28 2025-11-29 2025-11-30 2025-12-01 2025-12-02 2025-12-03 2025-12-04 2025-12-05 2025-12-06 2025-12-07 2025-12-08 2025-12-09 2025-12-10 2025-12-11 2025-12-12 2025-12-13 2025-12-14 2025-12-15 2025-12-16 2025-12-17 2025-12-18 2025-12-19 2025-12-20 2025-12-21 2025-12-22 2025-12-23 2025-12-24 2025-12-25" data-sector="im:98a15358-e1c5-4a47-a815-46b12877de29" data-location="im:535b80ad-ff68-4c04-94c1-188db06ccb3f" data-organizers="im:6338f948-a3c7-4bc4-9e25-fb85b151a752" class="event filterable -desktop-only event-start">
+												<a href="/en/abu-dhabi-events/am-conclave-middle-east-1/">AM Conclave Middle East</a>
+											</span>
+										
+									
+								</div>
+							
+								<div data-day-num="4" class="day" data-filter-date="2025-09-25">
+									<h3 class="day-label -current-month"><span>25</span></h3>
+									<span class="event-markers -mobile-only">
+										<span class="marker -boundary"></span>
+										
+											<span class="marker filterable -not-date-filterable" data-event-id="im:88501fb3-3153-4068-abf8-f073162239ee" data-date="2025-09-25" data-sector="im:98a15358-e1c5-4a47-a815-46b12877de29" data-location="im:535b80ad-ff68-4c04-94c1-188db06ccb3f" data-organizers="im:6338f948-a3c7-4bc4-9e25-fb85b151a752">•</span>
+										
+										<span class="marker -boundary"></span>
+									</span>
+									
+										
+									
+								</div>
+							
+								<div data-day-num="5" class="day" data-filter-date="2025-09-26">
+									<h3 class="day-label -current-month"><span>26</span></h3>
+									<span class="event-markers -mobile-only">
+										<span class="marker -boundary"></span>
+										
+											<span class="marker filterable -not-date-filterable" data-event-id="im:88501fb3-3153-4068-abf8-f073162239ee" data-date="2025-09-26" data-sector="im:98a15358-e1c5-4a47-a815-46b12877de29" data-location="im:535b80ad-ff68-4c04-94c1-188db06ccb3f" data-organizers="im:6338f948-a3c7-4bc4-9e25-fb85b151a752">•</span>
+										
+										<span class="marker -boundary"></span>
+									</span>
+									
+										
+									
+								</div>
+							
+								<div data-day-num="6" class="day" data-filter-date="2025-09-27">
+									<h3 class="day-label -current-month"><span>27</span></h3>
+									<span class="event-markers -mobile-only">
+										<span class="marker -boundary"></span>
+										
+											<span class="marker filterable -not-date-filterable" data-event-id="im:812c3be7-233f-4f7c-b950-b34108929b34" data-date="2025-09-27" data-sector="" data-location="im:bcdfc9ea-0768-4e7a-b966-8a3f4447190d" data-organizers="im:f2dec8ad-cc57-4588-a549-4c8c999f5cc9">•</span>
+										
+											<span class="marker filterable -not-date-filterable" data-event-id="im:88501fb3-3153-4068-abf8-f073162239ee" data-date="2025-09-27" data-sector="im:98a15358-e1c5-4a47-a815-46b12877de29" data-location="im:535b80ad-ff68-4c04-94c1-188db06ccb3f" data-organizers="im:6338f948-a3c7-4bc4-9e25-fb85b151a752">•</span>
+										
+										<span class="marker -boundary"></span>
+									</span>
+									
+										
+											<span data-span="2" data-event-id="im:812c3be7-233f-4f7c-b950-b34108929b34" data-date="2025-09-27 2025-09-28 2025-09-29 2025-09-30 2025-10-01 2025-10-02 2025-10-03" data-sector="" data-location="im:bcdfc9ea-0768-4e7a-b966-8a3f4447190d" data-organizers="im:f2dec8ad-cc57-4588-a549-4c8c999f5cc9" class="event filterable -desktop-only event-start">
+												<a href="/en/milset-expo-science-international-2025/">MILSET Expo Science International 2025</a>
+											</span>
+										
+									
+										
+									
+								</div>
+							
+								<div data-day-num="7" class="day" data-filter-date="2025-09-28">
+									<h3 class="day-label -current-month"><span>28</span></h3>
+									<span class="event-markers -mobile-only">
+										<span class="marker -boundary"></span>
+										
+											<span class="marker filterable -not-date-filterable" data-event-id="im:812c3be7-233f-4f7c-b950-b34108929b34" data-date="2025-09-28" data-sector="" data-location="im:bcdfc9ea-0768-4e7a-b966-8a3f4447190d" data-organizers="im:f2dec8ad-cc57-4588-a549-4c8c999f5cc9">•</span>
+										
+											<span class="marker filterable -not-date-filterable" data-event-id="im:88501fb3-3153-4068-abf8-f073162239ee" data-date="2025-09-28" data-sector="im:98a15358-e1c5-4a47-a815-46b12877de29" data-location="im:535b80ad-ff68-4c04-94c1-188db06ccb3f" data-organizers="im:6338f948-a3c7-4bc4-9e25-fb85b151a752">•</span>
+										
+										<span class="marker -boundary"></span>
+									</span>
+									
+										
+									
+										
+									
+								</div>
+							
+						</div>
+					
+						<div class="week">
+							
+								<div data-day-num="1" class="day-cell"></div>
+							
+								<div data-day-num="2" class="day-cell"></div>
+							
+								<div data-day-num="3" class="day-cell"></div>
+							
+								<div data-day-num="4" class="day-cell"></div>
+							
+								<div data-day-num="5" class="day-cell"></div>
+							
+								<div data-day-num="6" class="day-cell"></div>
+							
+								<div data-day-num="7" class="day-cell"></div>
+							
+							
+								<div data-day-num="1" class="day" data-filter-date="2025-09-29">
+									<h3 class="day-label -current-month"><span>29</span></h3>
+									<span class="event-markers -mobile-only">
+										<span class="marker -boundary"></span>
+										
+											<span class="marker filterable -not-date-filterable" data-event-id="im:812c3be7-233f-4f7c-b950-b34108929b34" data-date="2025-09-29" data-sector="" data-location="im:bcdfc9ea-0768-4e7a-b966-8a3f4447190d" data-organizers="im:f2dec8ad-cc57-4588-a549-4c8c999f5cc9">•</span>
+										
+											<span class="marker filterable -not-date-filterable" data-event-id="im:88501fb3-3153-4068-abf8-f073162239ee" data-date="2025-09-29" data-sector="im:98a15358-e1c5-4a47-a815-46b12877de29" data-location="im:535b80ad-ff68-4c04-94c1-188db06ccb3f" data-organizers="im:6338f948-a3c7-4bc4-9e25-fb85b151a752">•</span>
+										
+										<span class="marker -boundary"></span>
+									</span>
+									
+										
+											<span data-span="5" data-event-id="im:812c3be7-233f-4f7c-b950-b34108929b34" data-date="2025-09-27 2025-09-28 2025-09-29 2025-09-30 2025-10-01 2025-10-02 2025-10-03" data-sector="" data-location="im:bcdfc9ea-0768-4e7a-b966-8a3f4447190d" data-organizers="im:f2dec8ad-cc57-4588-a549-4c8c999f5cc9" class="event filterable -desktop-only event-end">
+												<a href="/en/milset-expo-science-international-2025/">MILSET Expo Science International 2025</a>
+											</span>
+										
+									
+										
+											<span data-span="7" data-event-id="im:88501fb3-3153-4068-abf8-f073162239ee" data-date="2025-09-24 2025-09-25 2025-09-26 2025-09-27 2025-09-28 2025-09-29 2025-09-30 2025-10-01 2025-10-02 2025-10-03 2025-10-04 2025-10-05 2025-10-06 2025-10-07 2025-10-08 2025-10-09 2025-10-10 2025-10-11 2025-10-12 2025-10-13 2025-10-14 2025-10-15 2025-10-16 2025-10-17 2025-10-18 2025-10-19 2025-10-20 2025-10-21 2025-10-22 2025-10-23 2025-10-24 2025-10-25 2025-10-26 2025-10-27 2025-10-28 2025-10-29 2025-10-30 2025-10-31 2025-11-01 2025-11-02 2025-11-03 2025-11-04 2025-11-05 2025-11-06 2025-11-07 2025-11-08 2025-11-09 2025-11-10 2025-11-11 2025-11-12 2025-11-13 2025-11-14 2025-11-15 2025-11-16 2025-11-17 2025-11-18 2025-11-19 2025-11-20 2025-11-21 2025-11-22 2025-11-23 2025-11-24 2025-11-25 2025-11-26 2025-11-27 2025-11-28 2025-11-29 2025-11-30 2025-12-01 2025-12-02 2025-12-03 2025-12-04 2025-12-05 2025-12-06 2025-12-07 2025-12-08 2025-12-09 2025-12-10 2025-12-11 2025-12-12 2025-12-13 2025-12-14 2025-12-15 2025-12-16 2025-12-17 2025-12-18 2025-12-19 2025-12-20 2025-12-21 2025-12-22 2025-12-23 2025-12-24 2025-12-25" data-sector="im:98a15358-e1c5-4a47-a815-46b12877de29" data-location="im:535b80ad-ff68-4c04-94c1-188db06ccb3f" data-organizers="im:6338f948-a3c7-4bc4-9e25-fb85b151a752" class="event filterable -desktop-only">
+												<a href="/en/abu-dhabi-events/am-conclave-middle-east-1/">AM Conclave Middle East</a>
+											</span>
+										
+									
+								</div>
+							
+								<div data-day-num="2" class="day" data-filter-date="2025-09-30">
+									<h3 class="day-label -current-month"><span>30</span></h3>
+									<span class="event-markers -mobile-only">
+										<span class="marker -boundary"></span>
+										
+											<span class="marker filterable -not-date-filterable" data-event-id="im:812c3be7-233f-4f7c-b950-b34108929b34" data-date="2025-09-30" data-sector="" data-location="im:bcdfc9ea-0768-4e7a-b966-8a3f4447190d" data-organizers="im:f2dec8ad-cc57-4588-a549-4c8c999f5cc9">•</span>
+										
+											<span class="marker filterable -not-date-filterable" data-event-id="im:88501fb3-3153-4068-abf8-f073162239ee" data-date="2025-09-30" data-sector="im:98a15358-e1c5-4a47-a815-46b12877de29" data-location="im:535b80ad-ff68-4c04-94c1-188db06ccb3f" data-organizers="im:6338f948-a3c7-4bc4-9e25-fb85b151a752">•</span>
+										
+										<span class="marker -boundary"></span>
+									</span>
+									
+										
+									
+										
+									
+								</div>
+							
+								<div data-day-num="3" class="day" data-filter-date="2025-10-01">
+									<h3 class="day-label -not-current-month"><span>1</span></h3>
+									<span class="event-markers -mobile-only">
+										<span class="marker -boundary"></span>
+										
+											<span class="marker filterable -not-date-filterable" data-event-id="im:812c3be7-233f-4f7c-b950-b34108929b34" data-date="2025-10-01" data-sector="" data-location="im:bcdfc9ea-0768-4e7a-b966-8a3f4447190d" data-organizers="im:f2dec8ad-cc57-4588-a549-4c8c999f5cc9">•</span>
+										
+											<span class="marker filterable -not-date-filterable" data-event-id="im:88501fb3-3153-4068-abf8-f073162239ee" data-date="2025-10-01" data-sector="im:98a15358-e1c5-4a47-a815-46b12877de29" data-location="im:535b80ad-ff68-4c04-94c1-188db06ccb3f" data-organizers="im:6338f948-a3c7-4bc4-9e25-fb85b151a752">•</span>
+										
+										<span class="marker -boundary"></span>
+									</span>
+									
+										
+									
+										
+									
+								</div>
+							
+								<div data-day-num="4" class="day" data-filter-date="2025-10-02">
+									<h3 class="day-label -not-current-month"><span>2</span></h3>
+									<span class="event-markers -mobile-only">
+										<span class="marker -boundary"></span>
+										
+											<span class="marker filterable -not-date-filterable" data-event-id="im:812c3be7-233f-4f7c-b950-b34108929b34" data-date="2025-10-02" data-sector="" data-location="im:bcdfc9ea-0768-4e7a-b966-8a3f4447190d" data-organizers="im:f2dec8ad-cc57-4588-a549-4c8c999f5cc9">•</span>
+										
+											<span class="marker filterable -not-date-filterable" data-event-id="im:88501fb3-3153-4068-abf8-f073162239ee" data-date="2025-10-02" data-sector="im:98a15358-e1c5-4a47-a815-46b12877de29" data-location="im:535b80ad-ff68-4c04-94c1-188db06ccb3f" data-organizers="im:6338f948-a3c7-4bc4-9e25-fb85b151a752">•</span>
+										
+										<span class="marker -boundary"></span>
+									</span>
+									
+										
+									
+										
+									
+								</div>
+							
+								<div data-day-num="5" class="day" data-filter-date="2025-10-03">
+									<h3 class="day-label -not-current-month"><span>3</span></h3>
+									<span class="event-markers -mobile-only">
+										<span class="marker -boundary"></span>
+										
+											<span class="marker filterable -not-date-filterable" data-event-id="im:812c3be7-233f-4f7c-b950-b34108929b34" data-date="2025-10-03" data-sector="" data-location="im:bcdfc9ea-0768-4e7a-b966-8a3f4447190d" data-organizers="im:f2dec8ad-cc57-4588-a549-4c8c999f5cc9">•</span>
+										
+											<span class="marker filterable -not-date-filterable" data-event-id="im:88501fb3-3153-4068-abf8-f073162239ee" data-date="2025-10-03" data-sector="im:98a15358-e1c5-4a47-a815-46b12877de29" data-location="im:535b80ad-ff68-4c04-94c1-188db06ccb3f" data-organizers="im:6338f948-a3c7-4bc4-9e25-fb85b151a752">•</span>
+										
+										<span class="marker -boundary"></span>
+									</span>
+									
+										
+									
+										
+									
+								</div>
+							
+								<div data-day-num="6" class="day" data-filter-date="2025-10-04">
+									<h3 class="day-label -not-current-month"><span>4</span></h3>
+									<span class="event-markers -mobile-only">
+										<span class="marker -boundary"></span>
+										
+											<span class="marker filterable -not-date-filterable" data-event-id="im:88501fb3-3153-4068-abf8-f073162239ee" data-date="2025-10-04" data-sector="im:98a15358-e1c5-4a47-a815-46b12877de29" data-location="im:535b80ad-ff68-4c04-94c1-188db06ccb3f" data-organizers="im:6338f948-a3c7-4bc4-9e25-fb85b151a752">•</span>
+										
+										<span class="marker -boundary"></span>
+									</span>
+									
+										
+									
+								</div>
+							
+								<div data-day-num="7" class="day" data-filter-date="2025-10-05">
+									<h3 class="day-label -not-current-month"><span>5</span></h3>
+									<span class="event-markers -mobile-only">
+										<span class="marker -boundary"></span>
+										
+											<span class="marker filterable -not-date-filterable" data-event-id="im:88501fb3-3153-4068-abf8-f073162239ee" data-date="2025-10-05" data-sector="im:98a15358-e1c5-4a47-a815-46b12877de29" data-location="im:535b80ad-ff68-4c04-94c1-188db06ccb3f" data-organizers="im:6338f948-a3c7-4bc4-9e25-fb85b151a752">•</span>
+										
+										<span class="marker -boundary"></span>
+									</span>
+									
+										
+									
+								</div>
+							
+						</div>
+					
+
+					<div class="arrow"></div>
+				</div>
+			</div>

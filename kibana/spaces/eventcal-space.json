@@ -1,0 +1,8 @@
+{
+  "id": "eventcal",
+  "name": "EventCal",
+  "description": "EventVue Event Calendar and Management System",
+  "color": "#2563eb",
+  "initials": "EC",
+  "disabledFeatures": []
+}

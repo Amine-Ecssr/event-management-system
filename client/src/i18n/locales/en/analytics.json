@@ -1,0 +1,87 @@
+{
+  "title": "Executive Dashboard",
+  "subtitle": "Overview of key metrics and performance indicators",
+  
+  "kpis": {
+    "totalEvents": "Total Events",
+    "activeEvents": "{{count}} active",
+    "upcomingEvents": "Upcoming Events",
+    "totalTasks": "Total Tasks",
+    "completedTasks": "{{count}} completed",
+    "pendingTasks": "{{count}} pending",
+    "overdueTasks": "Overdue Tasks",
+    "requireAttention": "Require immediate attention",
+    "totalPartners": "Total Partners",
+    "activeAgreements": "{{count}} active agreements",
+    "totalContacts": "Total Contacts",
+    "totalOrganizations": "Organizations",
+    "totalLeads": "{{count}} total leads",
+    "openLeads": "Open Leads"
+  },
+  
+  "filters": {
+    "selectPeriod": "Select period",
+    "week": "Last 7 Days",
+    "month": "Last 30 Days",
+    "quarter": "Last 90 Days",
+    "year": "Last Year"
+  },
+  
+  "tabs": {
+    "events": "Events",
+    "tasks": "Tasks",
+    "departments": "Departments",
+    "byCategory": "By Category",
+    "byType": "By Type",
+    "byMonth": "By Month",
+    "byStatus": "By Status",
+    "byPriority": "By Priority",
+    "byDepartment": "By Department",
+    "completion": "Completion Rate"
+  },
+  
+  "charts": {
+    "activityTrends": "Activity Trends",
+    "eventsByCategory": "Events by Category",
+    "eventsByType": "Events by Type",
+    "eventsByMonth": "Events by Month",
+    "eventsOverview": "Events Overview",
+    "tasksByStatus": "Tasks by Status",
+    "tasksByPriority": "Tasks by Priority",
+    "tasksByDepartment": "Tasks by Department",
+    "tasksOverview": "Tasks Overview",
+    "taskCount": "Task Count",
+    "completionRate": "Completion Rate",
+    "overallRate": "Overall",
+    "rate": "Rate",
+    "currentYear": "This Year",
+    "previousYear": "Last Year",
+    "departmentPerformance": "Department Performance"
+  },
+  
+  "entities": {
+    "events": "Events",
+    "tasks": "Tasks",
+    "partnerships": "Partnerships",
+    "contacts": "Contacts"
+  },
+  
+  "table": {
+    "department": "Department",
+    "events": "Events",
+    "completed": "Completed",
+    "pending": "Pending",
+    "completionRate": "Completion Rate",
+    "noData": "No data available"
+  },
+  
+  "overdue": {
+    "title": "Overdue Tasks Alert",
+    "description": "There are {{count}} overdue tasks that require immediate attention."
+  },
+  
+  "errors": {
+    "title": "Error Loading Dashboard",
+    "loadFailed": "Failed to load dashboard data. Please try again later."
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "title": "Speakers",
+  "description": "Select eligible contacts to add as speakers for this event",
+  "addSpeaker": "Add speaker...",
+  "selectSpeaker": "Select a speaker...",
+  "searchSpeakers": "Search eligible speakers...",
+  "searchContacts": "Search contacts...",
+  "role": "Role",
+  "noSpeakersFound": "No speakers found",
+  "noSpeakersSelected": "No speakers selected yet",
+  "noEligibleSpeakers": "No eligible speakers",
+  "noEligibleSpeakersHint": "Mark contacts as 'Eligible Speaker' in the Contacts page to add them here",
+  "selectRole": "Select role",
+  "loading": "Loading...",
+  "allSpeakersAdded": "All available speakers have been added",
+  "noSpeakersAvailable": "No speakers available. Mark contacts as eligible speakers from the Contacts page.",
+  "roles": {
+    "keynote": "Keynote Speaker",
+    "panelist": "Panelist",
+    "moderator": "Moderator",
+    "speaker": "Speaker",
+    "presenter": "Presenter"
+  },
+  "speakerAdded": "Speaker added successfully",
+  "speakerRemoved": "Speaker removed successfully",
+  "speakerUpdated": "Speaker updated",
+  "failedToAddSpeaker": "Failed to add speaker",
+  "failedToRemoveSpeaker": "Failed to remove speaker"
+}

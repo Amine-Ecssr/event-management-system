@@ -1,0 +1,84 @@
+{
+  "title": "تحليلات جهات الاتصال",
+  "subtitle": "رؤى حول قاعدة بيانات جهات الاتصال والمتحدثين وإدارة العملاء المحتملين",
+  "error": "خطأ في تحميل لوحة تحليلات جهات الاتصال",
+  
+  "totalContacts": "إجمالي جهات الاتصال",
+  "eligibleSpeakers": "المتحدثون المؤهلون",
+  "totalLeads": "إجمالي العملاء المحتملين",
+  "dataQuality": "جودة البيانات",
+  "thisMonth": "هذا الشهر",
+  "ofContacts": "من جهات الاتصال",
+  "active": "نشط",
+  "completeness": "درجة الاكتمال",
+  
+  "selectYear": "السنة",
+  "overview": "نظرة عامة",
+  "speakers": "المتحدثون",
+  "leads": "العملاء المحتملون",
+  "interactions": "التفاعلات",
+  
+  "contactGrowth": "نمو جهات الاتصال",
+  "noGrowthData": "لا توجد بيانات نمو",
+  "newContacts": "جهات اتصال جديدة",
+  "speakersAdded": "متحدثون جدد",
+  
+  "speakerMetrics": "مقاييس المتحدثين",
+  "utilizationRate": "معدل الاستخدام",
+  "utilizationDescription": "نسبة المتحدثين المؤهلين الذين شاركوا في الفعاليات",
+  "avgEventsPerSpeaker": "متوسط الفعاليات/المتحدث",
+  "topSpeakers": "أبرز المتحدثين",
+  "noSpeakerActivity": "لا يوجد نشاط للمتحدثين هذا العام",
+  "speakerStats": "إحصائيات المتحدثين",
+  "totalEligible": "إجمالي المؤهلين",
+  "utilized": "مستخدم",
+  
+  "leadFunnel": "قمع العملاء المحتملين",
+  "conversionRate": "معدل التحويل",
+  "conversionDescription": "العملاء المحتملون الذين انتقلوا إلى حالة غير نشطة (مكتمل/محول)",
+  "leadsByType": "العملاء المحتملون حسب النوع",
+  "noLeads": "لا توجد بيانات للعملاء المحتملين",
+  "leadStats": "إحصائيات العملاء المحتملين",
+  "leadStatus": {
+    "active": "نشط",
+    "inProgress": "قيد التنفيذ",
+    "inactive": "غير نشط"
+  },
+  
+  "interactionTrends": "اتجاهات التفاعل",
+  "total": "الإجمالي",
+  "avgPerLead": "المتوسط/العميل",
+  "noInteractionData": "لا توجد بيانات تفاعل",
+  "interactionType": {
+    "email": "البريد الإلكتروني",
+    "phone": "الهاتف",
+    "phone_call": "مكالمة هاتفية",
+    "meeting": "اجتماع",
+    "other": "أخرى"
+  },
+  
+  "hasEmail": "لديه بريد إلكتروني",
+  "hasPhone": "لديه هاتف",
+  "hasOrganization": "لديه مؤسسة",
+  "quality": {
+    "excellent": "ممتاز",
+    "good": "جيد",
+    "fair": "مقبول",
+    "needsImprovement": "يحتاج تحسين"
+  },
+  "completenessScore": "درجة الاكتمال",
+  
+  "distribution": "توزيع جهات الاتصال",
+  "byOrganization": "المؤسسة",
+  "byCountry": "الدولة",
+  "byPosition": "المنصب",
+  "noOrgData": "لا توجد بيانات مؤسسات",
+  "noCountryData": "لا توجد بيانات دول",
+  "noPositionData": "لا توجد بيانات مناصب",
+  "contacts": "جهات الاتصال",
+  
+  "growthPositive": "نمو جهات الاتصال",
+  "growthNegative": "انخفاض جهات الاتصال",
+  "growthPositiveDesc": "نمت قاعدة بيانات جهات الاتصال بنسبة {{rate}}% مقارنة بالشهر الماضي",
+  "growthNegativeDesc": "انخفضت إضافات جهات الاتصال بنسبة {{rate}}% مقارنة بالشهر الماضي"
+}

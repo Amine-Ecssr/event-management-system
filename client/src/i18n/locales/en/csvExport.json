@@ -1,0 +1,6 @@
+{
+  "exportSuccessful": "Export Successful",
+  "exportSuccessfulDesc": "Events have been exported to CSV file",
+  "exportFailed": "Export Failed",
+  "exportFailedDesc": "Failed to export events to CSV"
+}

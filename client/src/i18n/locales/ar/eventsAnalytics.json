@@ -1,0 +1,66 @@
+{
+  "title": "تحليلات الفعاليات",
+  "subtitle": "رؤى تفصيلية حول أنماط وأداء الفعاليات",
+  
+  "kpis": {
+    "totalEvents": "إجمالي الفعاليات",
+    "upcomingEvents": "الفعاليات القادمة",
+    "activeEvents": "الفعاليات النشطة",
+    "completedEvents": "الفعاليات المكتملة",
+    "archivedEvents": "الفعاليات المؤرشفة",
+    "avgEventsPerMonth": "متوسط الفعاليات/شهر",
+    "avgAttendeesPerEvent": "متوسط الحضور/فعالية",
+    "totalAttendees": "إجمالي الحضور"
+  },
+  
+  "filters": {
+    "allDepartments": "جميع الأقسام",
+    "selectYear": "اختر السنة"
+  },
+  
+  "tabs": {
+    "overview": "نظرة عامة",
+    "calendar": "التقويم",
+    "timeline": "الجدول الزمني",
+    "departments": "الأقسام"
+  },
+  
+  "charts": {
+    "eventsByCategory": "الفعاليات حسب الفئة",
+    "eventsByType": "الفعاليات حسب النوع",
+    "monthlyTrends": "الاتجاهات الشهرية",
+    "topLocations": "أهم المواقع",
+    "calendarHeatmap": "خريطة حرارية لتقويم الفعاليات",
+    "eventTimeline": "الجدول الزمني للفعاليات",
+    "departmentComparison": "مقارنة الأقسام",
+    "noLocationData": "لا توجد بيانات موقع متاحة"
+  },
+  
+  "heatmap": {
+    "events": "فعالية",
+    "events_plural": "فعاليات",
+    "more": "المزيد",
+    "less": "أقل"
+  },
+  
+  "timeline": {
+    "noEvents": "لا توجد فعاليات للعرض",
+    "viewAll": "عرض {{count}} فعاليات أخرى",
+    "status": {
+      "upcoming": "قادمة",
+      "active": "نشطة",
+      "completed": "مكتملة"
+    }
+  },
+  
+  "locationChart": {
+    "events": "الفعاليات",
+    "attendees": "الحضور",
+    "noData": "لا توجد بيانات موقع متاحة"
+  },
+  
+  "errors": {
+    "title": "خطأ في تحميل لوحة التحكم",
+    "loadFailed": "فشل في تحميل بيانات تحليلات الفعاليات. يرجى المحاولة مرة أخرى لاحقاً."
+  }
+}

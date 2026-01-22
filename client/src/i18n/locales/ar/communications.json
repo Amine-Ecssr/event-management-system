@@ -1,0 +1,22 @@
+{
+  "title": "الاتصالات",
+  "subtitle": "تكوين إعدادات إشعارات البريد الإلكتروني وواتساب",
+  "email": "البريد الإلكتروني",
+  "whatsapp": "واتساب",
+  "emailConfiguration": "تكوين البريد الإلكتروني",
+  "whatsappSettings": "إعدادات واتساب",
+  "status": "الحالة",
+  "connected": "متصل",
+  "notConnected": "غير متصل",
+  "connecting": "جاري الاتصال...",
+  "disconnected": "منفصل",
+  "configuration": "التكوين",
+  "testConnection": "اختبار الاتصال",
+  "saveConfiguration": "حفظ التكوين",
+  "phoneNumber": "رقم الهاتف",
+  "apiKey": "مفتاح API",
+  "webhookUrl": "عنوان Webhook",
+  "settingsUpdated": "تم تحديث الإعدادات",
+  "settingsUpdateError": "فشل تحديث الإعدادات",
+  "managementSummary": "الملخص الإداري"
+}

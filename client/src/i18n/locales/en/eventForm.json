@@ -1,0 +1,9 @@
+{
+  "reminderSettings": "Reminder Settings",
+  "reminderSettingsDesc": "Configure automatic WhatsApp and Email reminders for this event",
+  "oneWeekBefore": "1 week before event",
+  "oneDayBefore": "1 day before event",
+  "weeklyReminders": "Weekly reminders (every Monday until event)",
+  "dailyReminders": "Daily reminders (last 7 days before event)",
+  "morningOfEvent": "Morning of event (8:00 AM)"
+}

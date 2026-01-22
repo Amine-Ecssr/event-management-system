@@ -1,0 +1,57 @@
+# Edge stack for internet-facing services (run on separate VM)
+services:
+  whatsapp-service:
+    build:
+      context: ./whatsapp-service
+      dockerfile: Dockerfile
+    container_name: ecssr-edge-whatsapp
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      WHATSAPP_AUTH_PHRASE: ${WHATSAPP_AUTH_PHRASE:-change-this-secure-phrase}
+      WHATSAPP_DEFAULT_GROUP: ${WHATSAPP_DEFAULT_GROUP:-ECSSR Events}
+      MUDSLIDE_CACHE_DIR: ${MUDSLIDE_CACHE_DIR:-.mudslide-cache}
+      # Base URL for calling the core API over the private network link
+      CORE_API_BASE_URL: ${CORE_API_BASE_URL:-http://core-server.internal:5000}
+    ports:
+      - "3001:3001"
+    volumes:
+      # Persist WhatsApp session data (Baileys)
+      - ./whatsapp-service/auth_info:/app/auth_info
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    networks:
+      - edge-public
+
+  scraper-service:
+    build:
+      context: .
+      dockerfile: scraper-service/Dockerfile
+    container_name: ecssr-edge-scraper
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3002
+      SCRAPER_SERVICE_TOKEN: ${SCRAPER_SERVICE_TOKEN:-change-this-scraper-token}
+      SCRAPER_SERVICE_SECRET: ${SCRAPER_SERVICE_SECRET:-change-this-scraper-secret}
+      # Core API for posting scraped data (reachable over private link)
+      CORE_API_BASE_URL: ${CORE_API_BASE_URL:-http://core-server.internal:5000}
+    ports:
+      - "3002:3002"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    networks:
+      - edge-public
+
+networks:
+  edge-public:
+    driver: bridge

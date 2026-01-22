@@ -1,0 +1,22 @@
+{
+  "title": "Communications",
+  "subtitle": "Configure email and WhatsApp notification settings",
+  "email": "Email",
+  "whatsapp": "WhatsApp",
+  "emailConfiguration": "Email Configuration",
+  "whatsappSettings": "WhatsApp Settings",
+  "status": "Status",
+  "connected": "Connected",
+  "notConnected": "Not Connected",
+  "connecting": "Connecting...",
+  "disconnected": "Disconnected",
+  "configuration": "Configuration",
+  "testConnection": "Test Connection",
+  "saveConfiguration": "Save Configuration",
+  "phoneNumber": "Phone Number",
+  "apiKey": "API Key",
+  "webhookUrl": "Webhook URL",
+  "settingsUpdated": "Settings Updated",
+  "settingsUpdateError": "Failed to update settings",
+  "managementSummary": "Management Summary"
+}

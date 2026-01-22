@@ -1,0 +1,403 @@
+{
+  "title": "الشراكات",
+  "subtitle": "إدارة الشراكات والتعاون المؤسسي",
+  "partnerships": "الشراكات",
+  "partnership": "الشراكة",
+  "partnersList": "قائمة الشركاء",
+  "addPartnership": "إضافة شراكة",
+  "editPartnership": "تعديل الشراكة",
+  "viewPartnership": "عرض الشراكة",
+  "newPartnership": "شراكة جديدة",
+  "searchPlaceholder": "البحث عن شركاء...",
+  "noPartnershipsFound": "لم يتم العثور على شراكات",
+  "noPartnersYet": "لا يوجد شركاء بعد. قم بتحديد منظمة كشريك للبدء.",
+  "noActivitiesYet": "لا توجد أنشطة بعد",
+
+  "fields": {
+    "organization": "المنظمة",
+    "partnershipType": "نوع الشراكة",
+    "country": "الدولة",
+    "status": "الحالة",
+    "signedDate": "تاريخ التوقيع",
+    "signedBy": "التوقيع بواسطة",
+    "startDate": "تاريخ البداية",
+    "endDate": "تاريخ النهاية",
+    "notes": "ملاحظات",
+    "latestActivity": "آخر نشاط",
+    "primaryContact": "جهة الاتصال الرئيسية",
+    "secondaryContact": "جهة الاتصال الثانوية",
+    "website": "الموقع الإلكتروني"
+  },
+
+  "statuses": {
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "pending": "قيد الانتظار",
+    "expired": "منتهي الصلاحية",
+    "terminated": "ملغى"
+  },
+
+  "types": {
+    "strategic": "استراتيجي",
+    "operational": "تشغيلي",
+    "research": "بحثي",
+    "academic": "أكاديمي",
+    "media": "إعلامي",
+    "sponsorship": "رعاية",
+    "government": "حكومي",
+    "mou": "مذكرة تفاهم",
+    "other": "أخرى"
+  },
+
+  "tabs": {
+    "overview": "نظرة عامة",
+    "agreements": "الاتفاقيات",
+    "activities": "الأنشطة",
+    "contacts": "جهات الاتصال",
+    "events": "الفعاليات المشتركة",
+    "comments": "التعليقات",
+    "interactions": "التفاعلات",
+    "tasks": "المهام"
+  },
+
+  "comments": {
+    "title": "تعليقات الشراكة",
+    "addComment": "إضافة تعليق",
+    "editComment": "تعديل التعليق",
+    "noComments": "لا توجد تعليقات بعد",
+    "placeholder": "اكتب تعليقاً...",
+    "placeholderAr": "اكتب تعليقاً بالعربية (اختياري)...",
+    "postedBy": "نشر بواسطة",
+    "edited": "معدل",
+    "justNow": "الآن",
+    "confirmDelete": "هل أنت متأكد من حذف هذا التعليق؟"
+  },
+
+  "overview": {
+    "partnershipDetails": "تفاصيل الشراكة",
+    "summary": "ملخص",
+    "totalActivities": "إجمالي الأنشطة",
+    "jointEvents": "الفعاليات المشتركة",
+    "activeAgreements": "الاتفاقيات النشطة",
+    "lastActivity": "آخر نشاط",
+    "daysActive": "أيام النشاط",
+    "neverExpires": "لا تنتهي صلاحيتها",
+    "daysUntilExpiry": "{{days}} يوم حتى انتهاء الصلاحية",
+    "expired": "انتهت الصلاحية منذ {{days}} يوم"
+  },
+
+  "agreements": {
+    "title": "اتفاقيات الشراكة",
+    "addAgreement": "إضافة اتفاقية",
+    "editAgreement": "تعديل الاتفاقية",
+    "noAgreements": "لم يتم العثور على اتفاقيات",
+    "agreementTitle": "عنوان الاتفاقية",
+    "agreementNumber": "رقم الاتفاقية",
+    "agreementType": "نوع الاتفاقية",
+    "legalStatus": "الحالة القانونية",
+    "languages": "اللغات",
+    "signedDate": "تاريخ التوقيع",
+    "effectiveDate": "تاريخ السريان",
+    "expiryDate": "تاريخ الانتهاء",
+    "renewalDate": "تاريخ التجديد",
+    "description": "الوصف",
+    "attachment": "المرفق",
+    "uploadAttachment": "رفع مرفق",
+    "viewAttachment": "عرض المرفق",
+    "removeAttachment": "إزالة المرفق",
+    "terminationClause": "بند الإنهاء",
+    "terminationClauseAr": "بند الإنهاء (عربي)",
+    "agreementTypes": {
+      "mou": "مذكرة تفاهم",
+      "contract": "عقد",
+      "letter_of_intent": "خطاب نوايا",
+      "service_agreement": "اتفاقية خدمات",
+      "collaboration_agreement": "اتفاقية تعاون",
+      "sponsorship_agreement": "اتفاقية رعاية",
+      "other": "أخرى"
+    },
+    "legalStatuses": {
+      "binding": "ملزمة قانونياً",
+      "non-binding": "غير ملزمة"
+    },
+    "attachments": {
+      "title": "المرفقات",
+      "uploadAttachment": "رفع مرفق",
+      "noAttachments": "لا توجد مرفقات بعد",
+      "uploadHint": "ارفع ملفات PDF أو Word أو Excel أو صور (بحد أقصى 10 ميجابايت)",
+      "fileName": "اسم الملف",
+      "type": "النوع",
+      "size": "الحجم",
+      "uploadedAt": "تاريخ الرفع",
+      "uploadSuccess": "تم رفع المرفق بنجاح",
+      "uploadError": "فشل في رفع المرفق",
+      "deleteSuccess": "تم حذف المرفق بنجاح",
+      "deleteError": "فشل في حذف المرفق",
+      "deleteTitle": "حذف المرفق",
+      "deleteConfirm": "هل أنت متأكد من حذف \"{{fileName}}\"؟ لا يمكن التراجع عن هذا الإجراء.",
+      "fileSizeError": "حجم الملف يتجاوز الحد الأقصى 10 ميجابايت",
+      "fileTypeError": "نوع ملف غير صالح. المسموح: PDF، Word، Excel، وصيغ الصور الشائعة",
+      "allowedTypes": "أنواع الملفات المسموحة: PDF، Word (.doc, .docx)، Excel (.xls, .xlsx)، صور (.jpg, .png, .gif, .webp)"
+    }
+  },
+
+  "activities": {
+    "title": "أنشطة الشراكة",
+    "addActivity": "إضافة نشاط",
+    "editActivity": "تعديل النشاط",
+    "noActivities": "لم يتم تسجيل أي أنشطة",
+    "activityTitle": "عنوان النشاط",
+    "titlePlaceholder": "أدخل عنوان النشاط",
+    "activityType": "نوع النشاط",
+    "activityDate": "التاريخ",
+    "description": "الوصف",
+    "outcome": "النتيجة",
+    "participants": "المشاركون",
+    "linkedEvent": "الفعالية المرتبطة",
+    "selectEvent": "اختر فعالية...",
+    "noLinkedEvent": "لا توجد فعالية مرتبطة",
+    "types": {
+      "meeting": "اجتماع",
+      "call": "مكالمة",
+      "email": "بريد إلكتروني",
+      "event": "فعالية مشتركة",
+      "workshop": "ورشة عمل",
+      "training": "تدريب",
+      "site_visit": "زيارة ميدانية",
+      "conference": "مؤتمر",
+      "publication": "نشر",
+      "other": "أخرى"
+    }
+  },
+
+  "contacts": {
+    "title": "جهات اتصال الشراكة",
+    "addContact": "إضافة جهة اتصال",
+    "editContact": "تعديل جهة الاتصال",
+    "noContacts": "لم يتم تعيين جهات اتصال",
+    "selectContact": "اختر جهة الاتصال",
+    "name": "الاسم",
+    "position": "المنصب",
+    "contact": "معلومات الاتصال",
+    "role": "الدور",
+    "status": "الحالة",
+    "isPrimary": "جهة الاتصال الرئيسية",
+    "setPrimary": "تعيين كجهة رئيسية",
+    "roles": {
+      "primary": "جهة اتصال رئيسية",
+      "secondary": "جهة اتصال ثانوية",
+      "technical": "جهة اتصال تقنية",
+      "financial": "جهة اتصال مالية",
+      "legal": "جهة اتصال قانونية",
+      "other": "أخرى"
+    }
+  },
+
+  "analytics": {
+    "title": "تحليلات الشراكات",
+    "totalPartners": "إجمالي الشركاء",
+    "activePartners": "الشركاء النشطون",
+    "byType": "الشركاء حسب النوع",
+    "byStatus": "الشركاء حسب الحالة",
+    "recentActivities": "الأنشطة الأخيرة",
+    "upcomingRenewals": "التجديدات القادمة",
+    "expiringAgreements": "الاتفاقيات المنتهية قريباً"
+  },
+
+  "interactions": {
+    "title": "التفاعلات",
+    "timeline": "سجل التفاعلات",
+    "addInteraction": "إضافة تفاعل",
+    "editInteraction": "تعديل التفاعل",
+    "noInteractions": "لم يتم تسجيل أي تفاعلات",
+    "noInteractionsDesc": "ابدأ بتتبع اتصالاتك مع هذه الشراكة بإضافة أول تفاعل.",
+    "addFirstInteraction": "إضافة أول تفاعل",
+    "interactionType": "النوع",
+    "description": "الوصف",
+    "outcome": "النتيجة",
+    "createdAt": "التاريخ",
+    "filterSearch": "تصفية وبحث",
+    "filterByType": "تصفية حسب النوع",
+    "allTypes": "جميع الأنواع",
+    "searchPlaceholder": "البحث في التفاعلات...",
+    "newestFirst": "الأحدث أولاً",
+    "oldestFirst": "الأقدم أولاً",
+    "clearFilters": "مسح الفلاتر",
+    "noResults": "لا توجد تفاعلات مطابقة",
+    "noResultsDesc": "جرب تعديل الفلاتر أو مصطلحات البحث.",
+    "types": {
+      "email": "بريد إلكتروني",
+      "phone_call": "مكالمة هاتفية",
+      "meeting": "اجتماع",
+      "document_sent": "مستند مرسل",
+      "proposal_submitted": "مقترح مقدم",
+      "review_session": "جلسة مراجعة",
+      "other": "أخرى"
+    },
+    "attachments": {
+      "label": "المرفقات (اختياري)",
+      "existing": "المرفقات الموجودة",
+      "title": "المرفقات",
+      "dropzone": "اسحب الملفات هنا أو انقر للتصفح",
+      "maxFileSize": "الحد الأقصى لحجم الملف: {{size}}",
+      "filesSelected": "تم تحديد {{count}} ملف",
+      "uploading": "جاري رفع الملفات...",
+      "deleted": "تم حذف المرفق",
+      "files": "{{count}} ملف",
+      "files_plural": "{{count}} ملف",
+      "errors": {
+        "fileTooLarge": "الملف {{fileName}} كبير جداً. الحد الأقصى للحجم هو 10 ميجابايت.",
+        "invalidFileType": "الملف {{fileName}} من نوع غير صالح. الأنواع المسموحة: PDF، Word، Excel، PowerPoint، الصور، ZIP، الملفات النصية."
+      }
+    }
+  },
+
+  "tasks": {
+    "title": "المهام",
+    "addTask": "إضافة مهمة",
+    "editTask": "تعديل المهمة",
+    "noTasks": "لا توجد مهام لهذه الشراكة",
+    "taskTitle": "عنوان المهمة",
+    "dueDate": "تاريخ الاستحقاق",
+    "assignee": "المكلف",
+    "assignedDepartment": "القسم المكلف",
+    "selectDepartment": "اختر القسم",
+    "unassigned": "غير مكلف",
+    "priority": "الأولوية",
+    "status": "الحالة",
+    "description": "الوصف",
+    "markComplete": "تحديد كمكتمل",
+    "viewDetails": "عرض التفاصيل",
+    "priorities": {
+      "low": "منخفضة",
+      "medium": "متوسطة",
+      "high": "عالية"
+    },
+    "statuses": {
+      "pending": "قيد الانتظار",
+      "in_progress": "قيد التنفيذ",
+      "completed": "مكتمل"
+    }
+  },
+
+  "actions": {
+    "viewDetails": "عرض التفاصيل",
+    "markAsPartner": "تحديد كشريك",
+    "removePartner": "إزالة حالة الشراكة",
+    "renewAgreement": "تجديد الاتفاقية",
+    "exportData": "تصدير البيانات"
+  },
+
+  "confirmations": {
+    "deletePartnership": "هل أنت متأكد من إزالة حالة الشراكة من هذه المنظمة؟",
+    "deleteAgreement": "هل أنت متأكد من حذف هذه الاتفاقية؟",
+    "deleteActivity": "هل أنت متأكد من حذف هذا النشاط؟",
+    "deleteComment": "هل أنت متأكد من حذف هذا التعليق؟",
+    "deleteInteraction": "هل أنت متأكد من حذف هذا التفاعل؟ لا يمكن التراجع عن هذا الإجراء.",
+    "deleteTask": "هل أنت متأكد من حذف هذه المهمة؟ لا يمكن التراجع عن هذا الإجراء."
+  },
+
+  "messages": {
+    "partnershipCreated": "تم إنشاء الشراكة بنجاح",
+    "partnershipUpdated": "تم تحديث الشراكة بنجاح",
+    "partnershipDeleted": "تمت إزالة الشراكة بنجاح",
+    "agreementCreated": "تم إنشاء الاتفاقية بنجاح",
+    "agreementUpdated": "تم تحديث الاتفاقية بنجاح",
+    "agreementDeleted": "تم حذف الاتفاقية بنجاح",
+    "activityCreated": "تم تسجيل النشاط بنجاح",
+    "activityUpdated": "تم تحديث النشاط بنجاح",
+    "activityDeleted": "تم حذف النشاط بنجاح",
+    "contactAdded": "تمت إضافة جهة الاتصال للشراكة",
+    "contactRemoved": "تمت إزالة جهة الاتصال من الشراكة",
+    "commentCreated": "تمت إضافة التعليق بنجاح",
+    "commentUpdated": "تم تحديث التعليق بنجاح",
+    "commentDeleted": "تم حذف التعليق بنجاح",
+    "inactivitySettingsUpdated": "تم تحديث إعدادات عدم النشاط بنجاح",
+    "interactionAdded": "تمت إضافة التفاعل بنجاح",
+    "interactionUpdated": "تم تحديث التفاعل بنجاح",
+    "interactionDeleted": "تم حذف التفاعل بنجاح",
+    "taskCreated": "تم إنشاء المهمة بنجاح",
+    "taskUpdated": "تم تحديث المهمة بنجاح",
+    "taskDeleted": "تم حذف المهمة بنجاح",
+    "taskCompleted": "تم وضع علامة مكتملة على المهمة",
+    "taskReopened": "تم إعادة فتح المهمة"
+  },
+
+  "placeholders": {
+    "selectOrganization": "اختر منظمة...",
+    "selectType": "اختر نوع الشراكة...",
+    "selectCountry": "اختر الدولة...",
+    "selectStatus": "اختر الحالة...",
+    "notesPlaceholder": "أضف ملاحظات حول هذه الشراكة...",
+    "agreementTitle": "مثال: اتفاقية التعاون السنوية ٢٠٢٤",
+    "agreementNumber": "مثال: AGR-2024-001",
+    "selectAgreementType": "اختر نوع الاتفاقية...",
+    "selectLegalStatus": "اختر الحالة القانونية...",
+    "selectLanguages": "اختر اللغات...",
+    "activityDescription": "صف النشاط...",
+    "outcomeDescription": "صف النتيجة...",
+    "terminationClause": "أدخل شروط وأحكام الإنهاء...",
+    "terminationClauseAr": "أدخل شروط وأحكام الإنهاء بالعربية...",
+    "taskTitle": "أدخل عنوان المهمة...",
+    "taskDescription": "أدخل وصف المهمة...",
+    "interactionDescription": "صف التفاعل...",
+    "interactionOutcome": "صف النتيجة...",
+    "outcomePlaceholder": "صف نتيجة هذا التفاعل..."
+  },
+
+  "filters": {
+    "allTypes": "جميع الأنواع",
+    "allStatuses": "جميع الحالات",
+    "activeOnly": "النشطة فقط",
+    "expiringSoon": "تنتهي قريباً",
+    "sortBy": "ترتيب حسب",
+    "sortByStartDate": "تاريخ البداية (الأحدث)",
+    "sortByLatestActivity": "آخر نشاط",
+    "sortByOldestActivity": "الأقدم نشاطاً",
+    "sortByName": "الاسم (أ-ي)"
+  },
+
+  "inactivity": {
+    "activityStatus": "حالة النشاط",
+    "statusActive": "الشراكة نشطة",
+    "statusInactive": "الشراكة غير نشطة",
+    "inactive": "غير نشط",
+    "daysInactive": "{{days}} يوم بدون نشاط",
+    "lastActivity": "آخر نشاط",
+    "daysSinceActivity": "يوم منذ آخر نشاط",
+    "noActivityRecorded": "لم يتم تسجيل أي نشاط",
+    "settings": "إعدادات عدم النشاط",
+    "thresholdLabel": "عتبة عدم النشاط",
+    "thresholdHelp": "تحديد الشراكة كغير نشطة بعد هذه الفترة بدون نشاط",
+    "thresholdMonths_zero": "{{count}} شهر",
+    "thresholdMonths_one": "{{count}} شهر",
+    "thresholdMonths_two": "{{count}} شهران",
+    "thresholdMonths_few": "{{count}} أشهر",
+    "thresholdMonths_many": "{{count}} شهراً",
+    "thresholdMonths_other": "{{count}} شهر",
+    "notifyLabel": "إشعارات البريد الإلكتروني",
+    "notifyHelp": "إرسال تنبيهات بالبريد الإلكتروني عندما تصبح هذه الشراكة غير نشطة",
+    "lastNotificationSent": "آخر إشعار تم إرساله",
+    "warningThreshold": "تحذير: لا يوجد نشاط منذ {{days}} يوم"
+  },
+
+  "empty": {
+    "noPartners": "لم يتم العثور على شركاء",
+    "noAgreements": "لا توجد اتفاقيات لهذه الشراكة",
+    "noActivities": "لم يتم تسجيل أي أنشطة بعد",
+    "noContacts": "لم يتم تعيين جهات اتصال لهذه الشراكة",
+    "noComments": "لا توجد تعليقات بعد. ابدأ نقاشاً حول هذه الشراكة."
+  },
+
+  "languages": {
+    "arabic": "العربية",
+    "english": "الإنجليزية",
+    "french": "الفرنسية",
+    "spanish": "الإسبانية",
+    "chinese": "الصينية",
+    "portuguese": "البرتغالية",
+    "german": "الألمانية",
+    "russian": "الروسية",
+    "urdu": "الأردية"
+  }
+}

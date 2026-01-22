@@ -1,0 +1,66 @@
+{
+  "title": "Events Analytics",
+  "subtitle": "Detailed insights into event patterns and performance",
+  
+  "kpis": {
+    "totalEvents": "Total Events",
+    "upcomingEvents": "Upcoming Events",
+    "activeEvents": "Active Events",
+    "completedEvents": "Completed Events",
+    "archivedEvents": "Archived Events",
+    "avgEventsPerMonth": "Avg Events/Month",
+    "avgAttendeesPerEvent": "Avg Attendees/Event",
+    "totalAttendees": "Total Attendees"
+  },
+  
+  "filters": {
+    "allDepartments": "All Departments",
+    "selectYear": "Select Year"
+  },
+  
+  "tabs": {
+    "overview": "Overview",
+    "calendar": "Calendar",
+    "timeline": "Timeline",
+    "departments": "Departments"
+  },
+  
+  "charts": {
+    "eventsByCategory": "Events by Category",
+    "eventsByType": "Events by Type",
+    "monthlyTrends": "Monthly Trends",
+    "topLocations": "Top Locations",
+    "calendarHeatmap": "Event Calendar Heatmap",
+    "eventTimeline": "Event Timeline",
+    "departmentComparison": "Department Comparison",
+    "noLocationData": "No location data available"
+  },
+  
+  "heatmap": {
+    "events": "event",
+    "events_plural": "events",
+    "more": "More",
+    "less": "Less"
+  },
+  
+  "timeline": {
+    "noEvents": "No events to display",
+    "viewAll": "View {{count}} more events",
+    "status": {
+      "upcoming": "Upcoming",
+      "active": "Active",
+      "completed": "Completed"
+    }
+  },
+  
+  "locationChart": {
+    "events": "Events",
+    "attendees": "Attendees",
+    "noData": "No location data available"
+  },
+  
+  "errors": {
+    "title": "Error Loading Dashboard",
+    "loadFailed": "Failed to load events analytics data. Please try again later."
+  }
+}

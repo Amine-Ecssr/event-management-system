@@ -1,0 +1,232 @@
+{
+  "title": "Archive",
+  "titleAr": "الحصاد",
+  "subtitle": "Explore our past events and achievements",
+  "subtitleAr": "استكشف فعالياتنا وإنجازاتنا السابقة",
+  
+  "badge": "Archived",
+  "badgeAr": "الحصاد",
+  "alHasad": "Al Hasad",
+  "archiveImported": "Archive imported",
+  "restoreToCalendar": "Restore to Calendar",
+  
+  "stats": {
+    "totalEvents": "Total Events",
+    "totalAttendees": "Total Attendees",
+    "yearsActive": "Years Active",
+    "categories": "Categories",
+    "eventsWithPhotos": "With Photos",
+    "eventsWithVideos": "With Videos"
+  },
+  
+  "fields": {
+    "actualAttendees": "Actual Attendees",
+    "highlights": "Highlights",
+    "highlightsAr": "Highlights (Arabic)",
+    "impact": "Impact & Outcomes",
+    "impactAr": "Impact & Outcomes (Arabic)",
+    "keyTakeaways": "Key Takeaways",
+    "keyTakeawaysAr": "Key Takeaways (Arabic)",
+    "photos": "Photos",
+    "videos": "Videos",
+    "youtubeVideoIds": "YouTube Video IDs",
+    "archivedAt": "Archived On",
+    "archivedBy": "Archived By",
+    "speakers": "Speakers"
+  },
+  
+  "filters": {
+    "allYears": "All Years",
+    "allCategories": "All Categories",
+    "search": "Search archives...",
+    "searchPlaceholder": "Search by name, description, highlights...",
+    "clearFilters": "Clear Filters"
+  },
+  
+  "actions": {
+    "archiveEvent": "Archive Event",
+    "unarchiveEvent": "Unarchive",
+    "createDirectly": "Create Archive Entry",
+    "edit": "Edit Archive",
+    "delete": "Delete Archive",
+    "uploadPhotos": "Upload Photos",
+    "addVideo": "Add YouTube Video",
+    "viewDetails": "View Details",
+    "viewArchive": "View Archive",
+    "downloadPhoto": "Download Photo",
+    "deletePhoto": "Delete Photo",
+    "reorderPhotos": "Reorder Photos",
+    "importCsv": "Import CSV",
+    "exportCsv": "Export to CSV",
+    "share": "Share",
+    "copyLink": "Copy Link",
+    "createNew": "Create New"
+  },
+  
+  "messages": {
+    "eventArchived": "Event archived successfully",
+    "eventUnarchived": "Event unarchived successfully",
+    "archiveCreated": "Archive entry created successfully",
+    "archiveUpdated": "Archive entry updated successfully",
+    "archiveDeleted": "Archive entry deleted successfully",
+    "photosUploaded": "{{count}} photo(s) uploaded successfully",
+    "photoDeleted": "Photo deleted successfully",
+    "photoOrderUpdated": "Photo order updated",
+    "videoAdded": "YouTube video added",
+    "videoRemoved": "YouTube video removed",
+    "linkCopied": "Link copied to clipboard",
+    "cannotArchiveScraped": "Cannot archive scraped events. Only internal events can be archived.",
+    "alreadyArchived": "This event is already archived",
+    "confirmDelete": "Are you sure you want to delete this archive entry? This action cannot be undone.",
+    "confirmUnarchive": "Are you sure you want to unarchive this event? The archive entry will be deleted.",
+    "maxPhotosReached": "Maximum 20 photos allowed per archived event",
+    "maxVideosReached": "Maximum 5 videos allowed per archived event",
+    "invalidYoutubeUrl": "Please enter a valid YouTube URL",
+    "photoTooLarge": "Photo must be 5MB or less",
+    "unsupportedFormat": "Unsupported file format. Please use JPEG, PNG, WebP, or GIF.",
+    "eventRestored": "Event restored successfully",
+    "eventRestoredDesc": "The event has been moved back to the calendar",
+    "restoreFailed": "Failed to restore event",
+    "failedToShare": "Failed to share"
+  },
+  
+  "emptyStates": {
+    "noArchives": "No archived events yet",
+    "noArchivesDesc": "Start archiving your past events to showcase your achievements",
+    "noPhotos": "No photos uploaded",
+    "noPhotosDesc": "Upload photos to document this event",
+    "noVideos": "No videos added",
+    "noVideosDesc": "Add YouTube videos to showcase this event",
+    "noResults": "No matching archives found",
+    "noResultsDesc": "Try adjusting your search or filters"
+  },
+  
+  "dialog": {
+    "archiveEventTitle": "Archive Event",
+    "archiveEventDesc": "Add additional details to create a rich archive entry for this event.",
+    "createArchiveTitle": "Create New Archive",
+    "createArchiveDesc": "Add a new archived event directly without linking to an existing event",
+    "editArchiveTitle": "Edit Archive Entry",
+    "editArchiveDesc": "Update the archive details and media for this event.",
+    "deleteArchiveTitle": "Delete Archive Entry",
+    "uploadPhotosTitle": "Upload Photos",
+    "uploadPhotosDesc": "Upload up to {{remaining}} more photos ({{current}}/20 used)",
+    "addVideoTitle": "Add YouTube Video",
+    "addVideoDesc": "Paste a YouTube video URL to add it to this archive entry.",
+    "csvImportTitle": "Import from CSV",
+    "csvImportDesc": "Upload a CSV file containing archived events. Download the template for the correct format.",
+    "downloadTemplate": "Download Template",
+    "selectCsvFile": "Select CSV File",
+    "importing": "Importing..."
+  },
+  
+  "validation": {
+    "nameRequired": "Event name is required",
+    "dateRequired": "Start date is required",
+    "attendeesOrHighlights": "Please provide either actual attendees or highlights to create a meaningful archive entry"
+  },
+  
+  "timeline": {
+    "title": "Events Over Time",
+    "eventsPerMonth": "Events per month"
+  },
+  
+  "gallery": {
+    "viewFullSize": "View Full Size",
+    "previous": "Previous",
+    "next": "Next",
+    "close": "Close",
+    "photoOf": "Photo {{current}} of {{total}}"
+  },
+  
+  "admin": {
+    "title": "Archive Management",
+    "subtitle": "Manage archived events and media",
+    "internalEventsOnly": "Internal Events Only",
+    "internalEventsOnlyDesc": "Only internal (non-scraped) events can be archived",
+    "minioStatus": "Media Storage Status",
+    "minioAvailable": "Connected",
+    "minioUnavailable": "Unavailable",
+    "manageArchive": "Manage Archive",
+    "backToCalendar": "Back to Calendar"
+  },
+
+  "public": {
+    "theHarvest": "The Harvest",
+    "eventsArchive": "Events Archive",
+    "eventsThisYear": "Events this year",
+    "totalAttendees": "Total attendees"
+  },
+
+  "editArchiveTitle": "Edit Archive",
+  "editArchiveDesc": "Update the archive details and media for this event.",
+  "tabDetails": "Details",
+  "tabSpeakers": "Speakers",
+  "tabHighlights": "Highlights",
+  "tabMedia": "Media",
+  "currentPhotos": "Current Photos",
+  "uploadNewPhotos": "Upload New Photos",
+  "noPhotosYet": "No photos uploaded yet",
+  "loadingPhotos": "Loading photos...",
+  "photoStorageUnavailable": "Photo storage service is currently unavailable",
+  "uploading": "Uploading photos...",
+  "noVideosYet": "No videos added",
+  "separateWithCommas": "Separate multiple IDs with commas",
+  "csvImportErrors": "Errors:",
+  "csvImportSuccess": "Successfully imported {{count}} events",
+  "csvRequiredColumns": "Required columns: name or name_ar, start_date. Optional columns: description, location, actual_attendees, highlights, impact, and more.",
+  
+  "tabs": {
+    "details": "Details",
+    "speakers": "Speakers",
+    "highlights": "Highlights",
+    "media": "Media",
+    "basicInfo": "Basic Info",
+    "overview": "Overview",
+    "gallery": "Gallery",
+    "videos": "Videos"
+  },
+  
+  "form": {
+    "nameEnglish": "Name (English)",
+    "nameArabic": "Name (Arabic)",
+    "startTime": "Start Time",
+    "endTime": "End Time",
+    "selectCategory": "Select category",
+    "noCategory": "No category",
+    "locationArabic": "Location (Arabic)",
+    "organizers": "Organizers",
+    "organizersArabic": "Organizers (Arabic)",
+    "eventUrl": "Event URL",
+    "descriptionArabic": "Description (Arabic)",
+    "createArchive": "Create Archive"
+  },
+  
+  "detail": {
+    "attendees": "attendees",
+    "organizer": "Organizer",
+    "originalLink": "Original Link",
+    "view": "View",
+    "noPhotosForEvent": "No photos available for this event",
+    "noVideosForEvent": "No videos available for this event",
+    "exploreMore": "Explore More",
+    "viewAll": "View All",
+    "discoverMore": "Discover more archived events",
+    "browseArchive": "Browse Archive"
+  },
+  
+  "archiveDialog": {
+    "title": "Archive Event to Al Hasad",
+    "description": "Add this event to the Al Hasad archive with optional additional details",
+    "actualAttendees": "Actual Attendees",
+    "highlightsEn": "Highlights (English)",
+    "highlightsEnPlaceholder": "Key event highlights...",
+    "highlightsAr": "Highlights (Arabic)",
+    "highlightsArPlaceholder": "أبرز نقاط الفعالية...",
+    "addMoreLater": "You can add more details and photos later from the Archive Management page",
+    "archiving": "Archiving...",
+    "archiveToAlHasad": "Archive to Al Hasad",
+    "archived": "Event archived successfully",
+    "archivedDesc": "Event has been moved to Al Hasad archive"
+  }
+}

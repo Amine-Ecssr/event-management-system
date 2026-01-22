@@ -1,0 +1,282 @@
+version: '3.9'
+
+# Core stack (no internet access for proxy and client)
+# Run on the VM that hosts the API, Keycloak, database, and frontend.
+services:
+  # Elasticsearch with ICU plugin for Arabic support (Core Environment)
+  elasticsearch:
+    build:
+      context: ./elasticsearch
+      dockerfile: Dockerfile
+    image: eventcal-elasticsearch:8.12.0-icu
+    container_name: ecssr-core-elasticsearch
+    restart: unless-stopped
+    environment:
+      - node.name=eventcal-es-core
+      - cluster.name=eventcal-cluster-core
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
+      - xpack.security.enabled=true
+      - ELASTIC_PASSWORD=${ELASTICSEARCH_PASSWORD}
+      - xpack.security.http.ssl.enabled=false
+      - xpack.security.transport.ssl.enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+      - ./elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+    networks:
+      - core-backend
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf -u elastic:${ELASTICSEARCH_PASSWORD} http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+        reservations:
+          cpus: '1'
+          memory: 2G
+
+  # reverse-proxy:
+  #   image: nginxproxy/nginx-proxy:alpine
+  #   container_name: ecssr-core-proxy
+  #   restart: unless-stopped
+  #   ports:
+  #     - "5050:80"
+  #     - "5051:443"
+  #   environment:
+  #     # Domain names will be configured by IT; placeholders keep the template ready
+  #     VIRTUAL_HOST: ${DOMAIN:-}${WWW_DOMAIN:+,${WWW_DOMAIN}}
+  #     ENABLE_IPV6: "false"
+  #   volumes:
+  #     - /var/run/docker.sock:/tmp/docker.sock:ro
+  #     # Self-signed certificate provided by IT (place under deploy/certs/<domain>.crt|key)
+  #     - ./deploy/certs:/etc/nginx/certs:ro
+  #     - nginx_vhost:/etc/nginx/vhost.d
+  #     - nginx_html:/usr/share/nginx/html
+  #   networks:
+  #     # Internal network blocks egress to the internet for proxy + client
+  #     - core-internal
+
+  db:
+    image: postgres:16-alpine
+    container_name: ecssr-core-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-ecssr_events}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-keycloak-schema.sql:/docker-entrypoint-initdb.d/init-keycloak-schema.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - core-backend
+
+  migrate:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    image: omaralmansoori/eventvue-server:latest
+    container_name: ecssr-core-migrate
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-ecssr_events}
+    command: npm run db:migrate
+    restart: "no"
+    networks:
+      - core-backend
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:23.0
+    container_name: ecssr-core-keycloak
+    restart: unless-stopped
+    command: start
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-ecssr_events}
+      KC_DB_USERNAME: ${POSTGRES_USER:-postgres}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      KC_DB_SCHEMA: keycloak
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      KC_HOSTNAME: ${AUTH_DOMAIN:-auth.local.example}
+      KC_HOSTNAME_STRICT: true
+      KC_HOSTNAME_STRICT_HTTPS: false
+      KC_HTTP_ENABLED: true
+      KC_HEALTH_ENABLED: true
+      VIRTUAL_HOST: ${AUTH_DOMAIN:-auth.local.example}
+      VIRTUAL_PORT: 8080
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/8080;echo -e 'GET /health/ready HTTP/1.1\r\nhost: 127.0.0.1\r\nConnection: close\r\n\r\n' >&3;if [ $$? -eq 0 ]; then exit 0;else exit 1;fi"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - core-backend
+      - core-internal
+  minio:
+    image: quay.io/minio/minio:latest
+    container_name: ecssr-core-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-minioadmin}
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - core-backend
+
+  server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    image: omaralmansoori/eventvue-server:latest
+    container_name: ecssr-core-server
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+      elasticsearch:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      DOCKER_CONTAINER: "true"
+      
+      # Elasticsearch configuration
+      # For Serverless: Use ELASTICSEARCH_CLOUD_ID + ELASTICSEARCH_API_KEY
+      # For Traditional: Use ELASTICSEARCH_URL + USERNAME + PASSWORD
+      ELASTICSEARCH_CLOUD_ID: ${ELASTICSEARCH_CLOUD_ID:-}
+      ELASTICSEARCH_API_KEY: ${ELASTICSEARCH_API_KEY:-}
+      ELASTICSEARCH_URL: ${ELASTICSEARCH_URL:-http://elasticsearch:9200}
+      ELASTICSEARCH_USERNAME: ${ELASTICSEARCH_USERNAME:-elastic}
+      ELASTICSEARCH_PASSWORD: ${ELASTICSEARCH_PASSWORD}
+      ELASTICSEARCH_ENABLED: ${ELASTICSEARCH_ENABLED:-true}
+      ES_INDEX_PREFIX: ${ES_INDEX_PREFIX:-eventcal}
+      ES_INDEX_SUFFIX: ${ES_INDEX_SUFFIX:-core}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-ecssr_events}
+      KEYCLOAK_URL: ${KEYCLOAK_URL:-http://keycloak:8080}
+      KEYCLOAK_REALM: ${KEYCLOAK_REALM:-ecssr-events}
+      KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID:-ecssr-events-app}
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET:-}
+      KEYCLOAK_REDIRECT_URI: ${KEYCLOAK_REDIRECT_URI:-http://localhost:5001/api/auth/callback}
+      KEYCLOAK_SYNC_ENABLED: ${KEYCLOAK_SYNC_ENABLED:-true}
+      KEYCLOAK_SYNC_INTERVAL: ${KEYCLOAK_SYNC_INTERVAL:-3600000}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      SESSION_SECRET: ${SESSION_SECRET:-change-this-secret}
+
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
+
+      WHATSAPP_SERVICE_URL: ${WHATSAPP_SERVICE_URL:-http://whatsapp-service:3001}
+      SCRAPER_SERVICE_URL: ${SCRAPER_SERVICE_URL:-http://scraper-service:3002}
+
+      # MinIO configuration for Archive Media
+      MINIO_ENDPOINT: ${MINIO_ENDPOINT:-minio}
+      MINIO_PORT: ${MINIO_PORT:-9000}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
+      MINIO_BUCKET: ${MINIO_BUCKET:-ecssr-archive}
+      MINIO_EVENTS_BUCKET: ${MINIO_EVENTS_BUCKET:-ecssr-events}
+      MINIO_USE_SSL: ${MINIO_USE_SSL:-false}
+      
+      # AI Image Generation (optional - for sample data)
+      AI_IMAGE_PROVIDER: ${AI_IMAGE_PROVIDER:-placeholder}
+      AI_IMAGE_API_KEY: ${AI_IMAGE_API_KEY:-}
+      
+      VIRTUAL_HOST: ${API_DOMAIN:-api.local.example}
+      VIRTUAL_PORT: 5000
+    volumes:
+      - uploads_data:/app/uploads
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:5000/api/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - core-backend
+      - core-internal
+
+  client:
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+    image: omaralmansoori/eventvue-client:latest
+    container_name: ecssr-core-client
+    restart: unless-stopped
+    depends_on:
+      - server
+    ports:
+      - "80:80"
+    environment:
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://server:5000}
+      VIRTUAL_HOST: ${DOMAIN:-app.local.example}${WWW_DOMAIN:+,${WWW_DOMAIN}}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - core-backend
+      - core-internal
+
+volumes:
+  postgres_data:
+    driver: local
+  uploads_data:
+    driver: local
+  nginx_vhost:
+    driver: local
+  nginx_html:
+    driver: local
+  minio_data:
+    driver: local
+  elasticsearch_data:
+    driver: local
+
+networks:
+  core-backend:
+    driver: bridge
+  core-internal:
+    driver: bridge

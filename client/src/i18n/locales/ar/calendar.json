@@ -1,0 +1,57 @@
+{
+  "months": {
+    "jan": "يناير",
+    "feb": "فبراير",
+    "mar": "مارس",
+    "apr": "أبريل",
+    "may": "مايو",
+    "jun": "يونيو",
+    "jul": "يوليو",
+    "aug": "أغسطس",
+    "sep": "سبتمبر",
+    "oct": "أكتوبر",
+    "nov": "نوفمبر",
+    "dec": "ديسمبر"
+  },
+  "weekdays": {
+    "mon": "الإثنين",
+    "tue": "الثلاثاء",
+    "wed": "الأربعاء",
+    "thu": "الخميس",
+    "fri": "الجمعة",
+    "sat": "السبت",
+    "sun": "الأحد"
+  },
+  "viewModes": {
+    "monthly": "شهري",
+    "quarterly": "ربع سنوي",
+    "biAnnually": "نصف سنوي",
+    "yearly": "سنوي"
+  },
+  "views": {
+    "list": "قائمة",
+    "calendar": "تقويم"
+  },
+  "classic": "كلاسيكي",
+  "modern": "حديث",
+  "switchToClassic": "التبديل إلى التقويم الكلاسيكي",
+  "switchToModern": "التبديل إلى التقويم الحديث",
+  "allMonths": "جميع الأشهر",
+  "filterByMonth": "تصفية حسب الشهر",
+  "filterByCategory": "تصفية حسب الفئة",
+  "filterByEventType": "تصفية حسب نوع الفعالية",
+  "filterByEventScope": "تصفية حسب نطاق الفعالية",
+  "allCategories": "جميع الفئات",
+  "allTypes": "جميع الأنواع",
+  "allEvents": "جميع الفعاليات",
+  "localEvents": "الفعاليات المحلية",
+  "internationalEvents": "الفعاليات الدولية",
+  "internalEvents": "الفعاليات الداخلية",
+  "externalEvents": "الفعاليات الخارجية",
+  "previousYear": "السنة السابقة",
+  "nextYear": "السنة التالية",
+  "today": "اليوم",
+  "week": "أسبوع",
+  "month": "شهر",
+  "year": "سنة"
+}

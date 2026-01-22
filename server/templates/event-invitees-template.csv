@@ -1,0 +1,3 @@
+nameEn,nameAr,email,organization,organizationAr,position,positionAr,country,phone,title,titleAr,rsvp,registered,inviteEmailSent,notes
+John Doe,جون دو,john@acme.com,ACME Corp,شركة أكمي,Manager,مدير,AE,+971501234567,Dr.,د.,No,Yes,Yes,Registered online and invitation email sent
+Jane Smith,جين سميث,jane@university.edu,Tech University,جامعة التكنولوجيا,Professor,أستاذ,US,+12125551234,Prof.,أ.د.,Yes,Yes,Yes,Confirmed RSVP and registered

@@ -1,0 +1,11 @@
+{
+  "showList": "إظهار القائمة",
+  "hideList": "إخفاء القائمة",
+  "upcomingEvents": "الفعاليات القادمة",
+  "deleteEventConfirm": "هل أنت متأكد من حذف \"{{eventName}}\"؟ لا يمكن التراجع عن هذا الإجراء.",
+  "deleteAllEventsTitle": "حذف جميع الفعاليات",
+  "deleteAllEventsWarning": "سيؤدي هذا إلى حذف جميع الفعاليات بشكل دائم. لا يمكن التراجع عن هذا الإجراء.",
+  "deleteAllEventsConfirm": "للتأكيد، اكتب",
+  "deleteAllEventsPhrase": "حذف جميع الفعاليات",
+  "deleteAllEventsPlaceholder": "اكتب حذف جميع الفعاليات"
+}

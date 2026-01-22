@@ -1,0 +1,16 @@
+{
+  "template": "قالب",
+  "downloadTemplateTitle": "تنزيل قالب CSV فارغ لملئه",
+  "importCSV": "استيراد CSV",
+  "importing": "جاري الاستيراد...",
+  "importCSVTitle": "استيراد الفعاليات من ملف CSV (ترميز UTF-8). اضغط F12 لعرض رسائل الخطأ التفصيلية في حالة فشل الاستيراد.",
+  "deleteAll": "حذف الكل",
+  "errors": "أخطاء استيراد CSV",
+  "errorsPlural": "أخطاء",
+  "checkConsole": "تحقق من وحدة التحكم في المتصفح (F12) للحصول على التفاصيل الكاملة.",
+  "successfullyImported": "نجح الاستيراد",
+  "importedCount": "تم استيراد {{count}} فعالية/فعاليات",
+  "event": "فعالية/فعاليات",
+  "failed": "فشل الاستيراد",
+  "failedDesc": "فشل استيراد ملف CSV"
+}

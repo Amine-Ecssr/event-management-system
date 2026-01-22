@@ -1,0 +1,31 @@
+# Elasticsearch Configuration for EventVue/EventCal
+# This file is mounted into the container at /usr/share/elasticsearch/config/elasticsearch.yml
+
+# Cluster settings
+cluster.name: "eventcal-cluster"
+network.host: 0.0.0.0
+
+# Discovery settings (single-node for dev, configure for cluster in prod)
+discovery.type: single-node
+
+# Index settings - only allow auto-creation for eventcal indices
+action.auto_create_index: "eventcal-*"
+
+# Query settings
+indices.query.bool.max_clause_count: 4096
+
+# Path settings
+path.data: /usr/share/elasticsearch/data
+path.logs: /usr/share/elasticsearch/logs
+
+# Memory settings - lock memory to prevent swapping
+bootstrap.memory_lock: true
+
+# HTTP settings
+http.port: 9200
+http.cors.enabled: true
+http.cors.allow-origin: "*"
+http.cors.allow-headers: "X-Requested-With,Content-Type,Content-Length,Authorization"
+
+# Transport settings
+transport.port: 9300

@@ -1,0 +1,352 @@
+# =============================================================================
+# Prometheus Alert Rules for Elasticsearch - EventVue
+# =============================================================================
+#
+# These rules monitor Elasticsearch cluster health, performance, and capacity.
+# Requires elasticsearch_exporter to be running and scraped by Prometheus.
+#
+# Exporter: github.com/prometheus-community/elasticsearch_exporter
+# Recommended scrape interval: 15s
+# =============================================================================
+
+groups:
+  - name: elasticsearch.cluster
+    interval: 30s
+    rules:
+      # =========================================================================
+      # Cluster Health Alerts
+      # =========================================================================
+      
+      - alert: ElasticsearchClusterRed
+        expr: elasticsearch_cluster_health_status{color="red"} == 1
+        for: 5m
+        labels:
+          severity: critical
+          service: elasticsearch
+          team: platform
+        annotations:
+          summary: "Elasticsearch cluster is RED"
+          description: |
+            Elasticsearch cluster {{ $labels.cluster }} has been in RED status for more than 5 minutes.
+            This indicates one or more primary shards are unallocated.
+            Impact: Data loss may occur. Search and indexing may fail.
+            Runbook: https://wiki.example.com/runbooks/elasticsearch-cluster-red
+          runbook_url: "https://wiki.example.com/runbooks/elasticsearch-cluster-red"
+
+      - alert: ElasticsearchClusterYellow
+        expr: elasticsearch_cluster_health_status{color="yellow"} == 1
+        for: 15m
+        labels:
+          severity: warning
+          service: elasticsearch
+          team: platform
+        annotations:
+          summary: "Elasticsearch cluster is YELLOW"
+          description: |
+            Elasticsearch cluster {{ $labels.cluster }} has been in YELLOW status for more than 15 minutes.
+            This indicates one or more replica shards are unallocated.
+            Impact: Reduced redundancy. Single node failure may cause data unavailability.
+
+      - alert: ElasticsearchUnassignedShards
+        expr: elasticsearch_cluster_health_unassigned_shards > 0
+        for: 10m
+        labels:
+          severity: warning
+          service: elasticsearch
+          team: platform
+        annotations:
+          summary: "Elasticsearch has unassigned shards"
+          description: |
+            Cluster {{ $labels.cluster }} has {{ $value }} unassigned shards for more than 10 minutes.
+            Check cluster allocation settings and disk space.
+
+      - alert: ElasticsearchRelocatingShards
+        expr: elasticsearch_cluster_health_relocating_shards > 0
+        for: 30m
+        labels:
+          severity: info
+          service: elasticsearch
+          team: platform
+        annotations:
+          summary: "Elasticsearch shards relocating for extended time"
+          description: |
+            Cluster {{ $labels.cluster }} has {{ $value }} relocating shards for more than 30 minutes.
+            This may indicate slow disk I/O or network issues.
+
+      # =========================================================================
+      # Node Alerts
+      # =========================================================================
+
+      - alert: ElasticsearchNodeDown
+        expr: elasticsearch_cluster_health_number_of_nodes < 3
+        for: 5m
+        labels:
+          severity: critical
+          service: elasticsearch
+          team: platform
+        annotations:
+          summary: "Elasticsearch node is down"
+          description: |
+            Elasticsearch cluster {{ $labels.cluster }} has fewer than 3 nodes.
+            Current count: {{ $value }}. Check for node crashes or network issues.
+
+      - alert: ElasticsearchDataNodeDown
+        expr: elasticsearch_cluster_health_number_of_data_nodes < 2
+        for: 5m
+        labels:
+          severity: critical
+          service: elasticsearch
+          team: platform
+        annotations:
+          summary: "Elasticsearch data node is down"
+          description: |
+            Elasticsearch cluster {{ $labels.cluster }} has fewer than 2 data nodes.
+            Current count: {{ $value }}. Data availability may be impacted.
+
+      # =========================================================================
+      # Disk Space Alerts
+      # =========================================================================
+
+      - alert: ElasticsearchDiskSpaceLow
+        expr: |
+          (1 - (elasticsearch_filesystem_data_available_bytes / elasticsearch_filesystem_data_size_bytes)) * 100 > 80
+        for: 10m
+        labels:
+          severity: warning
+          service: elasticsearch
+          team: platform
+        annotations:
+          summary: "Elasticsearch disk space low"
+          description: |
+            Elasticsearch node {{ $labels.name }} disk usage is above 80%.
+            Current usage: {{ printf "%.1f" $value }}%.
+            ES will start relocating shards at 85% and stop allocating at 90%.
+
+      - alert: ElasticsearchDiskSpaceCritical
+        expr: |
+          (1 - (elasticsearch_filesystem_data_available_bytes / elasticsearch_filesystem_data_size_bytes)) * 100 > 90
+        for: 5m
+        labels:
+          severity: critical
+          service: elasticsearch
+          team: platform
+        annotations:
+          summary: "Elasticsearch disk space critical"
+          description: |
+            Elasticsearch node {{ $labels.name }} disk usage is above 90%.
+            Current usage: {{ printf "%.1f" $value }}%.
+            URGENT: ES has stopped allocating new shards. Add capacity immediately.
+
+      # =========================================================================
+      # Memory Alerts
+      # =========================================================================
+
+      - alert: ElasticsearchHeapUsageHigh
+        expr: |
+          (elasticsearch_jvm_memory_used_bytes{area="heap"} / elasticsearch_jvm_memory_max_bytes{area="heap"}) * 100 > 85
+        for: 10m
+        labels:
+          severity: warning
+          service: elasticsearch
+          team: platform
+        annotations:
+          summary: "Elasticsearch JVM heap usage high"
+          description: |
+            Elasticsearch node {{ $labels.name }} JVM heap usage is above 85%.
+            Current usage: {{ printf "%.1f" $value }}%.
+            Consider increasing heap size or reducing memory pressure.
+
+      - alert: ElasticsearchHeapUsageCritical
+        expr: |
+          (elasticsearch_jvm_memory_used_bytes{area="heap"} / elasticsearch_jvm_memory_max_bytes{area="heap"}) * 100 > 95
+        for: 5m
+        labels:
+          severity: critical
+          service: elasticsearch
+          team: platform
+        annotations:
+          summary: "Elasticsearch JVM heap usage critical"
+          description: |
+            Elasticsearch node {{ $labels.name }} JVM heap usage is above 95%.
+            Current usage: {{ printf "%.1f" $value }}%.
+            Risk of OOM. Immediate action required.
+
+      - alert: ElasticsearchOldGCTooFrequent
+        expr: |
+          rate(elasticsearch_jvm_gc_collection_seconds_count{gc="old"}[5m]) > 0.1
+        for: 10m
+        labels:
+          severity: warning
+          service: elasticsearch
+          team: platform
+        annotations:
+          summary: "Elasticsearch old generation GC running frequently"
+          description: |
+            Node {{ $labels.name }} is running old generation GC more than 6 times per minute.
+            This indicates memory pressure and may cause performance degradation.
+
+      # =========================================================================
+      # Performance Alerts
+      # =========================================================================
+
+      - alert: ElasticsearchSearchLatencyHigh
+        expr: |
+          rate(elasticsearch_indices_search_query_time_seconds[5m]) 
+          / rate(elasticsearch_indices_search_query_total[5m]) > 1
+        for: 10m
+        labels:
+          severity: warning
+          service: elasticsearch
+          team: platform
+        annotations:
+          summary: "Elasticsearch search latency high"
+          description: |
+            Elasticsearch search latency is above 1 second on average.
+            Current average: {{ printf "%.2f" $value }}s.
+            Check query complexity and cluster resources.
+
+      - alert: ElasticsearchIndexLatencyHigh
+        expr: |
+          rate(elasticsearch_indices_indexing_index_time_seconds[5m]) 
+          / rate(elasticsearch_indices_indexing_index_total[5m]) > 0.5
+        for: 10m
+        labels:
+          severity: warning
+          service: elasticsearch
+          team: platform
+        annotations:
+          summary: "Elasticsearch indexing latency high"
+          description: |
+            Elasticsearch indexing latency is above 500ms on average.
+            Current average: {{ printf "%.2f" $value }}s.
+            Check bulk queue size and node resources.
+
+      - alert: ElasticsearchBulkRejections
+        expr: |
+          rate(elasticsearch_thread_pool_rejected_count{name="bulk"}[5m]) > 0
+        for: 5m
+        labels:
+          severity: warning
+          service: elasticsearch
+          team: platform
+        annotations:
+          summary: "Elasticsearch bulk requests being rejected"
+          description: |
+            Node {{ $labels.name }} is rejecting bulk requests.
+            Rejection rate: {{ printf "%.2f" $value }}/s.
+            Increase thread pool size or reduce indexing rate.
+
+      - alert: ElasticsearchSearchRejections
+        expr: |
+          rate(elasticsearch_thread_pool_rejected_count{name="search"}[5m]) > 0
+        for: 5m
+        labels:
+          severity: warning
+          service: elasticsearch
+          team: platform
+        annotations:
+          summary: "Elasticsearch search requests being rejected"
+          description: |
+            Node {{ $labels.name }} is rejecting search requests.
+            Rejection rate: {{ printf "%.2f" $value }}/s.
+            Consider scaling out or optimizing queries.
+
+      # =========================================================================
+      # Circuit Breaker Alerts
+      # =========================================================================
+
+      - alert: ElasticsearchCircuitBreakerTripped
+        expr: |
+          elasticsearch_breakers_tripped > 0
+        for: 1m
+        labels:
+          severity: warning
+          service: elasticsearch
+          team: platform
+        annotations:
+          summary: "Elasticsearch circuit breaker tripped"
+          description: |
+            Circuit breaker {{ $labels.breaker }} on node {{ $labels.name }} has been tripped.
+            This prevents OutOfMemory errors but indicates memory pressure.
+
+      # =========================================================================
+      # EventVue Application Alerts
+      # =========================================================================
+
+      - alert: EventVueSearchSyncLag
+        expr: |
+          eventcal_elasticsearch_sync_lag_seconds > 300
+        for: 10m
+        labels:
+          severity: warning
+          service: eventvue
+          team: platform
+        annotations:
+          summary: "EventVue Elasticsearch sync is lagging"
+          description: |
+            The EventVue search index is more than 5 minutes behind PostgreSQL.
+            Current lag: {{ printf "%.0f" $value }} seconds.
+            Check the sync cron job and Elasticsearch connectivity.
+
+      - alert: EventVueSearchIndexMissing
+        expr: |
+          absent(elasticsearch_indices_docs{index=~"eventcal-.*"})
+        for: 5m
+        labels:
+          severity: critical
+          service: eventvue
+          team: platform
+        annotations:
+          summary: "EventVue search indices are missing"
+          description: |
+            No eventcal-* indices found in Elasticsearch.
+            Search functionality is completely unavailable.
+            Run reindex from admin panel.
+
+      - alert: EventVueSearchDocCountMismatch
+        expr: |
+          abs(eventcal_postgresql_events_total - eventcal_elasticsearch_events_total) > 100
+        for: 30m
+        labels:
+          severity: warning
+          service: eventvue
+          team: platform
+        annotations:
+          summary: "EventVue search index has document count mismatch"
+          description: |
+            PostgreSQL and Elasticsearch event counts differ by more than 100 documents.
+            PostgreSQL: {{ $labels.pg_count }}, Elasticsearch: {{ $labels.es_count }}.
+            Consider running a full reindex.
+
+      # =========================================================================
+      # Backup Alerts
+      # =========================================================================
+
+      - alert: ElasticsearchBackupFailed
+        expr: |
+          elasticsearch_snapshot_stats_snapshot_state{state="FAILED"} == 1
+        for: 1m
+        labels:
+          severity: critical
+          service: elasticsearch
+          team: platform
+        annotations:
+          summary: "Elasticsearch backup failed"
+          description: |
+            The latest Elasticsearch snapshot has failed.
+            Check snapshot repository access and available disk space.
+
+      - alert: ElasticsearchBackupTooOld
+        expr: |
+          time() - elasticsearch_snapshot_stats_latest_snapshot_timestamp_seconds > 86400
+        for: 1h
+        labels:
+          severity: warning
+          service: elasticsearch
+          team: platform
+        annotations:
+          summary: "Elasticsearch backup is too old"
+          description: |
+            No successful Elasticsearch snapshot in the last 24 hours.
+            Last backup was {{ humanizeDuration $value }} ago.
+            Check backup cron job and repository status.

@@ -1,0 +1,16 @@
+{
+  "title": "Files Management",
+  "subtitle": "View and manage all uploaded files. Total storage: {{size}}",
+  "deleteFileTitle": "Delete File",
+  "deleteFileDescription": "Are you sure you want to delete this file? This action cannot be undone.",
+  "file": "File",
+  "size": "Size",
+  "uploadDate": "Upload Date",
+  "task": "Task",
+  "actions": "Actions",
+  "loadingFiles": "Loading files...",
+  "noFiles": "No files uploaded yet",
+  "fileDeleted": "File deleted successfully",
+  "fileDeleteError": "Failed to delete file",
+  "downloadFailed": "Failed to download file"
+}

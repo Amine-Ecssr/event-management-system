@@ -1,0 +1,59 @@
+{
+  "title": "تحليلات المهام",
+  "subtitle": "تتبع أداء المهام وكفاءة الأقسام",
+  "error": "خطأ في تحميل لوحة المعلومات",
+  
+  "totalTasks": "إجمالي المهام",
+  "completionRate": "معدل الإنجاز",
+  "overdueTasks": "المهام المتأخرة",
+  "avgCompletionTime": "متوسط وقت الإنجاز",
+  "completed": "مكتملة",
+  "highPriority": "عالية الأولوية",
+  "days": "أيام",
+  
+  "tasksOverdue": "مهام متأخرة",
+  "reviewOverdue": "مراجعة وتحديث حالة المهام أو المواعيد النهائية",
+  "urgent": "عاجل",
+  
+  "overview": "نظرة عامة",
+  "departments": "الأقسام",
+  "overdueTab": "المتأخرة",
+  "trends": "الاتجاهات",
+  
+  "tasksByStatus": "المهام حسب الحالة",
+  "tasksByPriority": "المهام حسب الأولوية",
+  "workloadDistribution": "توزيع عبء العمل",
+  "departmentPerformance": "أداء الأقسام",
+  "taskTrends": "اتجاهات المهام",
+  
+  "allDepartments": "جميع الأقسام",
+  "noData": "لا توجد بيانات",
+  "noTrendData": "لا توجد بيانات اتجاهات",
+  "noWorkloadData": "لا توجد بيانات عبء العمل",
+  "noDepartments": "لا توجد بيانات أقسام",
+  "noOverdueTasks": "لا توجد مهام متأخرة",
+  
+  "status": {
+    "pending": "قيد الانتظار",
+    "in_progress": "قيد التنفيذ",
+    "completed": "مكتملة",
+    "cancelled": "ملغاة",
+    "waiting": "في انتظار"
+  },
+  
+  "priority": {
+    "high": "عالية",
+    "medium": "متوسطة",
+    "low": "منخفضة"
+  },
+  
+  "tasks": "مهام",
+  "activeTasks": "مهام نشطة",
+  "created": "تم إنشاؤها",
+  "completedLabel": "مكتملة",
+  "overdueLabel": "متأخرة",
+  "daysOverdue": "أيام تأخير",
+  
+  "department": "القسم",
+  "total": "الإجمالي"
+}

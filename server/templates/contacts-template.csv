@@ -1,0 +1,3 @@
+nameEn,nameAr,title,titleAr,organization,organizationAr,position,positionAr,country,phone,email,isEligibleSpeaker
+John Doe,جون دو,Dr.,د.,ACME Corporation,شركة أكمي,CEO,الرئيس التنفيذي,AE,+971501234567,john@acme.com,true
+Jane Smith,جين سميث,Prof.,أ.د.,Tech University,جامعة التكنولوجيا,Professor,أستاذ,US,+12125551234,jane@university.edu,true

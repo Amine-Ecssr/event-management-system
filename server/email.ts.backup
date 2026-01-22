@@ -1,0 +1,1682 @@
+import type { Event, Settings, Stakeholder, StakeholderRequirement, Task } from '@shared/schema';
+import { format } from 'date-fns';
+import { createEmailProvider } from './emailProvider';
+
+export class EmailService {
+  /**
+   * Parse comma-separated email list and combine with global CC
+   */
+  private getCombinedCcList(specificCc: string | null | undefined, globalCc: string | null | undefined): string[] {
+    const ccList: string[] = [];
+    
+    if (globalCc) {
+      ccList.push(...globalCc.split(',').map(e => e.trim()).filter(e => e));
+    }
+    
+    if (specificCc) {
+      ccList.push(...specificCc.split(',').map(e => e.trim()).filter(e => e));
+    }
+    
+    // Remove duplicates
+    return Array.from(new Set(ccList));
+  }
+
+  /**
+   * Replace template variables in a string
+   */
+  private replaceTemplateVariables(
+    template: string, 
+    event: Event, 
+    stakeholder?: Stakeholder,
+    additionalVars?: Record<string, string>,
+    isArabic: boolean = false
+  ): string {
+    const startDate = format(new Date(event.startDate), 'MMM dd, yyyy');
+    const endDate = format(new Date(event.endDate), 'MMM dd, yyyy');
+    
+    // Use Arabic fields when isArabic is true, fallback to English fields if Arabic not available
+    const replacements: Record<string, string> = {
+      eventName: isArabic ? (event.nameAr || event.name || '') : (event.name || ''),
+      description: isArabic ? (event.descriptionAr || event.description || '') : (event.description || ''),
+      startDate,
+      endDate,
+      location: isArabic ? (event.locationAr || event.location || '') : (event.location || ''),
+      organizers: isArabic ? (event.organizersAr || event.organizers || '') : (event.organizers || ''),
+      category: isArabic ? (event.categoryAr || event.category || '') : (event.category || ''),
+      eventType: event.eventType === 'international' ? (isArabic ? 'دولي' : 'International') : (isArabic ? 'محلي' : 'Local'),
+      eventTypeRaw: event.eventType || '',
+      eventScope: event.eventScope === 'external' ? (isArabic ? 'خارجي' : 'External') : (isArabic ? 'داخلي' : 'Internal'),
+      eventScopeRaw: event.eventScope || '',
+      url: event.url || '',
+      expectedAttendance: event.expectedAttendance?.toString() || '',
+      name: isArabic ? (stakeholder?.nameAr || stakeholder?.name || '') : (stakeholder?.name || ''),
+      stakeholderName: isArabic ? (stakeholder?.nameAr || stakeholder?.name || '') : (stakeholder?.name || ''),
+      ...additionalVars, // Merge any additional variables
+    };
+    
+    let result = template;
+    Object.entries(replacements).forEach(([key, value]) => {
+      const regex = new RegExp(`\\{\\{${key}\\}\\}`, 'g');
+      result = result.replace(regex, value);
+    });
+    
+    return result;
+  }
+  
+  /**
+   * Format a requirement item using a template
+   */
+  private formatRequirementItem(
+    req: StakeholderRequirement,
+    index: number,
+    template?: string | null,
+    isArabic: boolean = false
+  ): string {
+    // Default template with formatting
+    const defaultTemplate = `
+      <li style="margin-bottom: 8px;">
+        <strong>{{title}}</strong>
+        ${req.description || req.descriptionAr ? `<br><span style="opacity: 0.8; font-size: 14px;">{{description}}</span>` : ''}
+      </li>
+    `;
+    
+    const itemTemplate = template || defaultTemplate;
+    const number = (index + 1).toString();
+    
+    // Use Arabic fields when isArabic is true, fallback to English fields if Arabic not available
+    const title = isArabic ? (req.titleAr || req.title || '') : (req.title || '');
+    const description = isArabic ? (req.descriptionAr || req.description || '') : (req.description || '');
+    
+    // Replace template variables with raw values, allowing template to control formatting
+    let result = itemTemplate
+      .replace(/\{\{title\}\}/g, title)
+      .replace(/\{\{description\}\}/g, description)
+      .replace(/\{\{index\}\}/g, index.toString())
+      .replace(/\{\{number\}\}/g, number);
+    
+    return result;
+  }
+
+  /**
+   * Render task list as HTML
+   */
+  private renderTaskList(tasks: Task[], settings: Settings, emailType: 'stakeholder' | 'reminder' | 'management'): string {
+    if (tasks.length === 0) {
+      return '';
+    }
+
+    // Get styling based on email type
+    const brandColor = emailType === 'stakeholder' 
+      ? (settings.stakeholderRequirementsBrandColor || '#BC9F6D')
+      : emailType === 'reminder'
+      ? (settings.reminderRequirementsBrandColor || '#BC9F6D')
+      : (settings.managementSummaryRequirementsBrandColor || '#BC9F6D');
+    
+    const textColor = emailType === 'stakeholder'
+      ? (settings.stakeholderRequirementsTextColor || '#333333')
+      : emailType === 'reminder'
+      ? (settings.reminderRequirementsTextColor || '#333333')
+      : (settings.managementSummaryRequirementsTextColor || '#333333');
+    
+    const bgColor = emailType === 'stakeholder'
+      ? (settings.stakeholderRequirementsBgColor || '#F5F5F5')
+      : emailType === 'reminder'
+      ? (settings.reminderRequirementsBgColor || '#F5F5F5')
+      : (settings.managementSummaryRequirementsBgColor || '#F5F5F5');
+    
+    const fontFamily = emailType === 'stakeholder'
+      ? (settings.stakeholderRequirementsFontFamily || 'Arial, sans-serif')
+      : emailType === 'reminder'
+      ? (settings.reminderRequirementsFontFamily || 'Arial, sans-serif')
+      : (settings.managementSummaryRequirementsFontFamily || 'Arial, sans-serif');
+    
+    const fontSize = emailType === 'stakeholder'
+      ? (settings.stakeholderRequirementsFontSize || '16px')
+      : emailType === 'reminder'
+      ? (settings.reminderRequirementsFontSize || '16px')
+      : (settings.managementSummaryRequirementsFontSize || '16px');
+
+    // Helper function to get status color and label
+    const getStatusInfo = (status: string) => {
+      switch (status) {
+        case 'pending':
+          return { color: '#FFA500', label: 'Pending' };
+        case 'in_progress':
+          return { color: '#1E90FF', label: 'In Progress' };
+        case 'completed':
+          return { color: '#228B22', label: 'Completed' };
+        case 'cancelled':
+          return { color: '#808080', label: 'Cancelled' };
+        default:
+          return { color: '#333333', label: status };
+      }
+    };
+
+    let html = `
+      <div style="background-color: ${bgColor}; color: ${textColor}; font-family: ${fontFamily}; font-size: ${fontSize}; margin-top: 24px; padding: 16px; border-radius: 4px;">
+        <h3 style="color: ${brandColor}; font-size: 18px; margin-bottom: 12px; margin-top: 0;">Pending Tasks</h3>
+        <ul style="margin: 12px 0; padding-left: 20px;">
+    `;
+
+    tasks.forEach(task => {
+      const statusInfo = getStatusInfo(task.status || 'pending');
+      const dueDate = task.dueDate ? format(new Date(task.dueDate), 'MMM dd, yyyy') : null;
+      
+      html += `
+        <li style="margin-bottom: 12px;">
+          <strong>${task.title}</strong>
+          <span style="color: ${statusInfo.color}; margin-left: 8px;">[${statusInfo.label}]</span>
+          ${dueDate ? `<span style="opacity: 0.8; margin-left: 8px;">Due: ${dueDate}</span>` : ''}
+          ${task.description ? `<br><span style="opacity: 0.8; font-size: 14px;">${task.description}</span>` : ''}
+        </li>
+      `;
+    });
+
+    html += `
+        </ul>
+      </div>
+    `;
+
+    return html;
+  }
+  /**
+   * Send an email notification about an event (generic reminder)
+   */
+  async sendEventNotification(
+    event: Event,
+    toEmail: string,
+    settings: Settings,
+    prefix?: string
+  ): Promise<void> {
+    if (!settings.emailFromEmail) {
+      throw new Error('Email from address is required');
+    }
+
+    const provider = createEmailProvider(settings);
+    const { subject, html } = this.formatEventEmail(event, settings, prefix);
+    const fromName = settings.emailFromName || 'ECSSR Events';
+    
+    // Combine reminder CC + global CC
+    const ccList = this.getCombinedCcList(settings.reminderCcList, settings.globalCcList);
+    
+    try {
+      await provider.send({
+        from: `${fromName} <${settings.emailFromEmail}>`,
+        to: toEmail,
+        cc: ccList.length > 0 ? ccList : undefined,
+        subject,
+        html,
+      });
+      
+      console.log(`Reminder email sent to ${toEmail} with ${ccList.length} CCs`);
+    } catch (error) {
+      console.error('Failed to send reminder email:', error);
+      throw new Error(`Failed to send reminder email: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * Format an event into an HTML email using templates (for reminder emails)
+   */
+  formatEventEmail(
+    event: Event,
+    settings: Settings,
+    prefix?: string
+  ): { subject: string; html: string } {
+    // Determine language from global settings
+    const language = settings.emailLanguage || 'en';
+    const isArabic = language === 'ar';
+    
+    // Get templates from settings based on language or use defaults
+    const subjectTemplate = isArabic
+      ? (settings.reminderSubjectAr || settings.emailSubjectTemplate || 'تذكير بالفعالية: {{eventName}}')
+      : (settings.reminderSubject || settings.emailSubjectTemplate || 'Event Reminder: {{eventName}}');
+    const bodyTemplate = isArabic
+      ? (settings.reminderBodyAr || settings.emailBodyTemplate || '<h1>{{eventName}}</h1><p>{{description}}</p><p><strong>التاريخ:</strong> {{startDate}} - {{endDate}}</p>')
+      : (settings.reminderBody || settings.emailBodyTemplate || `
+      <h1>{{eventName}}</h1>
+      <p>{{description}}</p>
+      <p><strong>Date:</strong> {{startDate}} - {{endDate}}</p>
+      <p><strong>Location:</strong> {{location}}</p>
+      <p><strong>Organizers:</strong> {{organizers}}</p>
+      <p><strong>Category:</strong> {{category}}</p>
+      <p><strong>Type:</strong> {{eventType}}</p>
+      <p><strong>Expected Attendance:</strong> {{expectedAttendance}}</p>
+      <p><a href="{{url}}">More Information</a></p>
+    `);
+    
+    // Get styling from settings or use defaults
+    const brandColor = settings.reminderBrandColor || '#BC9F6D';
+    const textColor = settings.reminderTextColor || '#333333';
+    const bgColor = settings.reminderBgColor || '#FFFFFF';
+    const fontFamily = settings.reminderFontFamily || 'Arial, sans-serif';
+    const fontSize = settings.reminderFontSize || '16px';
+    
+    const footerBrandColor = settings.reminderFooterBrandColor || '#BC9F6D';
+    const footerTextColor = settings.reminderFooterTextColor || '#666666';
+    const footerBgColor = settings.reminderFooterBgColor || '#FFFFFF';
+    const footerFontFamily = settings.reminderFooterFontFamily || 'Arial, sans-serif';
+    const footerFontSize = settings.reminderFooterFontSize || '14px';
+    
+    const footerTemplate = isArabic
+      ? (settings.reminderFooterAr || '<p>مع أطيب التحيات،<br/>فريق فعاليات المركز</p>')
+      : (settings.reminderFooter || '<p>Best regards,<br/>ECSSR Events Team</p>');
+    
+    // RTL support - automatically enable for Arabic
+    const isRtl = isArabic || settings.reminderEmailRtl || false;
+    const dir = isRtl ? 'rtl' : 'ltr';
+    const textAlign = isRtl ? 'right' : 'left';
+    
+    // Replace all placeholders in subject
+    let subject = this.replaceTemplateVariables(subjectTemplate, event, undefined, undefined, isArabic);
+    
+    // Add prefix if provided
+    if (prefix) {
+      subject = prefix + subject;
+    }
+    
+    // Replace all placeholders in body
+    let customMessageHtml = this.replaceTemplateVariables(bodyTemplate, event, undefined, undefined, isArabic);
+    
+    // Handle {{requirements}} placeholder gracefully
+    // Reminder emails don't have requirements data, so we remove the placeholder if present
+    if (customMessageHtml.includes('{{requirements}}')) {
+      customMessageHtml = customMessageHtml.replace(/\{\{requirements\}\}/g, '');
+    }
+    
+    // Replace placeholders in footer
+    const footerHtml = this.replaceTemplateVariables(footerTemplate, event, undefined, undefined, isArabic);
+    
+    // Build complete HTML with styling and RTL support
+    const html = `
+<!DOCTYPE html>
+<html dir="${dir}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${subject}</title>
+</head>
+<body style="background-color: ${bgColor}; font-family: ${fontFamily}; font-size: ${fontSize}; color: ${textColor}; line-height: 1.6; max-width: 600px; margin: 0 auto; padding: 20px; direction: ${isRtl ? 'rtl' : 'ltr'}; text-align: ${textAlign};">
+  <!-- CUSTOM MESSAGE SECTION -->
+  <div>
+    ${customMessageHtml}
+  </div>
+  
+  <!-- FOOTER SECTION -->
+  <div style="background-color: ${footerBgColor}; color: ${footerTextColor}; font-family: ${footerFontFamily}; font-size: ${footerFontSize}; margin-top: 32px; padding: 16px; border-top: 1px solid #E0E0E0;">
+    ${footerHtml}
+  </div>
+</body>
+</html>
+    `;
+    
+    return { subject, html };
+  }
+
+  /**
+   * Send stakeholder notification email for an event
+   */
+  async sendStakeholderNotification(
+    event: Event,
+    stakeholder: Stakeholder,
+    emails: string[],
+    selectedRequirements: StakeholderRequirement[],
+    customRequirements: string,
+    settings: Settings,
+    tasks: Task[] = []
+  ): Promise<void> {
+    if (!settings.emailFromEmail) {
+      throw new Error('Email from address is required');
+    }
+
+    const provider = createEmailProvider(settings);
+    const fromName = settings.emailFromName || 'ECSSR Events';
+    
+    // Determine language from global settings
+    const language = settings.emailLanguage || 'en';
+    const isArabic = language === 'ar';
+    
+    // Get templates from settings based on language
+    const subjectTemplate = isArabic 
+      ? (settings.stakeholderSubjectAr || 'فعالية جديدة: {{eventName}}')
+      : (settings.stakeholderSubject || 'New Event: {{eventName}}');
+    const bodyTemplate = isArabic
+      ? (settings.stakeholderBodyAr || '<h1>{{eventName}}</h1><p>{{description}}</p><p><strong>التاريخ:</strong> {{startDate}} - {{endDate}}</p><p><strong>الموقع:</strong> {{location}}</p>')
+      : (settings.stakeholderBody || '<h1>{{eventName}}</h1><p>{{description}}</p><p><strong>Date:</strong> {{startDate}} - {{endDate}}</p><p><strong>Location:</strong> {{location}}</p>');
+    const greetingTemplate = isArabic
+      ? (settings.stakeholderGreetingAr || settings.stakeholderGreeting || 'عزيزي {{name}}')
+      : (settings.stakeholderGreeting || 'Dear {{name}},');
+    
+    // Get styling from settings or use defaults
+    const brandColor = settings.stakeholderBrandColor || '#BC9F6D';
+    const textColor = settings.stakeholderTextColor || '#333333';
+    const bgColor = settings.stakeholderBgColor || '#FFFFFF';
+    const fontFamily = settings.stakeholderFontFamily || 'Arial, sans-serif';
+    const fontSize = settings.stakeholderFontSize || '16px';
+    
+    const reqBrandColor = settings.stakeholderRequirementsBrandColor || '#BC9F6D';
+    const reqTextColor = settings.stakeholderRequirementsTextColor || '#333333';
+    const reqBgColor = settings.stakeholderRequirementsBgColor || '#F5F5F5';
+    const reqFontFamily = settings.stakeholderRequirementsFontFamily || 'Arial, sans-serif';
+    const reqFontSize = settings.stakeholderRequirementsFontSize || '16px';
+    
+    const footerBrandColor = settings.stakeholderFooterBrandColor || '#BC9F6D';
+    const footerTextColor = settings.stakeholderFooterTextColor || '#666666';
+    const footerBgColor = settings.stakeholderFooterBgColor || '#FFFFFF';
+    const footerFontFamily = settings.stakeholderFooterFontFamily || 'Arial, sans-serif';
+    const footerFontSize = settings.stakeholderFooterFontSize || '14px';
+    
+    const footerTemplate = isArabic
+      ? (settings.stakeholderFooterAr || '<p>مع أطيب التحيات،<br/>فريق فعاليات المركز</p>')
+      : (settings.stakeholderFooter || '<p>Best regards,<br/>ECSSR Events Team</p>');
+    
+    // RTL support - automatically enable for Arabic
+    const isRtl = isArabic || settings.stakeholderEmailRtl || false;
+    const dir = isRtl ? 'rtl' : 'ltr';
+    const textAlign = isRtl ? 'right' : 'left';
+    
+    // Replace template variables in subject (with stakeholder name)
+    const subject = this.replaceTemplateVariables(subjectTemplate, event, stakeholder, undefined, isArabic);
+    
+    // Build greeting with stakeholder name
+    const greetingHtml = greetingTemplate 
+      ? `<p>${this.replaceTemplateVariables(greetingTemplate, event, stakeholder, undefined, isArabic)}</p>`
+      : '';
+    
+    // Replace template variables in custom message (with stakeholder name)
+    let customMessageHtml = this.replaceTemplateVariables(bodyTemplate, event, stakeholder, undefined, isArabic);
+    
+    // Filter tasks to show only incomplete ones (pending, in_progress)
+    const incompleteTasks = tasks.filter(t => t.status === 'pending' || t.status === 'in_progress');
+    
+    // Build task list HTML
+    const taskListHtml = incompleteTasks.length > 0 
+      ? this.renderTaskList(incompleteTasks, settings, 'stakeholder')
+      : '';
+    
+    // Build requirements section HTML
+    let requirementsHtml = '';
+    if (selectedRequirements.length > 0 || customRequirements) {
+      const requirementsTitle = isArabic
+        ? (settings.stakeholderRequirementsTitleAr || 'متطلباتك لهذه الفعالية')
+        : (settings.stakeholderRequirementsTitle || 'Your Requirements for this Event');
+      requirementsHtml = `
+        <div style="background-color: ${reqBgColor}; color: ${reqTextColor}; font-family: ${reqFontFamily}; font-size: ${reqFontSize}; margin-top: 24px; padding: 16px; border-radius: 4px;">
+          <h2 style="color: ${reqBrandColor}; font-size: 18px; margin-bottom: 12px; margin-top: 0;">${requirementsTitle}</h2>
+      `;
+      
+      if (selectedRequirements.length > 0) {
+        requirementsHtml += '<ul style="margin: 12px 0; padding-left: 20px;">';
+        selectedRequirements.forEach((req, index) => {
+          requirementsHtml += this.formatRequirementItem(req, index, settings.stakeholderRequirementItemTemplate, isArabic);
+        });
+        requirementsHtml += '</ul>';
+      }
+      
+      if (customRequirements) {
+        const customReqTitle = settings.stakeholderCustomRequirementsTitle || 'Additional Requirements:';
+        requirementsHtml += `
+          <div style="margin-top: 12px;">
+            <strong>${customReqTitle}</strong>
+            <p style="margin-top: 8px; white-space: pre-wrap;">${customRequirements}</p>
+          </div>
+        `;
+      }
+      
+      requirementsHtml += '</div>';
+    }
+    
+    // Handle {{requirements}} template variable
+    const hasRequirementsPlaceholder = customMessageHtml.includes('{{requirements}}');
+    if (hasRequirementsPlaceholder) {
+      // Replace {{requirements}} with the actual requirements HTML
+      customMessageHtml = customMessageHtml.replace(/\{\{requirements\}\}/g, requirementsHtml);
+      requirementsHtml = ''; // Clear it so we don't append it again
+    }
+    
+    // Replace template variables in footer
+    const footerHtml = this.replaceTemplateVariables(footerTemplate, event, stakeholder, undefined, isArabic);
+    
+    // Build complete HTML with styling and RTL support
+    const html = `
+<!DOCTYPE html>
+<html dir="${dir}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${subject}</title>
+</head>
+<body style="background-color: ${bgColor}; font-family: ${fontFamily}; font-size: ${fontSize}; color: ${textColor}; line-height: 1.6; max-width: 600px; margin: 0 auto; padding: 20px; direction: ${isRtl ? 'rtl' : 'ltr'}; text-align: ${textAlign};">
+  <!-- GREETING SECTION -->
+  ${greetingHtml}
+  
+  <!-- CUSTOM MESSAGE SECTION -->
+  <div>
+    ${customMessageHtml}
+  </div>
+  
+  <!-- TASK LIST SECTION -->
+  ${taskListHtml}
+  
+  <!-- REQUIREMENTS SECTION (only if not embedded via {{requirements}}) -->
+  ${requirementsHtml}
+  
+  <!-- FOOTER SECTION -->
+  <div style="background-color: ${footerBgColor}; color: ${footerTextColor}; font-family: ${footerFontFamily}; font-size: ${footerFontSize}; margin-top: 32px; padding: 16px; border-top: 1px solid #E0E0E0;">
+    ${footerHtml}
+  </div>
+</body>
+</html>
+    `;
+    
+    // Combine stakeholder-specific CC + global CC
+    const ccList = this.getCombinedCcList(stakeholder.ccList || null, settings.globalCcList);
+    
+    try {
+      await provider.send({
+        from: `${fromName} <${settings.emailFromEmail}>`,
+        to: emails,
+        cc: ccList.length > 0 ? ccList : undefined,
+        subject,
+        html,
+      });
+      console.log(`Stakeholder notification sent to ${emails.join(', ')} with ${ccList.length} CCs for event ${event.name}`);
+    } catch (error) {
+      console.error('Failed to send stakeholder notification:', error);
+      throw new Error(`Failed to send stakeholder notification: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * Send management summary email for an event
+   * Includes full event details plus all stakeholder assignments and requirements
+   */
+  async sendManagementSummary(
+    event: Event,
+    stakeholderAssignments: Array<{
+      stakeholder: Stakeholder;
+      selectedRequirements: StakeholderRequirement[];
+      customRequirements: string;
+      emails: string[];
+    }>,
+    settings: Settings
+  ): Promise<void> {
+    if (!settings.managementSummaryEnabled || !settings.managementSummaryRecipients) {
+      return; // Silently skip if not enabled or no recipients
+    }
+
+    if (!settings.emailFromEmail) {
+      throw new Error('Email from address is required');
+    }
+
+    const provider = createEmailProvider(settings);
+    const fromName = settings.emailFromName || 'ECSSR Events';
+    
+    // Determine language from global settings
+    const language = settings.emailLanguage || 'en';
+    const isArabic = language === 'ar';
+    
+    // Get templates from settings based on language or use defaults
+    const subjectTemplate = isArabic
+      ? (settings.managementSummarySubjectAr || settings.managementSummarySubjectTemplate || 'ملخص إداري: {{eventName}}')
+      : (settings.managementSummarySubjectTemplate || 'Event Summary: {{eventName}}');
+    const bodyTemplate = isArabic
+      ? (settings.managementSummaryBodyAr || settings.managementSummaryBody || '<h1>{{eventName}}</h1><p>{{description}}</p><p><strong>التاريخ:</strong> {{startDate}} - {{endDate}}</p><p><strong>العدد المتوقع للحضور:</strong> {{expectedAttendance}}</p>')
+      : (settings.managementSummaryBody || '<h1>{{eventName}}</h1><p>{{description}}</p><p><strong>Date:</strong> {{startDate}} - {{endDate}}</p><p><strong>Expected Attendance:</strong> {{expectedAttendance}}</p>');
+    
+    // Get styling from settings or use defaults
+    const brandColor = settings.managementSummaryBrandColor || '#BC9F6D';
+    const textColor = settings.managementSummaryTextColor || '#333333';
+    const bgColor = settings.managementSummaryBgColor || '#FFFFFF';
+    const fontFamily = settings.managementSummaryFontFamily || 'Arial, sans-serif';
+    const fontSize = settings.managementSummaryFontSize || '16px';
+    
+    const reqBrandColor = settings.managementSummaryRequirementsBrandColor || '#BC9F6D';
+    const reqTextColor = settings.managementSummaryRequirementsTextColor || '#333333';
+    const reqBgColor = settings.managementSummaryRequirementsBgColor || '#F5F5F5';
+    const reqFontFamily = settings.managementSummaryRequirementsFontFamily || 'Arial, sans-serif';
+    const reqFontSize = settings.managementSummaryRequirementsFontSize || '16px';
+    
+    const footerBrandColor = settings.managementSummaryFooterBrandColor || '#BC9F6D';
+    const footerTextColor = settings.managementSummaryFooterTextColor || '#666666';
+    const footerBgColor = settings.managementSummaryFooterBgColor || '#FFFFFF';
+    const footerFontFamily = settings.managementSummaryFooterFontFamily || 'Arial, sans-serif';
+    const footerFontSize = settings.managementSummaryFooterFontSize || '14px';
+    
+    const footerTemplate = isArabic
+      ? (settings.managementSummaryFooterAr || '<p>مع أطيب التحيات،<br/>إدارة المركز</p>')
+      : (settings.managementSummaryFooter || '<p>Best regards,<br/>ECSSR Management</p>');
+    
+    // RTL support - automatically enable for Arabic
+    const isRtl = isArabic || settings.managementSummaryEmailRtl || false;
+    const dir = isRtl ? 'rtl' : 'ltr';
+    const textAlign = isRtl ? 'right' : 'left';
+    
+    // Prepare data for greeting with stakeholder variables
+    const stakeholderCount = stakeholderAssignments.length.toString();
+    const stakeholderNames = stakeholderAssignments.map(a => a.stakeholder.name).join(', ');
+    const additionalVars = {
+      stakeholderCount,
+      stakeholderNames,
+    };
+    
+    // Replace template variables in subject
+    const subject = this.replaceTemplateVariables(subjectTemplate, event, undefined, additionalVars, isArabic);
+    
+    // Build greeting if template is provided
+    let greetingHtml = '';
+    const greetingTemplate = isArabic
+      ? (settings.managementSummaryGreetingAr || settings.managementSummaryGreeting)
+      : settings.managementSummaryGreeting;
+    if (greetingTemplate) {
+      greetingHtml = `<p>${this.replaceTemplateVariables(greetingTemplate, event, undefined, additionalVars, isArabic)}</p>`;
+    }
+    
+    // Replace template variables in custom message
+    let customMessageHtml = this.replaceTemplateVariables(bodyTemplate, event, undefined, additionalVars, isArabic);
+    
+    // Build stakeholder assignments HTML with advanced customization (if enabled)
+    let stakeholdersHtml = '';
+    const includeRequirements = settings.managementSummaryIncludeRequirements !== false; // Default to true
+    if (stakeholderAssignments.length > 0 && includeRequirements) {
+      // Check if custom stakeholder template is provided
+      const useCustomTemplate = !!settings.managementSummaryStakeholderTemplate;
+      const separator = settings.managementSummaryStakeholderSeparator || '';
+      
+      if (useCustomTemplate) {
+        // Use advanced template system
+        const stakeholderItems = stakeholderAssignments.map(assignment => {
+          // Build requirements list HTML
+          let requirementsList = '';
+          if (assignment.selectedRequirements.length > 0) {
+            requirementsList = '<ul style="margin: 8px 0; padding-left: 20px;">';
+            assignment.selectedRequirements.forEach((req, index) => {
+              requirementsList += this.formatRequirementItem(req, index, settings.managementSummaryRequirementItemTemplate, isArabic);
+            });
+            requirementsList += '</ul>';
+          }
+          
+          // Custom requirements as plain text
+          const customReqs = assignment.customRequirements || '';
+          
+          // Template variables for each stakeholder
+          const stakeholderVars: Record<string, string> = {
+            stakeholderName: assignment.stakeholder.name,
+            emails: assignment.emails.join(', '),
+            emailsList: assignment.emails.map(e => `<div>${e}</div>`).join(''),
+            requirementsList,
+            selectedRequirementsCount: assignment.selectedRequirements.length.toString(),
+            customRequirements: customReqs,
+          };
+          
+          // Replace variables in stakeholder template
+          let result = settings.managementSummaryStakeholderTemplate || '';
+          Object.entries(stakeholderVars).forEach(([key, value]) => {
+            const regex = new RegExp(`\\{\\{${key}\\}\\}`, 'g');
+            result = result.replace(regex, value);
+          });
+          
+          return result;
+        });
+        
+        stakeholdersHtml = stakeholderItems.join(separator);
+      } else {
+        // Use default template
+        const requirementsTitle = isArabic
+          ? (settings.managementSummaryRequirementsTitleAr || 'تكليفات أصحاب المصلحة')
+          : (settings.managementSummaryRequirementsTitle || 'Stakeholder Assignments');
+        stakeholdersHtml = `
+          <div style="background-color: ${reqBgColor}; color: ${reqTextColor}; font-family: ${reqFontFamily}; font-size: ${reqFontSize}; margin-top: 24px; padding: 16px; border-radius: 4px;">
+            <h2 style="color: ${reqBrandColor}; font-size: 20px; margin-bottom: 16px; margin-top: 0;">${requirementsTitle}</h2>
+        `;
+        
+        stakeholderAssignments.forEach(assignment => {
+          const notifiedLabel = isArabic ? 'تم الإبلاغ' : 'Notified';
+          const assignedRequirementsLabel = isArabic ? 'المتطلبات المكلفة' : 'Assigned Requirements';
+          const customRequirementsLabel = isArabic ? 'المتطلبات الخاصة بهذه الفعالية' : 'Requirements specific to this event';
+          
+          stakeholdersHtml += `
+            <div style="margin-bottom: 24px; padding: 16px; background-color: ${bgColor}; border-radius: 4px; border-left: 4px solid ${reqBrandColor};">
+              <h3 style="color: ${reqBrandColor}; font-size: 18px; margin-bottom: 12px; margin-top: 0;">${isArabic && assignment.stakeholder.nameAr ? assignment.stakeholder.nameAr : assignment.stakeholder.name}</h3>
+              
+              <p style="margin-bottom: 8px;"><strong>${notifiedLabel}:</strong> ${assignment.emails.join(', ')}</p>
+              
+              ${assignment.selectedRequirements.length > 0 ? `
+                <div style="margin-top: 12px;">
+                  <p style="margin-bottom: 8px;"><strong>${assignedRequirementsLabel}:</strong></p>
+                  <ul style="margin: 8px 0; padding-left: 20px;">
+                    ${assignment.selectedRequirements.map((req, index) => this.formatRequirementItem(req, index, settings.managementSummaryRequirementItemTemplate, isArabic)).join('')}
+                  </ul>
+                </div>
+              ` : ''}
+              
+              ${assignment.customRequirements ? `
+                <div style="margin-top: 12px;">
+                  <p style="margin-bottom: 8px;"><strong>${customRequirementsLabel}:</strong></p>
+                  <p style="padding: 12px; border-radius: 4px; white-space: pre-wrap; opacity: 0.9;">${assignment.customRequirements}</p>
+                </div>
+              ` : ''}
+            </div>
+          `;
+        });
+        
+        stakeholdersHtml += '</div>';
+      }
+    }
+    
+    // Handle {{requirements}} template variable
+    const hasRequirementsPlaceholder = customMessageHtml.includes('{{requirements}}');
+    if (hasRequirementsPlaceholder) {
+      // Replace {{requirements}} with the actual stakeholder assignments HTML
+      customMessageHtml = customMessageHtml.replace(/\{\{requirements\}\}/g, stakeholdersHtml);
+      stakeholdersHtml = ''; // Clear it so we don't append it again
+    }
+    
+    // Replace template variables in footer
+    const footerHtml = this.replaceTemplateVariables(footerTemplate, event, undefined, undefined, isArabic);
+    
+    // Build complete HTML with styling and RTL support
+    const html = `
+<!DOCTYPE html>
+<html dir="${dir}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${subject}</title>
+</head>
+<body style="background-color: ${bgColor}; font-family: ${fontFamily}; font-size: ${fontSize}; color: ${textColor}; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 20px; direction: ${isRtl ? 'rtl' : 'ltr'}; text-align: ${textAlign};">
+  <!-- GREETING SECTION -->
+  ${greetingHtml}
+  
+  <!-- CUSTOM MESSAGE SECTION -->
+  <div>
+    ${customMessageHtml}
+  </div>
+  
+  <!-- STAKEHOLDER ASSIGNMENTS SECTION (only if not embedded via {{requirements}}) -->
+  ${stakeholdersHtml}
+  
+  <!-- FOOTER SECTION -->
+  <div style="background-color: ${footerBgColor}; color: ${footerTextColor}; font-family: ${footerFontFamily}; font-size: ${footerFontSize}; margin-top: 32px; padding: 16px; border-top: 1px solid #E0E0E0;">
+    ${footerHtml}
+  </div>
+</body>
+</html>
+    `;
+    
+    // Combine management summary CC + global CC
+    const ccList = this.getCombinedCcList(settings.managementSummaryCcList, settings.globalCcList);
+    
+    // Parse recipients
+    const recipients = settings.managementSummaryRecipients
+      .split(',')
+      .map(e => e.trim())
+      .filter(e => e);
+    
+    try {
+      await provider.send({
+        from: `${fromName} <${settings.emailFromEmail}>`,
+        to: recipients,
+        cc: ccList.length > 0 ? ccList : undefined,
+        subject,
+        html,
+      });
+      console.log(`Management summary sent to ${recipients.join(', ')} with ${ccList.length} CCs for event ${event.name}`);
+    } catch (error) {
+      console.error('Failed to send management summary:', error);
+      throw new Error(`Failed to send management summary: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * Test email configuration by sending a test email
+   */
+  async testConnection(
+    settings: Settings,
+    toEmail: string
+  ): Promise<void> {
+    if (!settings.emailFromEmail) {
+      throw new Error('Email from address is required');
+    }
+
+    const provider = createEmailProvider(settings);
+    const fromName = settings.emailFromName || 'ECSSR Events';
+    
+    try {
+      await provider.send({
+        from: `${fromName} <${settings.emailFromEmail}>`,
+        to: toEmail,
+        subject: 'ECSSR Events - Email Configuration Test',
+        html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Email Test</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+      line-height: 1.6;
+      color: #2C3E50;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    h1 {
+      color: #1B365D;
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    .success {
+      background-color: #E8F4FD;
+      border-left: 4px solid #C5A572;
+      padding: 16px;
+      border-radius: 4px;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Email Configuration Test</h1>
+  <div class="success">
+    <p><strong>Success!</strong></p>
+    <p>Your email configuration is working correctly. ECSSR Events notification system is ready to send email reminders.</p>
+  </div>
+  <p>This is a test email from ECSSR Events Calendar system.</p>
+  <p>If you received this email, your email configuration is set up correctly and ready to send event notifications.</p>
+</body>
+</html>
+        `,
+      });
+      
+      console.log('Test email sent successfully');
+    } catch (error) {
+      console.error('Failed to send test email:', error);
+      throw new Error(`Failed to send test email: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * Schedule and send daily reminders to stakeholders with pending tasks
+   * Should be called periodically (e.g., every hour) by the scheduler
+   */
+  async scheduleStakeholderDailyReminders(storage: any): Promise<void> {
+    try {
+      const settings = await storage.getSettings();
+
+      // Skip if email is not enabled
+      if (!settings.emailEnabled || !settings.emailFromEmail) {
+        return;
+      }
+
+      // Get all event-stakeholders with pending tasks
+      const eventStakeholdersWithTasks = await storage.getEventStakeholdersWithPendingTasks();
+
+      if (eventStakeholdersWithTasks.length === 0) {
+        return;
+      }
+
+      const now = new Date();
+      const currentHour = now.getHours();
+      const currentMinute = now.getMinutes();
+
+      for (const assignment of eventStakeholdersWithTasks) {
+        const { eventStakeholder, stakeholder, event, tasks, primaryEmail } = assignment;
+
+        // Skip if daily reminder is not enabled for this assignment
+        if (!eventStakeholder.dailyReminderEnabled) {
+          continue;
+        }
+
+        // Filter incomplete tasks
+        const incompleteTasks = tasks.filter((t: Task) => t.status === 'pending' || t.status === 'in_progress');
+        if (incompleteTasks.length === 0) {
+          continue;
+        }
+
+        // Check if already sent today
+        if (eventStakeholder.lastReminderSentAt) {
+          const lastSent = new Date(eventStakeholder.lastReminderSentAt);
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          
+          if (lastSent >= today) {
+            // Already sent today, skip
+            continue;
+          }
+        }
+
+        // Get the reminder time (use event-stakeholder specific or global)
+        const reminderTime = eventStakeholder.dailyReminderTime || settings.dailyReminderGlobalTime || '08:00';
+        const [targetHour, targetMinute] = reminderTime.split(':').map(Number);
+
+        // Check if current time matches the target time (within a 1-hour window)
+        // This allows the scheduler to catch reminders even if not running exactly at the target time
+        if (currentHour === targetHour && currentMinute >= targetMinute && currentMinute < targetMinute + 60) {
+          try {
+            // Get all emails for the stakeholder
+            const emails = await storage.getStakeholderEmails(stakeholder.id);
+            const emailAddresses = emails.map((e: any) => e.email);
+
+            // Get selected requirements for this assignment
+            const selectedRequirements = stakeholder.requirements?.filter(
+              (req: any) => eventStakeholder.selectedRequirementIds?.includes(req.id.toString())
+            ) || [];
+
+            // Send reminder email with tasks
+            await this.sendStakeholderNotification(
+              event,
+              stakeholder,
+              emailAddresses,
+              selectedRequirements,
+              eventStakeholder.customRequirements || '',
+              settings,
+              incompleteTasks
+            );
+
+            // Update last reminder sent timestamp
+            await storage.updateEventStakeholderLastReminder(eventStakeholder.id);
+
+            console.log(
+              `Daily reminder sent to ${stakeholder.name} (${primaryEmail}) for event "${event.name}" with ${incompleteTasks.length} pending tasks`
+            );
+          } catch (error) {
+            console.error(
+              `Failed to send daily reminder to ${stakeholder.name} for event "${event.name}":`,
+              error
+            );
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error in scheduleStakeholderDailyReminders:', error);
+    }
+  }
+
+  /**
+   * Send task completion notification email
+   * Notifies configured recipients when a task is marked as completed
+   */
+  async sendTaskCompletionNotification(params: {
+    taskTitle: string;
+    taskDescription: string | null;
+    eventName: string;
+    eventStartDate: string;
+    eventEndDate: string;
+    completedByStakeholder: string;
+    recipients: string[];
+    ccList?: string[];
+    settings: Settings;
+  }): Promise<void> {
+    const { taskTitle, taskDescription, eventName, eventStartDate, eventEndDate, completedByStakeholder, recipients, ccList, settings } = params;
+    
+    if (!settings.emailFromEmail) {
+      throw new Error('Email from address is required');
+    }
+
+    const provider = createEmailProvider(settings);
+    const fromName = settings.emailFromName || 'ECSSR Events';
+    
+    // Format dates
+    const startDate = format(new Date(eventStartDate), 'MMM dd, yyyy');
+    const endDate = format(new Date(eventEndDate), 'MMM dd, yyyy');
+    
+    // Determine language
+    const isArabic = settings.emailLanguage === 'ar';
+    
+    // Get template fields based on language
+    const subjectTemplate = isArabic 
+      ? (settings.taskCompletionSubjectAr || settings.taskCompletionSubject || 'Task Completed: {{taskTitle}} - {{eventName}}')
+      : (settings.taskCompletionSubject || 'Task Completed: {{taskTitle}} - {{eventName}}');
+    
+    const bodyTemplate = isArabic
+      ? (settings.taskCompletionBodyAr || settings.taskCompletionBody || '<p>Dear Team,</p><p>Kindly note that the following task has been marked as completed:</p>')
+      : (settings.taskCompletionBody || '<p>Dear Team,</p><p>Kindly note that the following task has been marked as completed:</p>');
+    
+    const footerTemplate = isArabic
+      ? (settings.taskCompletionFooterAr || settings.taskCompletionFooter || '<p>Best regards,<br/>ECSSR Events Team</p>')
+      : (settings.taskCompletionFooter || '<p>Best regards,<br/>ECSSR Events Team</p>');
+    
+    // Build subject with template variables
+    const subject = subjectTemplate
+      .replace(/\{\{taskTitle\}\}/g, taskTitle)
+      .replace(/\{\{eventName\}\}/g, eventName);
+    
+    // Build body with template variables
+    const bodyIntro = bodyTemplate
+      .replace(/\{\{taskTitle\}\}/g, taskTitle)
+      .replace(/\{\{eventName\}\}/g, eventName);
+    
+    // Get styling from settings (use task completion specific or fallback to stakeholder)
+    const brandColor = settings.taskCompletionBrandColor || settings.stakeholderBrandColor || '#BC9F6D';
+    const textColor = settings.taskCompletionTextColor || settings.stakeholderTextColor || '#333333';
+    const bgColor = settings.taskCompletionBgColor || settings.stakeholderBgColor || '#FFFFFF';
+    const fontFamily = settings.taskCompletionFontFamily || settings.stakeholderFontFamily || 'Arial, sans-serif';
+    const fontSize = settings.taskCompletionFontSize || settings.stakeholderFontSize || '16px';
+    
+    const footerBrandColor = settings.taskCompletionFooterBrandColor || settings.stakeholderFooterBrandColor || '#BC9F6D';
+    const footerTextColor = settings.taskCompletionFooterTextColor || settings.stakeholderFooterTextColor || '#666666';
+    const footerBgColor = settings.taskCompletionFooterBgColor || settings.stakeholderFooterBgColor || '#FFFFFF';
+    const footerFontFamily = settings.taskCompletionFooterFontFamily || settings.stakeholderFooterFontFamily || 'Arial, sans-serif';
+    const footerFontSize = settings.taskCompletionFooterFontSize || settings.stakeholderFooterFontSize || '14px';
+    
+    // RTL support
+    const isRtl = settings.taskCompletionEmailRtl || false;
+    const dir = isRtl ? 'rtl' : 'ltr';
+    const textAlign = isRtl ? 'right' : 'left';
+    
+    // Localized labels
+    const taskLabel = isArabic ? 'المهمة' : 'Task';
+    const descriptionLabel = isArabic ? 'الوصف' : 'Description';
+    const statusLabel = isArabic ? 'الحالة' : 'Status';
+    const completedLabel = isArabic ? '✓ مكتملة' : '✓ Completed';
+    const completedByLabel = isArabic ? 'أكملها' : 'Completed By';
+    const eventDetailsLabel = isArabic ? 'تفاصيل الفعالية' : 'Event Details';
+    const eventNameLabel = isArabic ? 'اسم الفعالية' : 'Event Name';
+    const eventDatesLabel = isArabic ? 'تواريخ الفعالية' : 'Event Dates';
+    const taskDetailsLabel = isArabic ? 'تفاصيل المهمة' : 'Task Details';
+    
+    // Build HTML email
+    const html = `
+<!DOCTYPE html>
+<html dir="${dir}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${subject}</title>
+</head>
+<body style="background-color: ${bgColor}; font-family: ${fontFamily}; font-size: ${fontSize}; color: ${textColor}; line-height: 1.6; max-width: 600px; margin: 0 auto; padding: 20px; direction: ${dir}; text-align: ${textAlign};">
+  <!-- GREETING/INTRO SECTION -->
+  ${bodyIntro}
+  
+  <!-- TASK DETAILS SECTION -->
+  <div style="background-color: #F5F5F5; padding: 16px; border-radius: 4px; margin: 20px 0; border-${isRtl ? 'right' : 'left'}: 4px solid ${brandColor};">
+    <h2 style="color: ${brandColor}; font-size: 18px; margin-bottom: 12px; margin-top: 0;">${taskDetailsLabel}</h2>
+    <p style="margin: 8px 0;"><strong>${taskLabel}:</strong> ${taskTitle}</p>
+    ${taskDescription ? `<p style="margin: 8px 0;"><strong>${descriptionLabel}:</strong> ${taskDescription}</p>` : ''}
+    <p style="margin: 8px 0;"><strong>${statusLabel}:</strong> <span style="color: #228B22;">${completedLabel}</span></p>
+    <p style="margin: 8px 0;"><strong>${completedByLabel}:</strong> ${completedByStakeholder}</p>
+  </div>
+  
+  <!-- EVENT DETAILS SECTION -->
+  <div style="background-color: #F5F5F5; padding: 16px; border-radius: 4px; margin: 20px 0; border-${isRtl ? 'right' : 'left'}: 4px solid ${brandColor};">
+    <h2 style="color: ${brandColor}; font-size: 18px; margin-bottom: 12px; margin-top: 0;">${eventDetailsLabel}</h2>
+    <p style="margin: 8px 0;"><strong>${eventNameLabel}:</strong> ${eventName}</p>
+    <p style="margin: 8px 0;"><strong>${eventDatesLabel}:</strong> ${startDate} - ${endDate}</p>
+  </div>
+  
+  <!-- FOOTER SECTION -->
+  <div style="background-color: ${footerBgColor}; color: ${footerTextColor}; font-family: ${footerFontFamily}; font-size: ${footerFontSize}; margin-top: 32px; padding: 16px; border-top: 1px solid #E0E0E0;">
+    ${footerTemplate}
+  </div>
+</body>
+</html>
+    `;
+    
+    // Combine notification emails CC + global CC
+    const combinedCcList = this.getCombinedCcList(ccList?.join(','), settings.globalCcList);
+    
+    try {
+      await provider.send({
+        from: `${fromName} <${settings.emailFromEmail}>`,
+        to: recipients,
+        cc: combinedCcList.length > 0 ? combinedCcList : undefined,
+        subject,
+        html,
+      });
+      
+      console.log(`Task completion notification sent to ${recipients.join(', ')} with ${combinedCcList.length} CCs for task "${taskTitle}"`);
+    } catch (error) {
+      console.error('Failed to send task completion notification:', error);
+      throw new Error(`Failed to send task completion notification: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * Generate preview HTML for stakeholder email (without sending)
+   */
+  generateStakeholderPreview(settings: Settings): { subject: string; html: string } {
+    // Create sample event data
+    const sampleEvent: Event = {
+      id: 'preview-1',
+      name: 'Annual Technology Summit 2025',
+      nameAr: 'قمة التكنولوجيا السنوية 2025',
+      description: 'Join us for the premier technology conference featuring industry leaders, innovative workshops, and networking opportunities.',
+      descriptionAr: 'انضم إلينا في مؤتمر التكنولوجيا الرائد الذي يضم قادة الصناعة وورش عمل مبتكرة وفرص التواصل.',
+      startDate: '2025-03-15',
+      endDate: '2025-03-17',
+      startTime: '09:00',
+      endTime: '17:00',
+      location: 'Dubai World Trade Centre',
+      locationAr: 'مركز دبي التجاري العالمي',
+      organizers: 'Tech Innovation Hub',
+      organizersAr: 'مركز الابتكار التقني',
+      url: 'https://example.com/tech-summit',
+      category: 'Technology',
+      categoryAr: 'تكنولوجيا',
+      categoryId: 1,
+      eventType: 'international',
+      eventScope: 'external',
+      expectedAttendance: 500,
+      isScraped: false,
+      source: 'manual',
+      externalId: null,
+      adminModified: false,
+      reminder1Week: true,
+      reminder1Day: true,
+      reminderWeekly: false,
+      reminderDaily: false,
+      reminderMorningOf: false,
+    };
+
+    const sampleStakeholder: Stakeholder = {
+      id: 1,
+      name: 'Public Relations Department',
+      nameAr: 'قسم العلاقات العامة',
+      keycloakGroupId: null,
+      active: true,
+      ccList: null,
+      createdAt: new Date(),
+    };
+
+    const sampleRequirements: StakeholderRequirement[] = [
+      {
+        id: 1,
+        departmentId: 1,
+        title: 'Submit Event Documentation',
+        titleAr: 'تقديم وثائق الفعالية',
+        description: 'Provide a comprehensive report covering key highlights, attendance figures, and outcomes within 5 business days.',
+        descriptionAr: 'تقديم تقرير شامل يغطي أبرز النقاط وأرقام الحضور والنتائج خلال 5 أيام عمل.',
+        isDefault: false,
+        notificationEmails: [],
+        createdAt: new Date(),
+      },
+      {
+        id: 2,
+        departmentId: 1,
+        title: 'Coordinate Logistics',
+        titleAr: 'تنسيق اللوجستيات',
+        description: 'Ensure all venue, catering, and technical requirements are confirmed at least 2 weeks before the event date.',
+        descriptionAr: 'التأكد من تأكيد جميع متطلبات المكان والتموين والمتطلبات الفنية قبل أسبوعين على الأقل من تاريخ الفعالية.',
+        isDefault: false,
+        notificationEmails: [],
+        createdAt: new Date(),
+      },
+      {
+        id: 3,
+        departmentId: 1,
+        title: 'Prepare Marketing Materials',
+        titleAr: 'إعداد المواد التسويقية',
+        description: 'Design and distribute promotional content including social media posts, email campaigns, and press releases.',
+        descriptionAr: 'تصميم وتوزيع المحتوى الترويجي بما في ذلك منشورات وسائل التواصل الاجتماعي وحملات البريد الإلكتروني والبيانات الصحفية.',
+        isDefault: false,
+        notificationEmails: [],
+        createdAt: new Date(),
+      },
+    ];
+
+    // Determine language from global settings
+    const language = settings.emailLanguage || 'en';
+    const isArabic = language === 'ar';
+    
+    // Get templates from settings based on language
+    const subjectTemplate = isArabic 
+      ? (settings.stakeholderSubjectAr || 'فعالية جديدة: {{eventName}}')
+      : (settings.stakeholderSubject || 'New Event: {{eventName}}');
+    const bodyTemplate = isArabic
+      ? (settings.stakeholderBodyAr || '<h1>{{eventName}}</h1><p>{{description}}</p><p><strong>التاريخ:</strong> {{startDate}} - {{endDate}}</p><p><strong>الموقع:</strong> {{location}}</p>')
+      : (settings.stakeholderBody || '<h1>{{eventName}}</h1><p>{{description}}</p><p><strong>Date:</strong> {{startDate}} - {{endDate}}</p><p><strong>Location:</strong> {{location}}</p>');
+    const greetingTemplate = isArabic
+      ? (settings.stakeholderGreetingAr || settings.stakeholderGreeting || 'عزيزي {{name}}')
+      : (settings.stakeholderGreeting || 'Dear {{name}},');
+    
+    // Get styling from settings or use defaults
+    const brandColor = settings.stakeholderBrandColor || '#BC9F6D';
+    const textColor = settings.stakeholderTextColor || '#333333';
+    const bgColor = settings.stakeholderBgColor || '#FFFFFF';
+    const fontFamily = settings.stakeholderFontFamily || 'Arial, sans-serif';
+    const fontSize = settings.stakeholderFontSize || '16px';
+    
+    const reqBrandColor = settings.stakeholderRequirementsBrandColor || '#BC9F6D';
+    const reqTextColor = settings.stakeholderRequirementsTextColor || '#333333';
+    const reqBgColor = settings.stakeholderRequirementsBgColor || '#F5F5F5';
+    const reqFontFamily = settings.stakeholderRequirementsFontFamily || 'Arial, sans-serif';
+    const reqFontSize = settings.stakeholderRequirementsFontSize || '16px';
+    
+    const footerBrandColor = settings.stakeholderFooterBrandColor || '#BC9F6D';
+    const footerTextColor = settings.stakeholderFooterTextColor || '#666666';
+    const footerBgColor = settings.stakeholderFooterBgColor || '#FFFFFF';
+    const footerFontFamily = settings.stakeholderFooterFontFamily || 'Arial, sans-serif';
+    const footerFontSize = settings.stakeholderFooterFontSize || '14px';
+    
+    const footerTemplate = isArabic
+      ? (settings.stakeholderFooterAr || '<p>مع أطيب التحيات،<br/>فريق فعاليات المركز</p>')
+      : (settings.stakeholderFooter || '<p>Best regards,<br/>ECSSR Events Team</p>');
+    
+    // RTL support - automatically enable for Arabic
+    const isRtl = isArabic || settings.stakeholderEmailRtl || false;
+    const dir = isRtl ? 'rtl' : 'ltr';
+    const textAlign = isRtl ? 'right' : 'left';
+    
+    // Replace template variables in subject (with stakeholder name)
+    const subject = this.replaceTemplateVariables(subjectTemplate, sampleEvent, sampleStakeholder, undefined, isArabic);
+    
+    // Build greeting with stakeholder name
+    const greetingHtml = greetingTemplate 
+      ? `<p>${this.replaceTemplateVariables(greetingTemplate, sampleEvent, sampleStakeholder, undefined, isArabic)}</p>`
+      : '';
+    
+    // Replace template variables in custom message (with stakeholder name)
+    let customMessageHtml = this.replaceTemplateVariables(bodyTemplate, sampleEvent, sampleStakeholder, undefined, isArabic);
+    
+    // Build requirements section HTML
+    let requirementsHtml = '';
+    const requirementsTitle = isArabic
+      ? (settings.stakeholderRequirementsTitleAr || 'متطلباتك لهذه الفعالية')
+      : (settings.stakeholderRequirementsTitle || 'Your Requirements for this Event');
+    requirementsHtml = `
+      <div style="background-color: ${reqBgColor}; color: ${reqTextColor}; font-family: ${reqFontFamily}; font-size: ${reqFontSize}; margin-top: 24px; padding: 16px; border-radius: 4px;">
+        <h2 style="color: ${reqBrandColor}; font-size: 18px; margin-bottom: 12px; margin-top: 0;">${requirementsTitle}</h2>
+        <ul style="margin: 12px 0; padding-left: 20px;">
+          ${sampleRequirements.map((req, index) => this.formatRequirementItem(req, index, settings.stakeholderRequirementItemTemplate, isArabic)).join('')}
+        </ul>
+      </div>
+    `;
+    
+    // Handle {{requirements}} template variable
+    const hasRequirementsPlaceholder = customMessageHtml.includes('{{requirements}}');
+    if (hasRequirementsPlaceholder) {
+      customMessageHtml = customMessageHtml.replace(/\{\{requirements\}\}/g, requirementsHtml);
+      requirementsHtml = '';
+    }
+    
+    // Replace template variables in footer
+    const footerHtml = this.replaceTemplateVariables(footerTemplate, sampleEvent, sampleStakeholder, undefined, isArabic);
+    
+    // Build complete HTML with styling and RTL support
+    const html = `
+<!DOCTYPE html>
+<html dir="${dir}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${subject}</title>
+</head>
+<body style="background-color: ${bgColor}; font-family: ${fontFamily}; font-size: ${fontSize}; color: ${textColor}; line-height: 1.6; max-width: 600px; margin: 0 auto; padding: 20px; direction: ${isRtl ? 'rtl' : 'ltr'}; text-align: ${textAlign};">
+  <!-- GREETING SECTION -->
+  ${greetingHtml}
+  
+  <!-- CUSTOM MESSAGE SECTION -->
+  <div>
+    ${customMessageHtml}
+  </div>
+  
+  <!-- REQUIREMENTS SECTION (only if not embedded via {{requirements}}) -->
+  ${requirementsHtml}
+  
+  <!-- FOOTER SECTION -->
+  <div style="background-color: ${footerBgColor}; color: ${footerTextColor}; font-family: ${footerFontFamily}; font-size: ${footerFontSize}; margin-top: 32px; padding: 16px; border-top: 1px solid #E0E0E0;">
+    ${footerHtml}
+  </div>
+</body>
+</html>
+    `;
+    
+    return { subject, html };
+  }
+
+  /**
+   * Generate preview HTML for reminder email (without sending)
+   */
+  generateReminderPreview(settings: Settings): { subject: string; html: string } {
+    // Create sample event data
+    const sampleEvent: Event = {
+      id: 'preview-1',
+      name: 'Annual Technology Summit 2025',
+      nameAr: 'قمة التكنولوجيا السنوية 2025',
+      description: 'Join us for the premier technology conference featuring industry leaders, innovative workshops, and networking opportunities.',
+      descriptionAr: 'انضم إلينا في مؤتمر التكنولوجيا الرائد الذي يضم قادة الصناعة وورش عمل مبتكرة وفرص التواصل.',
+      startDate: '2025-03-15',
+      endDate: '2025-03-17',
+      startTime: '09:00',
+      endTime: '17:00',
+      location: 'Dubai World Trade Centre',
+      locationAr: 'مركز دبي التجاري العالمي',
+      organizers: 'Tech Innovation Hub',
+      organizersAr: 'مركز الابتكار التقني',
+      url: 'https://example.com/tech-summit',
+      category: 'Technology',
+      categoryAr: 'تكنولوجيا',
+      categoryId: 1,
+      eventType: 'international',
+      eventScope: 'external',
+      expectedAttendance: 500,
+      isScraped: false,
+      source: 'manual',
+      externalId: null,
+      adminModified: false,
+      reminder1Week: true,
+      reminder1Day: true,
+      reminderWeekly: false,
+      reminderDaily: false,
+      reminderMorningOf: false,
+    };
+
+    return this.formatEventEmail(sampleEvent, settings);
+  }
+
+  /**
+   * Generate preview HTML for management summary email (without sending)
+   */
+  generateManagementPreview(settings: Settings): { subject: string; html: string } {
+    // Determine language from global settings first
+    const language = settings.emailLanguage || 'en';
+    const isArabic = language === 'ar';
+    
+    // Create sample event data
+    const sampleEvent: Event = {
+      id: 'preview-1',
+      name: 'Annual Technology Summit 2025',
+      nameAr: 'قمة التكنولوجيا السنوية 2025',
+      description: 'Join us for the premier technology conference featuring industry leaders, innovative workshops, and networking opportunities.',
+      descriptionAr: 'انضم إلينا في مؤتمر التكنولوجيا الرائد الذي يضم قادة الصناعة وورش عمل مبتكرة وفرص التواصل.',
+      startDate: '2025-03-15',
+      endDate: '2025-03-17',
+      startTime: '09:00',
+      endTime: '17:00',
+      location: 'Dubai World Trade Centre',
+      locationAr: 'مركز دبي التجاري العالمي',
+      organizers: 'Tech Innovation Hub',
+      organizersAr: 'مركز الابتكار التقني',
+      url: 'https://example.com/tech-summit',
+      category: 'Technology',
+      categoryAr: 'تكنولوجيا',
+      categoryId: 1,
+      eventType: 'international',
+      eventScope: 'external',
+      expectedAttendance: 500,
+      isScraped: false,
+      source: 'manual',
+      externalId: null,
+      adminModified: false,
+      reminder1Week: true,
+      reminder1Day: true,
+      reminderWeekly: false,
+      reminderDaily: false,
+      reminderMorningOf: false,
+    };
+
+    const sampleStakeholders = [
+      {
+        stakeholder: {
+          id: 1,
+          name: 'Public Relations Department',
+          nameAr: 'قسم العلاقات العامة',
+          active: true,
+          ccList: null,
+          createdAt: new Date(),
+        },
+        selectedRequirements: [
+          {
+            id: 1,
+            departmentId: 1,
+            title: 'Submit Event Documentation',
+            titleAr: 'تقديم وثائق الفعالية',
+            description: 'Provide a comprehensive report covering key highlights, attendance figures, and outcomes within 5 business days.',
+            descriptionAr: 'تقديم تقرير شامل يغطي أبرز النقاط وأرقام الحضور والنتائج خلال 5 أيام عمل.',
+            isDefault: false,
+            notificationEmails: [],
+            createdAt: new Date(),
+          },
+          {
+            id: 2,
+            departmentId: 1,
+            title: 'Manage Media Relations',
+            titleAr: 'إدارة العلاقات الإعلامية',
+            description: 'Coordinate with press and media outlets for event coverage, interviews, and post-event publicity.',
+            descriptionAr: 'التنسيق مع الصحافة ووسائل الإعلام لتغطية الفعالية والمقابلات والدعاية بعد الفعالية.',
+            isDefault: false,
+            notificationEmails: [],
+            createdAt: new Date(),
+          },
+        ],
+        customRequirements: 'Ensure all press releases and media materials are bilingual (English and Arabic).',
+        emails: ['pr@ecssr.ae'],
+      },
+      {
+        stakeholder: {
+          id: 2,
+          name: 'Events & Facilities Department',
+          nameAr: 'قسم الفعاليات والمرافق',
+          active: true,
+          ccList: null,
+          createdAt: new Date(),
+        },
+        selectedRequirements: [
+          {
+            id: 3,
+            departmentId: 2,
+            title: 'Coordinate Logistics',
+            titleAr: 'تنسيق اللوجستيات',
+            description: 'Ensure all venue, catering, and technical requirements are confirmed at least 2 weeks before the event.',
+            descriptionAr: 'التأكد من تأكيد جميع متطلبات المكان والتموين والمتطلبات الفنية قبل أسبوعين على الأقل من الفعالية.',
+            isDefault: false,
+            notificationEmails: [],
+            createdAt: new Date(),
+          },
+          {
+            id: 4,
+            departmentId: 2,
+            title: 'Oversee Registration Process',
+            titleAr: 'الإشراف على عملية التسجيل',
+            description: 'Manage attendee registration, ticketing systems, and check-in procedures on event day.',
+            descriptionAr: 'إدارة تسجيل الحضور وأنظمة التذاكر وإجراءات تسجيل الدخول يوم الفعالية.',
+            isDefault: false,
+            notificationEmails: [],
+            createdAt: new Date(),
+          },
+        ],
+        customRequirements: 'Coordinate with IT Department for online registration platform setup and testing.',
+        emails: ['events@ecssr.ae'],
+      },
+      {
+        stakeholder: {
+          id: 3,
+          name: 'Research & Programs Department',
+          nameAr: 'قسم البحوث والبرامج',
+          active: true,
+          ccList: null,
+          createdAt: new Date(),
+        },
+        selectedRequirements: [
+          {
+            id: 5,
+            departmentId: 3,
+            title: 'Arrange Speaker Sessions',
+            titleAr: 'ترتيب جلسات المتحدثين',
+            description: 'Schedule and coordinate with keynote speakers, panelists, and ensure all presentation materials are prepared.',
+            descriptionAr: 'جدولة والتنسيق مع المتحدثين الرئيسيين وأعضاء اللجنة والتأكد من إعداد جميع مواد العرض.',
+            isDefault: false,
+            notificationEmails: [],
+            createdAt: new Date(),
+          },
+          {
+            id: 6,
+            departmentId: 3,
+            title: 'Prepare Post-Event Survey',
+            titleAr: 'إعداد استطلاع ما بعد الفعالية',
+            description: 'Design and distribute feedback forms to collect attendee insights and measure event success.',
+            descriptionAr: 'تصميم وتوزيع نماذج التغذية الراجعة لجمع آراء الحضور وقياس نجاح الفعالية.',
+            isDefault: false,
+            notificationEmails: [],
+            createdAt: new Date(),
+          },
+        ],
+        customRequirements: isArabic 
+          ? 'توفير مواد الإحاطة البحثية للمتحدثين وضمان الدقة الأكاديمية في جميع العروض التقديمية.'
+          : 'Provide research briefing materials for speakers and ensure academic rigor in all presentations.',
+        emails: ['research@ecssr.ae'],
+      },
+    ];
+
+    // Use the actual email service method
+    // Get templates from settings based on language or use defaults
+    const subjectTemplate = isArabic
+      ? (settings.managementSummarySubjectAr || settings.managementSummarySubjectTemplate || 'ملخص إداري: {{eventName}}')
+      : (settings.managementSummarySubjectTemplate || 'Event Summary: {{eventName}}');
+    const bodyTemplate = isArabic
+      ? (settings.managementSummaryBodyAr || settings.managementSummaryBody || '<h1>{{eventName}}</h1><p>{{description}}</p><p><strong>التاريخ:</strong> {{startDate}} - {{endDate}}</p><p><strong>العدد المتوقع للحضور:</strong> {{expectedAttendance}}</p>')
+      : (settings.managementSummaryBody || '<h1>{{eventName}}</h1><p>{{description}}</p><p><strong>Date:</strong> {{startDate}} - {{endDate}}</p><p><strong>Expected Attendance:</strong> {{expectedAttendance}}</p>');
+    
+    // Get styling from settings or use defaults
+    const brandColor = settings.managementSummaryBrandColor || '#BC9F6D';
+    const textColor = settings.managementSummaryTextColor || '#333333';
+    const bgColor = settings.managementSummaryBgColor || '#FFFFFF';
+    const fontFamily = settings.managementSummaryFontFamily || 'Arial, sans-serif';
+    const fontSize = settings.managementSummaryFontSize || '16px';
+    
+    const reqBrandColor = settings.managementSummaryRequirementsBrandColor || '#BC9F6D';
+    const reqTextColor = settings.managementSummaryRequirementsTextColor || '#333333';
+    const reqBgColor = settings.managementSummaryRequirementsBgColor || '#F5F5F5';
+    const reqFontFamily = settings.managementSummaryRequirementsFontFamily || 'Arial, sans-serif';
+    const reqFontSize = settings.managementSummaryRequirementsFontSize || '16px';
+    
+    const footerBrandColor = settings.managementSummaryFooterBrandColor || '#BC9F6D';
+    const footerTextColor = settings.managementSummaryFooterTextColor || '#666666';
+    const footerBgColor = settings.managementSummaryFooterBgColor || '#FFFFFF';
+    const footerFontFamily = settings.managementSummaryFooterFontFamily || 'Arial, sans-serif';
+    const footerFontSize = settings.managementSummaryFooterFontSize || '14px';
+    
+    const footerTemplate = isArabic
+      ? (settings.managementSummaryFooterAr || '<p>مع أطيب التحيات،<br/>إدارة المركز</p>')
+      : (settings.managementSummaryFooter || '<p>Best regards,<br/>ECSSR Management</p>');
+    
+    // RTL support - automatically enable for Arabic
+    const isRtl = isArabic || settings.managementSummaryEmailRtl || false;
+    const dir = isRtl ? 'rtl' : 'ltr';
+    const textAlign = isRtl ? 'right' : 'left';
+    
+    // Prepare data for greeting with stakeholder variables
+    const stakeholderCount = sampleStakeholders.length.toString();
+    const stakeholderNames = sampleStakeholders.map(a => a.stakeholder.name).join(', ');
+    const additionalVars = {
+      stakeholderCount,
+      stakeholderNames,
+    };
+    
+    // Replace template variables in subject
+    const subject = this.replaceTemplateVariables(subjectTemplate, sampleEvent, undefined, additionalVars, isArabic);
+    
+    // Build greeting if template is provided
+    let greetingHtml = '';
+    const greetingTemplate = isArabic
+      ? (settings.managementSummaryGreetingAr || settings.managementSummaryGreeting)
+      : settings.managementSummaryGreeting;
+    if (greetingTemplate) {
+      greetingHtml = `<p>${this.replaceTemplateVariables(greetingTemplate, sampleEvent, undefined, additionalVars, isArabic)}</p>`;
+    }
+    
+    // Replace template variables in custom message
+    let customMessageHtml = this.replaceTemplateVariables(bodyTemplate, sampleEvent, undefined, additionalVars, isArabic);
+    
+    // Build stakeholder assignments HTML
+    let stakeholdersHtml = '';
+    const includeRequirements = settings.managementSummaryIncludeRequirements !== false;
+    if (sampleStakeholders.length > 0 && includeRequirements) {
+      const requirementsTitle = isArabic
+        ? (settings.managementSummaryRequirementsTitleAr || 'تكليفات أصحاب المصلحة')
+        : (settings.managementSummaryRequirementsTitle || 'Stakeholder Assignments');
+      stakeholdersHtml = `
+        <div style="background-color: ${reqBgColor}; color: ${reqTextColor}; font-family: ${reqFontFamily}; font-size: ${reqFontSize}; margin-top: 24px; padding: 16px; border-radius: 4px;">
+          <h2 style="color: ${reqBrandColor}; font-size: 20px; margin-bottom: 16px; margin-top: 0;">${requirementsTitle}</h2>
+      `;
+      
+      sampleStakeholders.forEach(assignment => {
+        const notifiedLabel = isArabic ? 'تم الإبلاغ' : 'Notified';
+        const assignedRequirementsLabel = isArabic ? 'المتطلبات المكلفة' : 'Assigned Requirements';
+        const customRequirementsLabel = isArabic ? 'المتطلبات الخاصة بهذه الفعالية' : 'Requirements specific to this event';
+        
+        stakeholdersHtml += `
+          <div style="margin-bottom: 24px; padding: 16px; background-color: ${bgColor}; border-radius: 4px; border-left: 4px solid ${reqBrandColor};">
+            <h3 style="color: ${reqBrandColor}; font-size: 18px; margin-bottom: 12px; margin-top: 0;">${isArabic && assignment.stakeholder.nameAr ? assignment.stakeholder.nameAr : assignment.stakeholder.name}</h3>
+            
+            <p style="margin-bottom: 8px;"><strong>${notifiedLabel}:</strong> ${assignment.emails.join(', ')}</p>
+            
+            ${assignment.selectedRequirements.length > 0 ? `
+              <div style="margin-top: 12px;">
+                <p style="margin-bottom: 8px;"><strong>${assignedRequirementsLabel}:</strong></p>
+                <ul style="margin: 8px 0; padding-left: 20px;">
+                  ${assignment.selectedRequirements.map((req, index) => this.formatRequirementItem(req, index, settings.managementSummaryRequirementItemTemplate, isArabic)).join('')}
+                </ul>
+              </div>
+            ` : ''}
+            
+            ${assignment.customRequirements ? `
+              <div style="margin-top: 12px;">
+                <p style="margin-bottom: 8px;"><strong>${customRequirementsLabel}:</strong></p>
+                <p style="padding: 12px; border-radius: 4px; white-space: pre-wrap; opacity: 0.9;">${assignment.customRequirements}</p>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      });
+      
+      stakeholdersHtml += '</div>';
+    }
+    
+    // Handle {{requirements}} template variable
+    const hasRequirementsPlaceholder = customMessageHtml.includes('{{requirements}}');
+    if (hasRequirementsPlaceholder) {
+      customMessageHtml = customMessageHtml.replace(/\{\{requirements\}\}/g, stakeholdersHtml);
+      stakeholdersHtml = '';
+    }
+    
+    // Replace template variables in footer
+    const footerHtml = this.replaceTemplateVariables(footerTemplate, sampleEvent, undefined, undefined, isArabic);
+    
+    // Build complete HTML with styling and RTL support
+    const html = `
+<!DOCTYPE html>
+<html dir="${dir}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${subject}</title>
+</head>
+<body style="background-color: ${bgColor}; font-family: ${fontFamily}; font-size: ${fontSize}; color: ${textColor}; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 20px; direction: ${isRtl ? 'rtl' : 'ltr'}; text-align: ${textAlign};">
+  <!-- GREETING SECTION -->
+  ${greetingHtml}
+  
+  <!-- CUSTOM MESSAGE SECTION -->
+  <div>
+    ${customMessageHtml}
+  </div>
+  
+  <!-- STAKEHOLDER ASSIGNMENTS SECTION (only if not embedded via {{requirements}}) -->
+  ${stakeholdersHtml}
+  
+  <!-- FOOTER SECTION -->
+  <div style="background-color: ${footerBgColor}; color: ${footerTextColor}; font-family: ${footerFontFamily}; font-size: ${footerFontSize}; margin-top: 32px; padding: 16px; border-top: 1px solid #E0E0E0;">
+    ${footerHtml}
+  </div>
+</body>
+</html>
+    `;
+    
+    return { subject, html };
+  }
+
+  generateTaskCompletionPreview(settings: Settings): { subject: string; html: string } {
+    // Determine language from global settings
+    const language = settings.emailLanguage || 'en';
+    const isArabic = language === 'ar';
+    
+    // Sample task data
+    const taskTitle = isArabic ? 'تقديم وثائق الفعالية' : 'Submit Event Documentation';
+    const taskDescription = isArabic 
+      ? 'تقديم تقرير شامل يغطي أبرز النقاط وأرقام الحضور والنتائج خلال 5 أيام عمل.'
+      : 'Provide a comprehensive report covering key highlights, attendance figures, and outcomes within 5 business days.';
+    const eventName = isArabic ? 'قمة التكنولوجيا السنوية 2025' : 'Annual Technology Summit 2025';
+    const eventStartDate = '2025-03-15';
+    const eventEndDate = '2025-03-17';
+    const completedByStakeholder = isArabic ? 'قسم العلاقات العامة' : 'Public Relations Department';
+    
+    // Get template fields based on language
+    const subjectTemplate = isArabic 
+      ? (settings.taskCompletionSubjectAr || settings.taskCompletionSubject || 'Task Completed: {{taskTitle}} - {{eventName}}')
+      : (settings.taskCompletionSubject || 'Task Completed: {{taskTitle}} - {{eventName}}');
+    
+    const bodyTemplate = isArabic
+      ? (settings.taskCompletionBodyAr || settings.taskCompletionBody || '<p>Dear Team,</p><p>Kindly note that the following task has been marked as completed:</p>')
+      : (settings.taskCompletionBody || '<p>Dear Team,</p><p>Kindly note that the following task has been marked as completed:</p>');
+    
+    const footerTemplate = isArabic
+      ? (settings.taskCompletionFooterAr || settings.taskCompletionFooter || '<p>Best regards,<br/>ECSSR Events Team</p>')
+      : (settings.taskCompletionFooter || '<p>Best regards,<br/>ECSSR Events Team</p>');
+    
+    // Format dates
+    const startDate = format(new Date(eventStartDate), 'MMM dd, yyyy');
+    const endDate = format(new Date(eventEndDate), 'MMM dd, yyyy');
+    
+    // Build subject with template variables
+    const subject = subjectTemplate
+      .replace(/\{\{taskTitle\}\}/g, taskTitle)
+      .replace(/\{\{eventName\}\}/g, eventName);
+    
+    // Build body with template variables
+    const bodyIntro = bodyTemplate
+      .replace(/\{\{taskTitle\}\}/g, taskTitle)
+      .replace(/\{\{eventName\}\}/g, eventName);
+    
+    // Get styling from settings
+    const brandColor = settings.taskCompletionBrandColor || settings.stakeholderBrandColor || '#BC9F6D';
+    const textColor = settings.taskCompletionTextColor || settings.stakeholderTextColor || '#333333';
+    const bgColor = settings.taskCompletionBgColor || settings.stakeholderBgColor || '#FFFFFF';
+    const fontFamily = settings.taskCompletionFontFamily || settings.stakeholderFontFamily || 'Arial, sans-serif';
+    const fontSize = settings.taskCompletionFontSize || settings.stakeholderFontSize || '16px';
+    
+    const footerBrandColor = settings.taskCompletionFooterBrandColor || settings.stakeholderFooterBrandColor || '#BC9F6D';
+    const footerTextColor = settings.taskCompletionFooterTextColor || settings.stakeholderFooterTextColor || '#666666';
+    const footerBgColor = settings.taskCompletionFooterBgColor || settings.stakeholderFooterBgColor || '#FFFFFF';
+    const footerFontFamily = settings.taskCompletionFooterFontFamily || settings.stakeholderFooterFontFamily || 'Arial, sans-serif';
+    const footerFontSize = settings.taskCompletionFooterFontSize || settings.stakeholderFooterFontSize || '14px';
+    
+    // RTL support
+    const isRtl = settings.taskCompletionEmailRtl || false;
+    const dir = isRtl ? 'rtl' : 'ltr';
+    const textAlign = isRtl ? 'right' : 'left';
+    
+    // Localized labels
+    const taskLabel = isArabic ? 'المهمة' : 'Task';
+    const descriptionLabel = isArabic ? 'الوصف' : 'Description';
+    const statusLabel = isArabic ? 'الحالة' : 'Status';
+    const completedLabel = isArabic ? '✓ مكتملة' : '✓ Completed';
+    const completedByLabel = isArabic ? 'أكملها' : 'Completed By';
+    const eventDetailsLabel = isArabic ? 'تفاصيل الفعالية' : 'Event Details';
+    const eventNameLabel = isArabic ? 'اسم الفعالية' : 'Event Name';
+    const eventDatesLabel = isArabic ? 'تواريخ الفعالية' : 'Event Dates';
+    const taskDetailsLabel = isArabic ? 'تفاصيل المهمة' : 'Task Details';
+    
+    // Build HTML email
+    const html = `
+<!DOCTYPE html>
+<html dir="${dir}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${subject}</title>
+</head>
+<body style="background-color: ${bgColor}; font-family: ${fontFamily}; font-size: ${fontSize}; color: ${textColor}; line-height: 1.6; max-width: 600px; margin: 0 auto; padding: 20px; direction: ${dir}; text-align: ${textAlign};">
+  <!-- GREETING/INTRO SECTION -->
+  ${bodyIntro}
+  
+  <!-- TASK DETAILS SECTION -->
+  <div style="background-color: #F5F5F5; padding: 16px; border-radius: 4px; margin: 20px 0; border-${isRtl ? 'right' : 'left'}: 4px solid ${brandColor};">
+    <h2 style="color: ${brandColor}; font-size: 18px; margin-bottom: 12px; margin-top: 0;">${taskDetailsLabel}</h2>
+    <p style="margin: 8px 0;"><strong>${taskLabel}:</strong> ${taskTitle}</p>
+    <p style="margin: 8px 0;"><strong>${descriptionLabel}:</strong> ${taskDescription}</p>
+    <p style="margin: 8px 0;"><strong>${statusLabel}:</strong> <span style="color: #228B22;">${completedLabel}</span></p>
+    <p style="margin: 8px 0;"><strong>${completedByLabel}:</strong> ${completedByStakeholder}</p>
+  </div>
+  
+  <!-- EVENT DETAILS SECTION -->
+  <div style="background-color: #F5F5F5; padding: 16px; border-radius: 4px; margin: 20px 0; border-${isRtl ? 'right' : 'left'}: 4px solid ${brandColor};">
+    <h2 style="color: ${brandColor}; font-size: 18px; margin-bottom: 12px; margin-top: 0;">${eventDetailsLabel}</h2>
+    <p style="margin: 8px 0;"><strong>${eventNameLabel}:</strong> ${eventName}</p>
+    <p style="margin: 8px 0;"><strong>${eventDatesLabel}:</strong> ${startDate} - ${endDate}</p>
+  </div>
+  
+  <!-- FOOTER SECTION -->
+  <div style="background-color: ${footerBgColor}; color: ${footerTextColor}; font-family: ${footerFontFamily}; font-size: ${footerFontSize}; margin-top: 32px; padding: 16px; border-top: 1px solid #E0E0E0;">
+    ${footerTemplate}
+  </div>
+</body>
+</html>
+    `;
+    
+    return { subject, html };
+  }
+}
+
+export const emailService = new EmailService();

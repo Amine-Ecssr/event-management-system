@@ -1,0 +1,196 @@
+{
+  "title": "تحليلات التفاعل",
+  "subtitle": "رؤى شاملة حول تفاعل جهات الاتصال والفعاليات",
+  "description": "تتبع معدل التحويل من الدعوة إلى الحضور وأنماط تفاعل جهات الاتصال",
+  "tabs": {
+    "overview": "نظرة عامة",
+    "contacts": "جهات الاتصال الفردية",
+    "organizations": "المنظمات"
+  },
+  "sections": {
+    "individualContactStatistics": "إحصائيات جهات الاتصال الفردية",
+    "individualContactStatisticsDesc": "تتبع تفاعل جهات الاتصال الفردية، بما في ذلك أكثر الحاضرين ومعدلات التحويل الشخصية.",
+    "organizationEngagement": "تفاعل المنظمات",
+    "organizationEngagementDesc": "عرض المنظمات ذات معدلات التحويل والحضور الأعلى، مرتبة حسب مقاييس التفاعل."
+  },
+  "stats": {
+    "totalInvitations": "إجمالي الدعوات",
+    "emailsSentCount": "{{count}} بريد مرسل",
+    "registrations": "التسجيلات",
+    "conversionRate": "{{rate}}% معدل التحويل",
+    "attendance": "إجمالي الحضور",
+    "ofRegistered": "{{rate}}% من المسجلين",
+    "overallConversion": "التحويل الإجمالي",
+    "inviteToAttend": "دعوة ← حضور",
+    "activeContacts": "جهات الاتصال النشطة",
+    "ofTotal": "من {{total}} إجمالي"
+  },
+  "trends": {
+    "title": "اتجاهات التفاعل الشهرية",
+    "subtitle": "الدعوات مقابل الحضور"
+  },
+  "distribution": {
+    "title": "توزيع تفاعل جهات الاتصال",
+    "subtitle": "التقسيم حسب مستوى التفاعل"
+  },
+  "tiers": {
+    "highlyEngaged": "تفاعل عالي (5+)",
+    "moderatelyEngaged": "تفاعل متوسط (2-4)",
+    "lowEngaged": "تفاعل منخفض (1)",
+    "notEngaged": "غير متفاعل"
+  },
+  "category": {
+    "title": "التفاعل حسب فئة الفعالية",
+    "subtitle": "مقارنة الدعوات والحضور عبر الفئات"
+  },
+  "topEvents": {
+    "title": "أفضل الفعاليات أداءً",
+    "subtitle": "مرتبة حسب معدل الحضور",
+    "attendedCount": "{{attended}} / {{invited}} حضروا"
+  },
+  "eventType": {
+    "title": "الأداء حسب نوع الفعالية",
+    "subtitle": "محلي مقابل دولي، داخلي مقابل خارجي",
+    "rateAndEvents": "{{rate}}% نسبة • {{count}} فعاليات"
+  },
+  "eventTypes": {
+    "local": "محلي",
+    "international": "دولي"
+  },
+  "eventScopes": {
+    "internal": "داخلي",
+    "external": "خارجي"
+  },
+  "geographic": {
+    "title": "التفاعل الجغرافي",
+    "subtitle": "تفاعل جهات الاتصال حسب الدولة"
+  },
+  "detailedAnalytics": {
+    "title": "تحليلات التفاعل التفصيلية",
+    "subtitle": "رؤى التحويل والحضور على مستوى المنظمات والأفراد"
+  },
+  "conversionFunnel": {
+    "title": "قمع التحويل",
+    "description": "تتبع الرحلة من الدعوة إلى الحضور",
+    "emailSent": "البريد المرسل",
+    "registered": "مسجل",
+    "rsvp": "تأكيد الحضور",
+    "attended": "حضر"
+  },
+  "engagementByCategory": {
+    "title": "التفاعل حسب فئة الفعالية",
+    "description": "مقارنة مقاييس التفاعل عبر فئات الفعاليات المختلفة",
+    "tableHeaders": {
+      "category": "الفئة",
+      "events": "الفعاليات",
+      "registrationRate": "نسبة التسجيل",
+      "rsvpRate": "نسبة تأكيد الحضور",
+      "attendanceRate": "نسبة الحضور"
+    }
+  },
+  "seasonalTrends": {
+    "title": "اتجاهات التفاعل الموسمية",
+    "description": "تتبع أنماط التفاعل على مدار العام"
+  },
+  "contactEngagementLevels": {
+    "title": "مستويات تفاعل جهات الاتصال",
+    "description": "توزيع جهات الاتصال حسب تكرار التفاعل",
+    "highlyEngaged": "تفاعل عالي (5+ فعاليات)",
+    "moderatelyEngaged": "تفاعل متوسط (2-4 فعاليات)",
+    "lowEngaged": "تفاعل منخفض (فعالية واحدة)",
+    "notEngaged": "غير متفاعل"
+  },
+  "geographicDistribution": {
+    "title": "التوزيع الجغرافي",
+    "description": "أهم الدول حسب تفاعل جهات الاتصال",
+    "contacts": "جهات الاتصال",
+    "attendances": "الحضور"
+  },
+  "topPerformingEvents": {
+    "title": "أفضل الفعاليات أداءً",
+    "description": "الفعاليات ذات أعلى معدلات حضور",
+    "tableHeaders": {
+      "event": "الفعالية",
+      "category": "الفئة",
+      "date": "التاريخ",
+      "invitees": "المدعوون",
+      "attendees": "الحاضرون",
+      "rate": "النسبة"
+    }
+  },
+  "eventTypePerformance": {
+    "title": "الأداء حسب نوع الفعالية ونطاقها",
+    "description": "مقارنة الفعاليات المحلية مقابل الدولية والداخلية مقابل الخارجية",
+    "tableHeaders": {
+      "type": "النوع",
+      "scope": "النطاق",
+      "events": "الفعاليات",
+      "invitees": "المدعوون",
+      "attendees": "الحاضرون",
+      "attendanceRate": "نسبة الحضور"
+    }
+  },
+  "chart": {
+    "invitees": "المدعوون",
+    "attendees": "الحاضرون",
+    "events": "الفعاليات"
+  },
+  "contactStatistics": {
+    "totalContacts": "إجمالي جهات الاتصال",
+    "withEvents": "مع فعاليات",
+    "withoutEvents": "بدون",
+    "averageAttendance": "متوسط الحضور",
+    "eventsPerActiveContact": "فعاليات لكل جهة اتصال نشطة",
+    "registrationRate": "نسبة التسجيل",
+    "ofInvitees": "من {{total}} مدعو",
+    "rsvpConversion": "تحويل تأكيد الحضور",
+    "confirmedRsvps": "تأكيدات حضور",
+    "topAttendees": "أكثر الحاضرين",
+    "noAttendeesYet": "لا يوجد حاضرون حتى الآن"
+  },
+  "organizationStatistics": {
+    "totalOrganizations": "إجمالي المنظمات",
+    "withEventAttendance": "مع حضور فعاليات",
+    "avgAttendanceRate": "متوسط نسبة الحضور",
+    "acrossAllOrganizations": "عبر جميع المنظمات",
+    "topOrganization": "أفضل منظمة",
+    "totalAttendances": "إجمالي الحضور",
+    "engagementRankings": "تصنيفات تفاعل المنظمات",
+    "tableHeaders": {
+      "rank": "الترتيب",
+      "organization": "المنظمة",
+      "contacts": "جهات الاتصال",
+      "active": "نشط",
+      "attendances": "الحضور",
+      "avgPerContact": "المتوسط/جهة اتصال",
+      "rate": "النسبة",
+      "topAttendee": "أكثر حضوراً"
+    },
+    "events": "فعاليات",
+    "noStatisticsAvailable": "لا توجد إحصائيات للمنظمات"
+  },
+  "errors": {
+    "failedToLoadEngagement": "فشل في تحميل تحليلات التفاعل. يرجى تحديث الصفحة.",
+    "failedToLoadContacts": "فشل في تحميل إحصائيات جهات الاتصال. يرجى تحديث الصفحة.",
+    "failedToLoadOrganizations": "فشل في تحميل إحصائيات المنظمات. يرجى تحديث الصفحة."
+  },
+  "months": {
+    "jan": "يناير",
+    "feb": "فبراير",
+    "mar": "مارس",
+    "apr": "أبريل",
+    "may": "مايو",
+    "jun": "يونيو",
+    "jul": "يوليو",
+    "aug": "أغسطس",
+    "sep": "سبتمبر",
+    "oct": "أكتوبر",
+    "nov": "نوفمبر",
+    "dec": "ديسمبر"
+  },
+  "alerts": {
+    "contactsNotEngaged": "جهة اتصال لم تحضر أي فعاليات",
+    "considerReEngagement": "فكر في حملات إعادة التفاعل المستهدفة",
+    "needsAttention": "يحتاج اهتماماً"
+  }
+}

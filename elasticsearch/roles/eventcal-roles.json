@@ -1,0 +1,170 @@
+{
+  "roles": {
+    "eventcal_app": {
+      "description": "Application service role for EventVue backend",
+      "cluster": [
+        "monitor",
+        "manage_index_templates",
+        "cluster:admin/ingest/pipeline/get"
+      ],
+      "indices": [
+        {
+          "names": ["eventcal-*"],
+          "privileges": [
+            "create_index",
+            "delete_index",
+            "read",
+            "write",
+            "manage",
+            "view_index_metadata"
+          ]
+        }
+      ],
+      "applications": [],
+      "run_as": []
+    },
+    "eventcal_readonly": {
+      "description": "Read-only access for reporting and analytics",
+      "cluster": [
+        "monitor"
+      ],
+      "indices": [
+        {
+          "names": ["eventcal-*"],
+          "privileges": [
+            "read",
+            "view_index_metadata"
+          ]
+        }
+      ],
+      "applications": [
+        {
+          "application": "kibana-.kibana",
+          "privileges": ["read"],
+          "resources": ["space:eventcal"]
+        }
+      ],
+      "run_as": []
+    },
+    "eventcal_admin": {
+      "description": "Full admin access for EventVue Elasticsearch",
+      "cluster": [
+        "all"
+      ],
+      "indices": [
+        {
+          "names": ["eventcal-*"],
+          "privileges": ["all"]
+        }
+      ],
+      "applications": [
+        {
+          "application": "kibana-.kibana",
+          "privileges": ["all"],
+          "resources": ["*"]
+        }
+      ],
+      "run_as": ["*"]
+    },
+    "eventcal_backup": {
+      "description": "Backup operations role for snapshot management",
+      "cluster": [
+        "manage_slm",
+        "manage_snapshots",
+        "cluster:admin/snapshot/create",
+        "cluster:admin/snapshot/delete",
+        "cluster:admin/snapshot/get",
+        "cluster:admin/snapshot/restore",
+        "cluster:admin/snapshot/status",
+        "cluster:admin/repository/get",
+        "cluster:admin/repository/put",
+        "cluster:admin/repository/delete"
+      ],
+      "indices": [
+        {
+          "names": ["eventcal-*"],
+          "privileges": [
+            "read",
+            "view_index_metadata"
+          ]
+        }
+      ],
+      "applications": [],
+      "run_as": []
+    },
+    "eventcal_kibana": {
+      "description": "Kibana access for dashboards and visualizations",
+      "cluster": [
+        "monitor"
+      ],
+      "indices": [
+        {
+          "names": ["eventcal-*"],
+          "privileges": [
+            "read",
+            "view_index_metadata"
+          ]
+        },
+        {
+          "names": [".kibana*"],
+          "privileges": [
+            "manage",
+            "read",
+            "write"
+          ]
+        }
+      ],
+      "applications": [
+        {
+          "application": "kibana-.kibana",
+          "privileges": [
+            "feature_dashboard.all",
+            "feature_discover.all",
+            "feature_visualize.all",
+            "feature_canvas.read",
+            "feature_maps.read"
+          ],
+          "resources": ["space:eventcal", "space:default"]
+        }
+      ],
+      "run_as": []
+    },
+    "eventcal_monitoring": {
+      "description": "Monitoring access for Prometheus/Grafana",
+      "cluster": [
+        "monitor",
+        "cluster:monitor/health",
+        "cluster:monitor/state",
+        "cluster:monitor/stats"
+      ],
+      "indices": [
+        {
+          "names": ["eventcal-*"],
+          "privileges": [
+            "monitor",
+            "view_index_metadata"
+          ]
+        }
+      ],
+      "applications": [],
+      "run_as": []
+    }
+  },
+  "users": {
+    "eventcal_app_user": {
+      "description": "Service account for EventVue backend",
+      "roles": ["eventcal_app"],
+      "notes": "Password should be set via ES API or during setup"
+    },
+    "eventcal_readonly_user": {
+      "description": "Read-only user for dashboards",
+      "roles": ["eventcal_readonly", "eventcal_kibana"],
+      "notes": "For external reporting tools"
+    },
+    "eventcal_backup_user": {
+      "description": "Backup service account",
+      "roles": ["eventcal_backup"],
+      "notes": "Used by backup cron job"
+    }
+  }
+}

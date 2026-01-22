@@ -1,0 +1,57 @@
+{
+  "months": {
+    "jan": "Jan",
+    "feb": "Feb",
+    "mar": "Mar",
+    "apr": "Apr",
+    "may": "May",
+    "jun": "Jun",
+    "jul": "Jul",
+    "aug": "Aug",
+    "sep": "Sep",
+    "oct": "Oct",
+    "nov": "Nov",
+    "dec": "Dec"
+  },
+  "weekdays": {
+    "mon": "Mon",
+    "tue": "Tue",
+    "wed": "Wed",
+    "thu": "Thu",
+    "fri": "Fri",
+    "sat": "Sat",
+    "sun": "Sun"
+  },
+  "viewModes": {
+    "monthly": "Monthly",
+    "quarterly": "Quarterly",
+    "biAnnually": "Bi-annually",
+    "yearly": "Yearly"
+  },
+  "views": {
+    "list": "Gallery",
+    "calendar": "Calendar"
+  },
+  "classic": "Classic",
+  "modern": "Modern",
+  "switchToClassic": "Switch to Classic Calendar",
+  "switchToModern": "Switch to Modern Calendar",
+  "allMonths": "All Months",
+  "filterByMonth": "Filter by Month",
+  "filterByCategory": "Filter by Category",
+  "filterByEventType": "Filter by Event Type",
+  "filterByEventScope": "Filter by Event Scope",
+  "allCategories": "All Categories",
+  "allTypes": "All Types",
+  "allEvents": "All Events",
+  "localEvents": "Local Events",
+  "internationalEvents": "International Events",
+  "internalEvents": "Internal Events",
+  "externalEvents": "External Events",
+  "previousYear": "Previous Year",
+  "nextYear": "Next Year",
+  "today": "Today",
+  "week": "Week",
+  "month": "Month",
+  "year": "Year"
+}

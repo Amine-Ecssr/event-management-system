@@ -1,0 +1,23 @@
+# Development Docker configuration with hot reload
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install dependencies
+COPY package*.json ./
+RUN npm ci --no-check-certificate
+
+# Copy application files (will be overridden by bind mount in docker-compose)
+COPY . .
+
+# Create uploads directory
+RUN mkdir -p /app/uploads
+
+# Expose ports
+EXPOSE 5050
+
+# Set environment to development
+ENV NODE_ENV=development
+
+# Start development server
+CMD ["npm", "run", "dev"]

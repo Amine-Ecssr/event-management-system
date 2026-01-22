@@ -1,0 +1,100 @@
+{
+  "title": "تحليلات الشراكات",
+  "subtitle": "تتبع وتحليل أداء الشراكة",
+  "error": "خطأ في تحميل لوحة المعلومات",
+  
+  "activeAgreements": "الاتفاقيات النشطة",
+  "partnerOrganizations": "المنظمات الشريكة",
+  "expiringThisMonth": "تنتهي هذا الشهر",
+  "newThisMonth": "جديدة هذا الشهر",
+  "totalActivities": "إجمالي الأنشطة",
+  "total": "الإجمالي",
+  "thisQuarter": "هذا الربع",
+  "thisMonth": "هذا الشهر",
+  
+  "agreementsExpiringQuarter": "اتفاقيات تنتهي هذا الربع",
+  "reviewRenewals": "مراجعة وبدء محادثات التجديد",
+  "actionRequired": "إجراء مطلوب",
+  
+  "insights": "الرؤى",
+  "activityTab": "النشاط",
+  "renewals": "التجديدات",
+  "pipeline": "خط الأنابيب",
+  "partners": "الشركاء",
+  "trends": "الاتجاهات",
+  
+  "partnersByCountry": "الشركاء حسب الدولة",
+  "partnersByCountryDesc": "التوزيع الجغرافي للمنظمات الشريكة",
+  "activityTypesTitle": "أنواع الأنشطة",
+  "activityTypesDesc": "تفصيل أنشطة الشراكة حسب النوع",
+  "mostActivePartners": "أكثر الشركاء نشاطاً",
+  "mostActivePartnersDesc": "ترتيب الشركاء حسب مستوى النشاط",
+  "agreementTypesDesc": "توزيع الاتفاقيات حسب النوع",
+  "trendsDesc": "الاتفاقيات الجديدة والمنتهية والأنشطة شهرياً",
+  "recentActivityDesc": "آخر أحداث وتحديثات الشراكة",
+  "renewalsDesc": "الاتفاقيات التي تنتهي قريباً وتحتاج اهتماماً",
+  
+  "activityBreakdown": "أنواع الأنشطة",
+  "lastActivity": "آخر نشاط",
+  "country": "الدولة",
+  "activities": "الأنشطة",
+  "totalActivitiesCount": "الإجمالي: {{count}} نشاط",
+  
+  "activityTypes": {
+    "jointEvent": "فعالية مشتركة",
+    "sponsorship": "رعاية",
+    "collaboration": "تعاون",
+    "training": "تدريب",
+    "exchange": "تبادل",
+    "meeting": "اجتماع",
+    "other": "أخرى"
+  },
+  
+  "stages": {
+    "draft": "مسودة",
+    "pending": "قيد الانتظار",
+    "active": "نشط",
+    "expiring": "ينتهي قريباً",
+    "expired": "منتهي"
+  },
+  
+  "noAgreements": "لا توجد اتفاقيات",
+  
+  "priority": {
+    "high": "عاجل",
+    "medium": "قريب",
+    "low": "قادم"
+  },
+  
+  "days": "أيام",
+  "contact": "اتصال",
+  "noUpcomingRenewals": "لا توجد تجديدات قادمة في الـ 90 يوماً القادمة",
+  
+  "upcomingRenewals": "التجديدات القادمة",
+  "agreementTypes": "أنواع الاتفاقيات",
+  "agreements": "اتفاقيات",
+  "noData": "لا توجد بيانات متاحة",
+  
+  "partnerPerformance": "ترتيب الشركاء",
+  "noPartners": "لا توجد بيانات شركاء متاحة",
+  "rank": "الترتيب",
+  "organization": "المنظمة",
+  "totalAgreements": "الإجمالي",
+  "activeAgreementsLabel": "النشط",
+  "partnerSince": "شريك منذ",
+  
+  "partnershipTrends": "اتجاهات الشراكة",
+  "newAgreements": "اتفاقيات جديدة",
+  "expirations": "انتهاءات",
+  "netChange": "صافي التغيير",
+  "noTrendData": "لا توجد بيانات اتجاهات متاحة",
+  
+  "recentActivity": "النشاط الأخير",
+  "noActivity": "لا يوجد نشاط حديث",
+  "activity": {
+    "created": "تم الإنشاء",
+    "renewed": "تم التجديد",
+    "expired": "انتهت",
+    "updated": "تم التحديث"
+  }
+}

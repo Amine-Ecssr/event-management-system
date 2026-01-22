@@ -1,0 +1,16 @@
+{
+  "template": "Template",
+  "downloadTemplateTitle": "Download a blank CSV template to fill in",
+  "importCSV": "Import CSV",
+  "importing": "Importing...",
+  "importCSVTitle": "Import events from CSV file (UTF-8 encoding). Press F12 to see detailed error messages if import fails.",
+  "deleteAll": "Delete All",
+  "errors": "CSV Import Errors",
+  "errorsPlural": "errors",
+  "checkConsole": "Check browser console (F12) for full details.",
+  "successfullyImported": "Import Successful",
+  "importedCount": "Imported {{count}} events",
+  "event": "event(s)",
+  "failed": "Import Failed",
+  "failedDesc": "Failed to import CSV file"
+}

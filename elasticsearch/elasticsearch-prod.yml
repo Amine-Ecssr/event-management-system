@@ -1,0 +1,142 @@
+# Production Elasticsearch Configuration
+# For EventVue/ECSSR Events Calendar
+# 
+# This configuration enables security, audit logging, and production-grade settings.
+# Mount SSL certificates and configure environment variables before use.
+
+cluster.name: "eventcal-cluster-prod"
+node.name: "eventcal-es-prod-01"
+network.host: 0.0.0.0
+
+# ==================== Security Settings ====================
+
+# Enable X-Pack security
+xpack.security.enabled: true
+xpack.security.enrollment.enabled: true
+
+# TLS for HTTP layer (client connections)
+xpack.security.http.ssl:
+  enabled: true
+  key: /usr/share/elasticsearch/config/certs/es-key.pem
+  certificate: /usr/share/elasticsearch/config/certs/es-cert.pem
+  certificate_authorities: /usr/share/elasticsearch/config/certs/ca.pem
+
+# TLS for transport layer (inter-node communication)
+xpack.security.transport.ssl:
+  enabled: true
+  verification_mode: certificate
+  key: /usr/share/elasticsearch/config/certs/es-key.pem
+  certificate: /usr/share/elasticsearch/config/certs/es-cert.pem
+  certificate_authorities: /usr/share/elasticsearch/config/certs/ca.pem
+
+# ==================== Audit Logging ====================
+
+xpack.security.audit.enabled: true
+xpack.security.audit.logfile.events.include:
+  - access_denied
+  - authentication_failed
+  - authentication_success
+  - connection_denied
+  - tampered_request
+  - security_config_change
+  - run_as_denied
+  - anonymous_access_denied
+
+xpack.security.audit.logfile.events.exclude:
+  - access_granted
+
+# ==================== Path Settings ====================
+
+path.data: /usr/share/elasticsearch/data
+path.logs: /usr/share/elasticsearch/logs
+path.repo: ["/usr/share/elasticsearch/backup"]
+
+# ==================== Memory Settings ====================
+
+# Lock memory to prevent swapping
+bootstrap.memory_lock: true
+
+# ==================== Index Settings ====================
+
+# Only auto-create indices with eventcal prefix
+action.auto_create_index: "eventcal-*,.kibana*,.security*"
+
+# Increase max boolean clauses for complex queries
+indices.query.bool.max_clause_count: 4096
+
+# Field data cache limit (25% of heap)
+indices.fielddata.cache.size: 25%
+
+# Circuit breaker settings
+indices.breaker.total.use_real_memory: true
+indices.breaker.total.limit: 95%
+indices.breaker.fielddata.limit: 40%
+indices.breaker.request.limit: 40%
+
+# ==================== Search Settings ====================
+
+# Search thread pool
+thread_pool.search.size: 13
+thread_pool.search.queue_size: 1000
+
+# Search throttling
+search.default_search_timeout: 30s
+
+# ==================== Indexing Settings ====================
+
+# Write thread pool
+thread_pool.write.size: 5
+thread_pool.write.queue_size: 200
+
+# ==================== Slow Query Logging ====================
+
+# Search slow logs
+index.search.slowlog.threshold.query.warn: 10s
+index.search.slowlog.threshold.query.info: 5s
+index.search.slowlog.threshold.query.debug: 2s
+index.search.slowlog.threshold.query.trace: 500ms
+
+index.search.slowlog.threshold.fetch.warn: 1s
+index.search.slowlog.threshold.fetch.info: 500ms
+index.search.slowlog.threshold.fetch.debug: 200ms
+index.search.slowlog.threshold.fetch.trace: 100ms
+
+# Indexing slow logs
+index.indexing.slowlog.threshold.index.warn: 10s
+index.indexing.slowlog.threshold.index.info: 5s
+index.indexing.slowlog.threshold.index.debug: 2s
+index.indexing.slowlog.threshold.index.trace: 500ms
+
+# ==================== Recovery Settings ====================
+
+# Limit concurrent recoveries
+cluster.routing.allocation.node_concurrent_recoveries: 2
+indices.recovery.max_bytes_per_sec: 40mb
+
+# ==================== Monitoring ====================
+
+# Enable monitoring collection
+xpack.monitoring.collection.enabled: true
+xpack.monitoring.collection.interval: 30s
+
+# Export to local indices (or configure external monitoring cluster)
+xpack.monitoring.exporters.local:
+  type: local
+  use_ingest: false
+
+# ==================== Watcher (Alerting) ====================
+
+xpack.watcher.enabled: true
+
+# ==================== Machine Learning ====================
+
+# Disable if not used to save resources
+xpack.ml.enabled: false
+
+# ==================== Cluster Settings ====================
+
+# Minimum master nodes (for multi-node cluster)
+# discovery.zen.minimum_master_nodes: 2
+
+# For single node deployment
+discovery.type: single-node

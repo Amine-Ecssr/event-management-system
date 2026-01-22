@@ -1,0 +1,35 @@
+{
+  "title": "Dropdown Management",
+  "subtitle": "Manage categories, organizations, positions, partnership types, and agreement types",
+  "hubDescription": "Select a dropdown type to manage its items",
+  "manage": "Manage",
+  "backToHub": "Back to Dropdowns",
+  "search": "Search...",
+  "noResults": "No results found",
+  "englishName": "English Name",
+  "arabicName": "Arabic Name",
+  "enterEnglishName": "Enter English name",
+  "enterArabicName": "Enter Arabic name",
+  "englishNameRequired": "English name is required",
+  "confirmDelete": "Confirm Delete",
+  "categories": {
+    "title": "Event Categories",
+    "subtitle": "Manage event categories for organizing and filtering events"
+  },
+  "organizations": {
+    "title": "Organizations",
+    "subtitle": "Manage organizations for contacts, speakers, and partnerships"
+  },
+  "positions": {
+    "title": "Positions",
+    "subtitle": "Manage job positions/titles for contacts and speakers"
+  },
+  "partnershipTypes": {
+    "title": "Partnership Types",
+    "subtitle": "Manage partnership classification types"
+  },
+  "agreementTypes": {
+    "title": "Agreement Types",
+    "subtitle": "Manage agreement/contract types for partnerships"
+  }
+}

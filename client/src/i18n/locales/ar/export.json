@@ -1,0 +1,75 @@
+{
+  "selectFormat": "اختر صيغة التصدير",
+  "selectLanguage": "اختر اللغة",
+  "exporting": "جاري التصدير...",
+  "bilingual": "ثنائي اللغة (كلاهما)",
+  "hint": "اختر الصيغة واللغة للتصدير",
+  "success": {
+    "title": "تم التصدير بنجاح",
+    "description": "تم تنزيل الملف \"{{filename}}\""
+  },
+  "error": {
+    "title": "فشل التصدير",
+    "description": "تعذر إنشاء التصدير. يرجى المحاولة مرة أخرى."
+  },
+  "formats": {
+    "xlsx": "إكسل",
+    "csv": "CSV",
+    "pdf": "PDF"
+  },
+  "languages": {
+    "en": "الإنجليزية",
+    "ar": "العربية",
+    "both": "ثنائي اللغة"
+  },
+  "entities": {
+    "events": "الفعاليات",
+    "archivedEvents": "الفعاليات المؤرشفة",
+    "tasks": "المهام",
+    "overdueTasks": "المهام المتأخرة",
+    "contacts": "جهات الاتصال",
+    "speakers": "المتحدثون",
+    "organizations": "المنظمات",
+    "partnerships": "الشراكات",
+    "leads": "العملاء المحتملون"
+  },
+  "columns": {
+    "id": "المعرف",
+    "name": "الاسم",
+    "title": "العنوان",
+    "email": "البريد الإلكتروني",
+    "phone": "الهاتف",
+    "status": "الحالة",
+    "priority": "الأولوية",
+    "date": "التاريخ",
+    "startDate": "تاريخ البداية",
+    "endDate": "تاريخ النهاية",
+    "dueDate": "تاريخ الاستحقاق",
+    "category": "الفئة",
+    "type": "النوع",
+    "location": "الموقع",
+    "organizer": "المنظم",
+    "department": "القسم",
+    "assignee": "المسؤول",
+    "organization": "المنظمة",
+    "position": "المنصب",
+    "country": "الدولة",
+    "value": "القيمة",
+    "source": "المصدر",
+    "notes": "ملاحظات",
+    "createdAt": "تاريخ الإنشاء"
+  },
+  "jobs": {
+    "title": "مهام التصدير",
+    "status": {
+      "pending": "قيد الانتظار",
+      "processing": "قيد المعالجة",
+      "completed": "مكتمل",
+      "failed": "فشل"
+    },
+    "progress": "التقدم",
+    "download": "تنزيل",
+    "cancel": "إلغاء",
+    "noJobs": "لا توجد مهام تصدير"
+  }
+}

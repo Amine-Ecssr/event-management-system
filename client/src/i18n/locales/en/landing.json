@@ -1,0 +1,46 @@
+{
+  "hero": {
+    "title": "Welcome to ECSSR Events Calendar",
+    "subtitle": "Discover upcoming events, manage tasks, and stay connected with our comprehensive event management system",
+    "badge": "Your Gateway to Events",
+    "viewCalendar": "View Calendar",
+    "viewArchive": "View Archive",
+    "signIn": "Sign In"
+  },
+  "stats": {
+    "title": "Live Statistics",
+    "totalEvents": "Total Events",
+    "upcomingEvents": "Upcoming Events",
+    "pastEvents": "Past Events",
+    "activeCategories": "Active Categories",
+    "eventsByCategory": "Events by Category"
+  },
+  "upcomingEvents": {
+    "title": "Upcoming Events",
+    "subtitle": "Stay updated with our latest events and activities",
+    "viewAll": "View All Events",
+    "noEvents": "No upcoming events at this time",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "viewDetails": "View Details"
+  },
+  "archive": {
+    "title": "Event Archive",
+    "subtitle": "Explore our rich collection of past events with photos, videos, and detailed information",
+    "archivedEvents": "Archived Events",
+    "categories": "Categories",
+    "withMedia": "With Media",
+    "richContent": "Rich Content",
+    "exploreArchive": "Explore Archive"
+  },
+  "features": {
+    "title": "Powerful Features",
+    "subtitle": "Everything you need to manage and discover events",
+    "calendar": "Interactive Calendar",
+    "calendarDesc": "View events in multiple formats - monthly, quarterly, bi-annually, or yearly",
+    "archive": "Event Archive",
+    "archiveDesc": "Browse past events with rich media and detailed information",
+    "tasks": "Task Management",
+    "tasksDesc": "Track stakeholder assignments and deadlines efficiently"
+  }
+}

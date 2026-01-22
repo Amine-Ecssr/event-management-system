@@ -1,0 +1,6 @@
+{
+  "exportSuccessful": "نجح التصدير",
+  "exportSuccessfulDesc": "تم تصدير الفعاليات إلى ملف CSV",
+  "exportFailed": "فشل التصدير",
+  "exportFailedDesc": "فشل تصدير الفعاليات إلى CSV"
+}

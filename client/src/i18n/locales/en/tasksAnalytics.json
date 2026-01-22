@@ -1,0 +1,59 @@
+{
+  "title": "Tasks Analytics",
+  "subtitle": "Track task performance and department efficiency",
+  "error": "Error loading dashboard",
+  
+  "totalTasks": "Total Tasks",
+  "completionRate": "Completion Rate",
+  "overdueTasks": "Overdue Tasks",
+  "avgCompletionTime": "Avg Completion Time",
+  "completed": "completed",
+  "highPriority": "high priority",
+  "days": "days",
+  
+  "tasksOverdue": "tasks are overdue",
+  "reviewOverdue": "Review and update task status or deadlines",
+  "urgent": "Urgent",
+  
+  "overview": "Overview",
+  "departments": "Departments",
+  "overdueTab": "Overdue",
+  "trends": "Trends",
+  
+  "tasksByStatus": "Tasks by Status",
+  "tasksByPriority": "Tasks by Priority",
+  "workloadDistribution": "Workload Distribution",
+  "departmentPerformance": "Department Performance",
+  "taskTrends": "Task Trends",
+  
+  "allDepartments": "All Departments",
+  "noData": "No data available",
+  "noTrendData": "No trend data available",
+  "noWorkloadData": "No workload data available",
+  "noDepartments": "No department data available",
+  "noOverdueTasks": "No overdue tasks",
+  
+  "status": {
+    "pending": "Pending",
+    "in_progress": "In Progress",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "waiting": "Waiting"
+  },
+  
+  "priority": {
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low"
+  },
+  
+  "tasks": "tasks",
+  "activeTasks": "active tasks",
+  "created": "Created",
+  "completedLabel": "Completed",
+  "overdueLabel": "Overdue",
+  "daysOverdue": "days overdue",
+  
+  "department": "Department",
+  "total": "Total"
+}

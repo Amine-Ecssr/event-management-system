@@ -1,0 +1,75 @@
+{
+  "selectFormat": "Select Export Format",
+  "selectLanguage": "Select Language",
+  "exporting": "Exporting...",
+  "bilingual": "Bilingual (Both)",
+  "hint": "Choose format and language for your export",
+  "success": {
+    "title": "Export Successful",
+    "description": "Your file \"{{filename}}\" has been downloaded"
+  },
+  "error": {
+    "title": "Export Failed",
+    "description": "Unable to generate export. Please try again."
+  },
+  "formats": {
+    "xlsx": "Excel",
+    "csv": "CSV",
+    "pdf": "PDF"
+  },
+  "languages": {
+    "en": "English",
+    "ar": "Arabic",
+    "both": "Bilingual"
+  },
+  "entities": {
+    "events": "Events",
+    "archivedEvents": "Archived Events",
+    "tasks": "Tasks",
+    "overdueTasks": "Overdue Tasks",
+    "contacts": "Contacts",
+    "speakers": "Speakers",
+    "organizations": "Organizations",
+    "partnerships": "Partnerships",
+    "leads": "Leads"
+  },
+  "columns": {
+    "id": "ID",
+    "name": "Name",
+    "title": "Title",
+    "email": "Email",
+    "phone": "Phone",
+    "status": "Status",
+    "priority": "Priority",
+    "date": "Date",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "dueDate": "Due Date",
+    "category": "Category",
+    "type": "Type",
+    "location": "Location",
+    "organizer": "Organizer",
+    "department": "Department",
+    "assignee": "Assignee",
+    "organization": "Organization",
+    "position": "Position",
+    "country": "Country",
+    "value": "Value",
+    "source": "Source",
+    "notes": "Notes",
+    "createdAt": "Created"
+  },
+  "jobs": {
+    "title": "Export Jobs",
+    "status": {
+      "pending": "Pending",
+      "processing": "Processing",
+      "completed": "Completed",
+      "failed": "Failed"
+    },
+    "progress": "Progress",
+    "download": "Download",
+    "cancel": "Cancel",
+    "noJobs": "No export jobs found"
+  }
+}

@@ -1,0 +1,232 @@
+{
+  "title": "الحصاد",
+  "titleAr": "الحصاد",
+  "subtitle": "استكشف فعالياتنا وإنجازاتنا السابقة",
+  "subtitleAr": "استكشف فعالياتنا وإنجازاتنا السابقة",
+  
+  "badge": "الحصاد",
+  "badgeAr": "الحصاد",
+  "alHasad": "الحصاد",
+  "archiveImported": "تم استيراد الأرشيف",
+  "restoreToCalendar": "استعادة الحدث",
+  
+  "stats": {
+    "totalEvents": "إجمالي الفعاليات",
+    "totalAttendees": "إجمالي الحضور",
+    "yearsActive": "سنوات النشاط",
+    "categories": "التصنيفات",
+    "eventsWithPhotos": "مع صور",
+    "eventsWithVideos": "مع فيديوهات"
+  },
+  
+  "fields": {
+    "actualAttendees": "عدد الحضور الفعلي",
+    "highlights": "أبرز النقاط",
+    "highlightsAr": "أبرز النقاط (بالعربية)",
+    "impact": "الأثر والنتائج",
+    "impactAr": "الأثر والنتائج (بالعربية)",
+    "keyTakeaways": "النقاط الرئيسية",
+    "keyTakeawaysAr": "النقاط الرئيسية (بالعربية)",
+    "photos": "الصور",
+    "videos": "الفيديوهات",
+    "youtubeVideoIds": "معرفات فيديو يوتيوب",
+    "archivedAt": "تاريخ الأرشفة",
+    "archivedBy": "أرشفة بواسطة",
+    "speakers": "المتحدثون"
+  },
+  
+  "filters": {
+    "allYears": "كل السنوات",
+    "allCategories": "كل التصنيفات",
+    "search": "البحث في الأرشيف...",
+    "searchPlaceholder": "البحث بالاسم، الوصف، أبرز النقاط...",
+    "clearFilters": "مسح الفلاتر"
+  },
+  
+  "actions": {
+    "archiveEvent": "أرشفة الفعالية",
+    "unarchiveEvent": "إلغاء الأرشفة",
+    "createDirectly": "إنشاء سجل أرشيف",
+    "edit": "تعديل الأرشيف",
+    "delete": "حذف الأرشيف",
+    "uploadPhotos": "رفع الصور",
+    "addVideo": "إضافة فيديو يوتيوب",
+    "viewDetails": "عرض التفاصيل",
+    "viewArchive": "عرض الأرشيف",
+    "downloadPhoto": "تحميل الصورة",
+    "deletePhoto": "حذف الصورة",
+    "reorderPhotos": "إعادة ترتيب الصور",
+    "importCsv": "استيراد CSV",
+    "exportCsv": "تصدير إلى CSV",
+    "share": "مشاركة",
+    "copyLink": "نسخ الرابط",
+    "createNew": "إنشاء جديد"
+  },
+  
+  "messages": {
+    "eventArchived": "تم أرشفة الفعالية بنجاح",
+    "eventUnarchived": "تم إلغاء أرشفة الفعالية بنجاح",
+    "archiveCreated": "تم إنشاء سجل الأرشيف بنجاح",
+    "archiveUpdated": "تم تحديث سجل الأرشيف بنجاح",
+    "archiveDeleted": "تم حذف سجل الأرشيف بنجاح",
+    "photosUploaded": "تم رفع {{count}} صورة بنجاح",
+    "photoDeleted": "تم حذف الصورة بنجاح",
+    "photoOrderUpdated": "تم تحديث ترتيب الصور",
+    "videoAdded": "تمت إضافة فيديو يوتيوب",
+    "videoRemoved": "تم إزالة فيديو يوتيوب",
+    "linkCopied": "تم نسخ الرابط",
+    "cannotArchiveScraped": "لا يمكن أرشفة الفعاليات المستوردة. يمكن أرشفة الفعاليات الداخلية فقط.",
+    "alreadyArchived": "هذه الفعالية مؤرشفة بالفعل",
+    "confirmDelete": "هل أنت متأكد من حذف سجل الأرشيف هذا؟ لا يمكن التراجع عن هذا الإجراء.",
+    "confirmUnarchive": "هل أنت متأكد من إلغاء أرشفة هذه الفعالية؟ سيتم حذف سجل الأرشيف.",
+    "maxPhotosReached": "الحد الأقصى 20 صورة لكل فعالية مؤرشفة",
+    "maxVideosReached": "الحد الأقصى 5 فيديوهات لكل فعالية مؤرشفة",
+    "invalidYoutubeUrl": "يرجى إدخال رابط يوتيوب صالح",
+    "photoTooLarge": "يجب أن تكون الصورة 5 ميجابايت أو أقل",
+    "unsupportedFormat": "صيغة الملف غير مدعومة. يرجى استخدام JPEG أو PNG أو WebP أو GIF.",
+    "eventRestored": "تمت استعادة الفعالية بنجاح",
+    "eventRestoredDesc": "تم إرجاع الفعالية إلى التقويم",
+    "restoreFailed": "فشل في استعادة الفعالية",
+    "failedToShare": "فشل في المشاركة"
+  },
+  
+  "emptyStates": {
+    "noArchives": "لا توجد فعاليات مؤرشفة بعد",
+    "noArchivesDesc": "ابدأ بأرشفة فعالياتك السابقة لعرض إنجازاتك",
+    "noPhotos": "لم يتم رفع صور",
+    "noPhotosDesc": "ارفع صوراً لتوثيق هذه الفعالية",
+    "noVideos": "لم تتم إضافة فيديوهات",
+    "noVideosDesc": "أضف فيديوهات يوتيوب لعرض هذه الفعالية",
+    "noResults": "لم يتم العثور على نتائج",
+    "noResultsDesc": "حاول تعديل البحث أو الفلاتر"
+  },
+  
+  "dialog": {
+    "archiveEventTitle": "أرشفة الفعالية",
+    "archiveEventDesc": "أضف تفاصيل إضافية لإنشاء سجل أرشيف غني لهذه الفعالية.",
+    "createArchiveTitle": "إنشاء أرشيف جديد",
+    "createArchiveDesc": "أضف فعالية مؤرشفة جديدة مباشرة بدون ربطها بفعالية موجودة",
+    "editArchiveTitle": "تعديل سجل الأرشيف",
+    "editArchiveDesc": "تحديث تفاصيل الأرشيف والوسائط لهذه الفعالية.",
+    "deleteArchiveTitle": "حذف سجل الأرشيف",
+    "uploadPhotosTitle": "رفع الصور",
+    "uploadPhotosDesc": "يمكنك رفع {{remaining}} صورة إضافية ({{current}}/20 مستخدمة)",
+    "addVideoTitle": "إضافة فيديو يوتيوب",
+    "addVideoDesc": "الصق رابط فيديو يوتيوب لإضافته إلى سجل الأرشيف.",
+    "csvImportTitle": "استيراد من CSV",
+    "csvImportDesc": "قم بتحميل ملف CSV يحتوي على الفعاليات المؤرشفة. قم بتنزيل القالب للحصول على التنسيق الصحيح.",
+    "downloadTemplate": "تحميل القالب",
+    "selectCsvFile": "اختر ملف CSV",
+    "importing": "جاري الاستيراد..."
+  },
+  
+  "validation": {
+    "nameRequired": "اسم الفعالية مطلوب",
+    "dateRequired": "تاريخ البدء مطلوب",
+    "attendeesOrHighlights": "يرجى تقديم عدد الحضور الفعلي أو أبرز النقاط لإنشاء سجل أرشيف مفيد"
+  },
+  
+  "timeline": {
+    "title": "الفعاليات عبر الزمن",
+    "eventsPerMonth": "الفعاليات شهرياً"
+  },
+  
+  "gallery": {
+    "viewFullSize": "عرض بالحجم الكامل",
+    "previous": "السابق",
+    "next": "التالي",
+    "close": "إغلاق",
+    "photoOf": "الصورة {{current}} من {{total}}"
+  },
+  
+  "admin": {
+    "title": "إدارة الأرشيف",
+    "subtitle": "إدارة الفعاليات المؤرشفة والوسائط",
+    "internalEventsOnly": "الفعاليات الداخلية فقط",
+    "internalEventsOnlyDesc": "يمكن أرشفة الفعاليات الداخلية فقط (غير المستوردة)",
+    "minioStatus": "حالة تخزين الوسائط",
+    "minioAvailable": "متصل",
+    "minioUnavailable": "غير متاح",
+    "manageArchive": "إدارة الأرشيف",
+    "backToCalendar": "العودة للتقويم"
+  },
+
+  "public": {
+    "theHarvest": "الحصاد",
+    "eventsArchive": "أرشيف الفعاليات",
+    "eventsThisYear": "فعاليات في هذا العام",
+    "totalAttendees": "إجمالي الحضور"
+  },
+
+  "editArchiveTitle": "تعديل الأرشيف",
+  "editArchiveDesc": "تحديث تفاصيل الأرشيف والوسائط لهذه الفعالية.",
+  "tabDetails": "التفاصيل",
+  "tabSpeakers": "المتحدثون",
+  "tabHighlights": "أبرز النقاط",
+  "tabMedia": "الوسائط",
+  "currentPhotos": "الصور الحالية",
+  "uploadNewPhotos": "رفع صور جديدة",
+  "noPhotosYet": "لم يتم رفع صور بعد",
+  "loadingPhotos": "جاري تحميل الصور...",
+  "photoStorageUnavailable": "خدمة تخزين الصور غير متاحة حالياً",
+  "uploading": "جاري رفع الصور...",
+  "noVideosYet": "لا توجد فيديوهات",
+  "separateWithCommas": "فصل المعرفات بفواصل",
+  "csvImportErrors": "أخطاء:",
+  "csvImportSuccess": "تم استيراد {{count}} فعالية بنجاح",
+  "csvRequiredColumns": "الأعمدة المطلوبة: name أو name_ar, start_date. الأعمدة الاختيارية: description, location, actual_attendees, highlights, impact, والمزيد.",
+  
+  "tabs": {
+    "details": "التفاصيل",
+    "speakers": "المتحدثون",
+    "highlights": "أبرز النقاط",
+    "media": "الوسائط",
+    "basicInfo": "البيانات الأساسية",
+    "overview": "نظرة عامة",
+    "gallery": "المعرض",
+    "videos": "الفيديوهات"
+  },
+  
+  "form": {
+    "nameEnglish": "الاسم (انجليزي)",
+    "nameArabic": "الاسم (عربي)",
+    "startTime": "وقت البداية",
+    "endTime": "وقت النهاية",
+    "selectCategory": "اختر الفئة",
+    "noCategory": "بدون فئة",
+    "locationArabic": "الموقع (عربي)",
+    "organizers": "المنظمون",
+    "organizersArabic": "المنظمون (عربي)",
+    "eventUrl": "رابط الفعالية",
+    "descriptionArabic": "الوصف (عربي)",
+    "createArchive": "إنشاء الأرشيف"
+  },
+  
+  "detail": {
+    "attendees": "حضور",
+    "organizer": "المنظم",
+    "originalLink": "الرابط الأصلي",
+    "view": "عرض",
+    "noPhotosForEvent": "لا توجد صور لهذا الحدث",
+    "noVideosForEvent": "لا توجد فيديوهات لهذا الحدث",
+    "exploreMore": "استكشف المزيد",
+    "viewAll": "عرض الكل",
+    "discoverMore": "اكتشف المزيد من الفعاليات المؤرشفة",
+    "browseArchive": "تصفح الأرشيف"
+  },
+  
+  "archiveDialog": {
+    "title": "أرشفة الفعالية إلى الحصاد",
+    "description": "أضف هذه الفعالية إلى أرشيف الحصاد مع تفاصيل إضافية اختيارية",
+    "actualAttendees": "العدد الفعلي للحضور",
+    "highlightsEn": "أبرز النقاط (انجليزي)",
+    "highlightsEnPlaceholder": "أبرز نقاط الفعالية...",
+    "highlightsAr": "أبرز النقاط (عربي)",
+    "highlightsArPlaceholder": "أبرز نقاط الفعالية...",
+    "addMoreLater": "يمكنك إضافة المزيد من التفاصيل والصور لاحقاً من صفحة إدارة الأرشيف",
+    "archiving": "جاري الأرشفة...",
+    "archiveToAlHasad": "أرشفة إلى الحصاد",
+    "archived": "تمت الأرشفة بنجاح",
+    "archivedDesc": "تم نقل الفعالية إلى الحصاد"
+  }
+}

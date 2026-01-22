@@ -1,0 +1,35 @@
+{
+  "editInteraction": "تعديل التفاعل",
+  "addInteraction": "إضافة تفاعل",
+  "interactionType": "نوع التفاعل",
+  "description": "الوصف",
+  "outcome": "النتيجة",
+  "createdAt": "التاريخ والوقت",
+  "types": {
+    "meeting": "اجتماع",
+    "call": "مكالمة",
+    "email": "بريد إلكتروني",
+    "visit": "زيارة",
+    "other": "أخرى"
+  },
+  "placeholders": {
+    "description": "أدخل تفاصيل التفاعل...",
+    "outcome": "أدخل النتيجة أو الإجراءات المتابعة..."
+  },
+  "attachments": {
+    "label": "المرفقات (اختياري)",
+    "existing": "المرفقات الموجودة",
+    "title": "المرفقات",
+    "dropzone": "اسحب الملفات هنا أو انقر للتصفح",
+    "maxFileSize": "الحد الأقصى لحجم الملف: {{size}}",
+    "filesSelected": "تم تحديد {{count}} ملف",
+    "uploading": "جاري رفع الملفات...",
+    "deleted": "تم حذف المرفق",
+    "files": "ملف",
+    "files_plural": "ملفات",
+    "errors": {
+      "fileTooLarge": "الملف {{fileName}} كبير جداً. الحد الأقصى للحجم هو 10 ميجابايت.",
+      "invalidFileType": "الملف {{fileName}} من نوع غير صالح. الأنواع المسموحة: PDF، Word، Excel، PowerPoint، الصور، ZIP، الملفات النصية."
+    }
+  }
+}

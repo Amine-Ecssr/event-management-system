@@ -1,0 +1,399 @@
+{
+  "title": "Partnerships",
+  "subtitle": "Manage organizational partnerships and collaborations",
+  "partnerships": "Partnerships",
+  "partnership": "Partnership",
+  "partnersList": "Partners List",
+  "addPartnership": "Add Partnership",
+  "editPartnership": "Edit Partnership",
+  "viewPartnership": "View Partnership",
+  "newPartnership": "New Partnership",
+  "searchPlaceholder": "Search partners...",
+  "noPartnershipsFound": "No partnerships found",
+  "noPartnersYet": "No partners yet. Mark an organization as a partner to get started.",
+  "noActivitiesYet": "No activities yet",
+  
+  "fields": {
+    "organization": "Organization",
+    "partnershipType": "Partnership Type",
+    "country": "Country",
+    "status": "Status",
+    "signedDate": "Signed Date",
+    "signedBy": "Signed By",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "notes": "Notes",
+    "latestActivity": "Latest Activity",
+    "primaryContact": "Primary Contact",
+    "secondaryContact": "Secondary Contact",
+    "website": "Website"
+  },
+
+  "statuses": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "pending": "Pending",
+    "expired": "Expired",
+    "terminated": "Terminated"
+  },
+
+  "types": {
+    "strategic": "Strategic",
+    "operational": "Operational",
+    "research": "Research",
+    "academic": "Academic",
+    "media": "Media",
+    "sponsorship": "Sponsorship",
+    "government": "Government",
+    "mou": "MOU",
+    "other": "Other"
+  },
+
+  "tabs": {
+    "overview": "Overview",
+    "agreements": "Agreements",
+    "activities": "Activities",
+    "contacts": "Contacts",
+    "events": "Joint Events",
+    "comments": "Comments",
+    "interactions": "Interactions",
+    "tasks": "Tasks"
+  },
+
+  "comments": {
+    "title": "Partnership Comments",
+    "addComment": "Add Comment",
+    "editComment": "Edit Comment",
+    "noComments": "No comments yet",
+    "placeholder": "Write a comment...",
+    "placeholderAr": "Write comment in Arabic (optional)...",
+    "postedBy": "Posted by",
+    "edited": "edited",
+    "justNow": "Just now",
+    "confirmDelete": "Are you sure you want to delete this comment?"
+  },
+
+  "overview": {
+    "partnershipDetails": "Partnership Details",
+    "summary": "Summary",
+    "totalActivities": "Total Activities",
+    "jointEvents": "Joint Events",
+    "activeAgreements": "Active Agreements",
+    "lastActivity": "Last Activity",
+    "daysActive": "Days Active",
+    "neverExpires": "Never Expires",
+    "daysUntilExpiry": "{{days}} days until expiry",
+    "expired": "Expired {{days}} days ago"
+  },
+
+  "agreements": {
+    "title": "Partnership Agreements",
+    "addAgreement": "Add Agreement",
+    "editAgreement": "Edit Agreement",
+    "noAgreements": "No agreements found",
+    "agreementTitle": "Agreement Title",
+    "agreementNumber": "Agreement Number",
+    "agreementType": "Agreement Type",
+    "legalStatus": "Legal Status",
+    "languages": "Languages",
+    "signedDate": "Signed Date",
+    "effectiveDate": "Effective Date",
+    "expiryDate": "Expiry Date",
+    "renewalDate": "Renewal Date",
+    "description": "Description",
+    "attachment": "Attachment",
+    "uploadAttachment": "Upload Attachment",
+    "viewAttachment": "View Attachment",
+    "removeAttachment": "Remove Attachment",
+    "terminationClause": "Termination Clause",
+    "terminationClauseAr": "Termination Clause (Arabic)",
+    "agreementTypes": {
+      "mou": "Memorandum of Understanding",
+      "contract": "Contract",
+      "letter_of_intent": "Letter of Intent",
+      "service_agreement": "Service Agreement",
+      "collaboration_agreement": "Collaboration Agreement",
+      "sponsorship_agreement": "Sponsorship Agreement",
+      "other": "Other"
+    },
+    "legalStatuses": {
+      "binding": "Legally Binding",
+      "non-binding": "Non-Binding"
+    },
+    "attachments": {
+      "title": "Attachments",
+      "uploadAttachment": "Upload Attachment",
+      "noAttachments": "No attachments yet",
+      "uploadHint": "Upload PDF, Word, Excel, or image files (max 10MB)",
+      "fileName": "File Name",
+      "type": "Type",
+      "size": "Size",
+      "uploadedAt": "Uploaded",
+      "uploadSuccess": "Attachment uploaded successfully",
+      "uploadError": "Failed to upload attachment",
+      "deleteSuccess": "Attachment deleted successfully",
+      "deleteError": "Failed to delete attachment",
+      "deleteTitle": "Delete Attachment",
+      "deleteConfirm": "Are you sure you want to delete \"{{fileName}}\"? This action cannot be undone.",
+      "fileSizeError": "File size exceeds the maximum limit of 10MB",
+      "fileTypeError": "Invalid file type. Allowed: PDF, Word, Excel, and common image formats",
+      "allowedTypes": "Allowed file types: PDF, Word (.doc, .docx), Excel (.xls, .xlsx), Images (.jpg, .png, .gif, .webp)"
+    }
+  },
+
+  "activities": {
+    "title": "Partnership Activities",
+    "addActivity": "Add Activity",
+    "editActivity": "Edit Activity",
+    "noActivities": "No activities recorded",
+    "activityTitle": "Activity Title",
+    "titlePlaceholder": "Enter activity title",
+    "activityType": "Activity Type",
+    "activityDate": "Date",
+    "description": "Description",
+    "outcome": "Outcome",
+    "participants": "Participants",
+    "linkedEvent": "Linked Event",
+    "selectEvent": "Select event...",
+    "noLinkedEvent": "No linked event",
+    "types": {
+      "meeting": "Meeting",
+      "call": "Call",
+      "email": "Email",
+      "event": "Joint Event",
+      "workshop": "Workshop",
+      "training": "Training",
+      "site_visit": "Site Visit",
+      "conference": "Conference",
+      "publication": "Publication",
+      "other": "Other"
+    }
+  },
+
+  "contacts": {
+    "title": "Partnership Contacts",
+    "addContact": "Add Contact",
+    "editContact": "Edit Contact",
+    "noContacts": "No contacts assigned",
+    "selectContact": "Select Contact",
+    "name": "Name",
+    "position": "Position",
+    "contact": "Contact Info",
+    "role": "Role",
+    "status": "Status",
+    "isPrimary": "Primary Contact",
+    "setPrimary": "Set as Primary",
+    "roles": {
+      "primary": "Primary Contact",
+      "secondary": "Secondary Contact",
+      "technical": "Technical Contact",
+      "financial": "Financial Contact",
+      "legal": "Legal Contact",
+      "other": "Other"
+    }
+  },
+
+  "analytics": {
+    "title": "Partnership Analytics",
+    "totalPartners": "Total Partners",
+    "activePartners": "Active Partners",
+    "byType": "Partners by Type",
+    "byStatus": "Partners by Status",
+    "recentActivities": "Recent Activities",
+    "upcomingRenewals": "Upcoming Renewals",
+    "expiringAgreements": "Expiring Agreements"
+  },
+
+  "interactions": {
+    "title": "Interactions",
+    "timeline": "Interaction Timeline",
+    "addInteraction": "Add Interaction",
+    "editInteraction": "Edit Interaction",
+    "noInteractions": "No interactions recorded",
+    "noInteractionsDesc": "Start tracking your communications with this partnership by adding your first interaction.",
+    "addFirstInteraction": "Add First Interaction",
+    "interactionType": "Type",
+    "description": "Description",
+    "outcome": "Outcome",
+    "createdAt": "Date",
+    "filterSearch": "Filter & Search",
+    "filterByType": "Filter by type",
+    "allTypes": "All Types",
+    "searchPlaceholder": "Search interactions...",
+    "newestFirst": "Newest First",
+    "oldestFirst": "Oldest First",
+    "clearFilters": "Clear Filters",
+    "noResults": "No matching interactions",
+    "noResultsDesc": "Try adjusting your filters or search terms.",
+    "types": {
+      "email": "Email",
+      "phone_call": "Phone Call",
+      "meeting": "Meeting",
+      "document_sent": "Document Sent",
+      "proposal_submitted": "Proposal Submitted",
+      "review_session": "Review Session",
+      "other": "Other"
+    },
+    "attachments": {
+      "label": "Attachments (Optional)",
+      "existing": "Existing Attachments",
+      "title": "Attachments",
+      "dropzone": "Drop files here or click to browse",
+      "maxFileSize": "Max file size: {{size}}",
+      "filesSelected": "{{count}} file(s) selected",
+      "uploading": "Uploading files...",
+      "deleted": "Attachment deleted",
+      "files": "{{count}} file",
+      "files_plural": "{{count}} files",
+      "errors": {
+        "fileTooLarge": "File {{fileName}} is too large. Maximum size is 10MB.",
+        "invalidFileType": "File {{fileName}} has an invalid type. Allowed types: PDF, Word, Excel, PowerPoint, images, ZIP, text files."
+      }
+    }
+  },
+
+  "tasks": {
+    "title": "Tasks",
+    "addTask": "Add Task",
+    "editTask": "Edit Task",
+    "noTasks": "No tasks for this partnership",
+    "taskTitle": "Task Title",
+    "dueDate": "Due Date",
+    "assignee": "Assignee",
+    "assignedDepartment": "Assigned Department",
+    "selectDepartment": "Select Department",
+    "unassigned": "Unassigned",
+    "priority": "Priority",
+    "status": "Status",
+    "description": "Description",
+    "markComplete": "Mark Complete",
+    "viewDetails": "View Details",
+    "priorities": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "statuses": {
+      "pending": "Pending",
+      "in_progress": "In Progress",
+      "completed": "Completed"
+    }
+  },
+
+  "actions": {
+    "viewDetails": "View Details",
+    "markAsPartner": "Mark as Partner",
+    "removePartner": "Remove Partner Status",
+    "renewAgreement": "Renew Agreement",
+    "exportData": "Export Data"
+  },
+
+  "confirmations": {
+    "deletePartnership": "Are you sure you want to remove the partnership status from this organization?",
+    "deleteAgreement": "Are you sure you want to delete this agreement?",
+    "deleteActivity": "Are you sure you want to delete this activity?",
+    "deleteComment": "Are you sure you want to delete this comment?",
+    "deleteInteraction": "Are you sure you want to delete this interaction? This action cannot be undone.",
+    "deleteTask": "Are you sure you want to delete this task? This action cannot be undone."
+  },
+
+  "messages": {
+    "partnershipCreated": "Partnership created successfully",
+    "partnershipUpdated": "Partnership updated successfully",
+    "partnershipDeleted": "Partnership removed successfully",
+    "agreementCreated": "Agreement created successfully",
+    "agreementUpdated": "Agreement updated successfully",
+    "agreementDeleted": "Agreement deleted successfully",
+    "activityCreated": "Activity recorded successfully",
+    "activityUpdated": "Activity updated successfully",
+    "activityDeleted": "Activity deleted successfully",
+    "contactAdded": "Contact added to partnership",
+    "contactRemoved": "Contact removed from partnership",
+    "commentCreated": "Comment added successfully",
+    "commentUpdated": "Comment updated successfully",
+    "commentDeleted": "Comment deleted successfully",
+    "inactivitySettingsUpdated": "Inactivity settings updated successfully",
+    "interactionAdded": "Interaction added successfully",
+    "interactionUpdated": "Interaction updated successfully",
+    "interactionDeleted": "Interaction deleted successfully",
+    "taskCreated": "Task created successfully",
+    "taskUpdated": "Task updated successfully",
+    "taskDeleted": "Task deleted successfully",
+    "taskCompleted": "Task marked as completed",
+    "taskReopened": "Task reopened"
+  },
+
+  "placeholders": {
+    "selectOrganization": "Select an organization...",
+    "selectType": "Select partnership type...",
+    "selectCountry": "Select country...",
+    "selectStatus": "Select status...",
+    "notesPlaceholder": "Add notes about this partnership...",
+    "agreementTitle": "e.g., Annual Collaboration Agreement 2024",
+    "agreementNumber": "e.g., AGR-2024-001",
+    "selectAgreementType": "Select agreement type...",
+    "selectLegalStatus": "Select legal status...",
+    "selectLanguages": "Select languages...",
+    "activityDescription": "Describe the activity...",
+    "outcomeDescription": "Describe the outcome...",
+    "terminationClause": "Enter termination conditions and terms...",
+    "terminationClauseAr": "أدخل شروط وأحكام الإنهاء...",
+    "taskTitle": "Enter task title...",
+    "taskDescription": "Enter task description...",
+    "interactionDescription": "Describe the interaction...",
+    "interactionOutcome": "Describe the outcome...",
+    "outcomePlaceholder": "Describe the outcome of this interaction..."
+  },
+
+  "filters": {
+    "allTypes": "All Types",
+    "allStatuses": "All Statuses",
+    "activeOnly": "Active Only",
+    "expiringSoon": "Expiring Soon",
+    "sortBy": "Sort By",
+    "sortByStartDate": "Start Date (Newest)",
+    "sortByLatestActivity": "Latest Activity",
+    "sortByOldestActivity": "Oldest Activity",
+    "sortByName": "Name (A-Z)"
+  },
+
+  "inactivity": {
+    "activityStatus": "Activity Status",
+    "statusActive": "Partnership is Active",
+    "statusInactive": "Partnership Inactive",
+    "inactive": "Inactive",
+    "daysInactive": "{{days}} days inactive",
+    "lastActivity": "Last Activity",
+    "daysSinceActivity": "days since last activity",
+    "noActivityRecorded": "No activity recorded",
+    "settings": "Inactivity Settings",
+    "thresholdLabel": "Inactivity Threshold",
+    "thresholdHelp": "Mark partnership as inactive after this period without activity",
+    "thresholdMonths_one": "{{count}} month",
+    "thresholdMonths_other": "{{count}} months",
+    "notifyLabel": "Email Notifications",
+    "notifyHelp": "Send email alerts when this partnership becomes inactive",
+    "lastNotificationSent": "Last notification sent",
+    "warningThreshold": "Warning: No activity for {{days}} days"
+  },
+
+  "empty": {
+    "noPartners": "No partners found",
+    "noAgreements": "No agreements for this partnership",
+    "noActivities": "No activities recorded yet",
+    "noContacts": "No contacts assigned to this partnership",
+    "noComments": "No comments yet. Start a discussion about this partnership."
+  },
+
+  "languages": {
+    "arabic": "Arabic",
+    "english": "English",
+    "french": "French",
+    "spanish": "Spanish",
+    "chinese": "Chinese",
+    "portuguese": "Portuguese",
+    "german": "German",
+    "russian": "Russian",
+    "urdu": "Urdu"
+  }
+}

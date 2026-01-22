@@ -1,0 +1,440 @@
+# Production Docker Compose - Microservices Architecture
+# Separates frontend, backend, WhatsApp service, and database
+
+services:
+  # Public reverse proxy (Nginx) with automatic Let's Encrypt
+  reverse-proxy:
+    image: nginxproxy/nginx-proxy:alpine
+    container_name: ecssr-nginx-proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - nginx_certs:/etc/nginx/certs:rw
+      - nginx_vhost:/etc/nginx/vhost.d
+      - nginx_html:/usr/share/nginx/html
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    labels:
+      - com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy=true
+    networks:
+      - proxy-network
+
+  acme-companion:
+    image: nginxproxy/acme-companion
+    container_name: ecssr-nginx-proxy-acme
+    restart: unless-stopped
+    environment:
+      - DEFAULT_EMAIL=${LETSENCRYPT_EMAIL:-admin@example.com}
+      # Reduce time between certificate checks to speed up initial issuance
+      - ACME_CA_URI=${ACME_CA_URI:-https://acme-v02.api.letsencrypt.org/directory}
+    volumes:
+      - nginx_certs:/etc/nginx/certs:rw
+      - nginx_vhost:/etc/nginx/vhost.d
+      - nginx_html:/usr/share/nginx/html
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - acme_state:/etc/acme.sh
+    depends_on:
+      - reverse-proxy
+    networks:
+      - proxy-network
+
+  # ============================================================================
+  # Elasticsearch & Kibana - DISABLED FOR SERVERLESS SETUP
+  # ============================================================================
+  # Using Elasticsearch Serverless (Elastic Cloud)
+  # Configure with ELASTICSEARCH_CLOUD_ID and ELASTICSEARCH_API_KEY
+  # Access Kibana at: https://cloud.elastic.co → Your Project → Kibana
+  # ============================================================================
+  #
+  # elasticsearch:
+  #   build:
+  #     context: ./elasticsearch
+  #     dockerfile: Dockerfile
+  #   image: eventcal-elasticsearch:8.12.0-icu
+  #   container_name: ecssr-events-elasticsearch
+  #   restart: unless-stopped
+  #   environment:
+  #     - node.name=eventcal-es-prod
+  #     - cluster.name=eventcal-cluster-prod
+  #     - discovery.type=single-node
+  #     - bootstrap.memory_lock=true
+  #     - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
+  #     - xpack.security.enabled=true
+  #     - ELASTIC_PASSWORD=${ELASTICSEARCH_PASSWORD}
+  #     - xpack.security.http.ssl.enabled=false
+  #     - xpack.security.transport.ssl.enabled=false
+  #   ulimits:
+  #     memlock:
+  #       soft: -1
+  #       hard: -1
+  #     nofile:
+  #       soft: 65536
+  #       hard: 65536
+  #   volumes:
+  #     - elasticsearch_data:/usr/share/elasticsearch/data
+  #     - ./elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+  #   networks:
+  #     - ecssr-network
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "curl -sf -u elastic:${ELASTICSEARCH_PASSWORD} http://localhost:9200/_cluster/health || exit 1"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 10
+  #     start_period: 60s
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: '2'
+  #         memory: 4G
+  #       reservations:
+  #         cpus: '1'
+  #         memory: 2G
+  #   logging:
+  #     driver: "json-file"
+  #     options:
+  #       max-size: "100m"
+  #       max-file: "5"
+  #
+  # kibana:
+  #   image: docker.elastic.co/kibana/kibana:8.12.0
+  #   container_name: ecssr-events-kibana
+  #   restart: unless-stopped
+  #   environment:
+  #     - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+  #     - ELASTICSEARCH_USERNAME=kibana_system
+  #     - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
+  #     - SERVER_NAME=kibana.eventcal.app
+  #     - SERVER_HOST=0.0.0.0
+  #     - SERVER_PUBLICBASEURL=https://${KIBANA_DOMAIN:-kibana.eventcal.app}
+  #     - XPACK_SECURITY_ENABLED=true
+  #     - XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=${KIBANA_ENCRYPTION_KEY}
+  #     # nginx-proxy integration
+  #     - VIRTUAL_HOST=${KIBANA_DOMAIN:-kibana.eventcal.app}
+  #     - VIRTUAL_PORT=5601
+  #     - LETSENCRYPT_HOST=${KIBANA_DOMAIN:-kibana.eventcal.app}
+  #     - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL:-admin@ecssr.ae}
+  #   depends_on:
+  #     elasticsearch:
+  #       condition: service_healthy
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "curl -sf http://localhost:5601/api/status || exit 1"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 10
+  #     start_period: 90s
+  #   networks:
+  #     - ecssr-network
+  #     - proxy-network
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: '1'
+  #         memory: 2G
+  # ============================================================================
+
+  # PostgreSQL Database
+  db:
+    image: postgres:16-alpine
+    container_name: ecssr-events-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-ecssr_events}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-keycloak-schema.sql:/docker-entrypoint-initdb.d/init-keycloak-schema.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ecssr-network
+
+  # MinIO Object Storage for Archive Media
+  minio:
+    image: minio/minio:latest
+    container_name: ecssr-events-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-minioadmin}
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - ecssr-network
+
+  # Database Migrations
+  migrate:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    container_name: ecssr-events-migrate
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-ecssr_events}
+    command: npm run db:migrate
+    restart: "no"
+    networks:
+      - ecssr-network
+
+  # Keycloak Authentication Server
+  keycloak:
+    image: quay.io/keycloak/keycloak:23.0
+    container_name: ecssr-events-keycloak
+    restart: unless-stopped
+    command: start --proxy edge
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-ecssr_events}
+      KC_DB_USERNAME: ${POSTGRES_USER:-postgres}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      KC_DB_SCHEMA: keycloak
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      KC_HOSTNAME: ${AUTH_DOMAIN:-auth.eventcal.app}
+      KC_HOSTNAME_STRICT: true
+      KC_HOSTNAME_STRICT_HTTPS: false
+      KC_PROXY: edge
+      KC_HTTP_ENABLED: true
+      KC_HEALTH_ENABLED: true
+      VIRTUAL_HOST: ${AUTH_DOMAIN:-}
+      VIRTUAL_PORT: 8080
+      LETSENCRYPT_HOST: ${AUTH_DOMAIN:-}
+      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL:-admin@example.com}
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://127.0.0.1:8080/health/ready || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 90s
+    networks:
+      - ecssr-network
+      - proxy-network
+
+  # Backend Server
+  server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    container_name: ecssr-events-server
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+      keycloak:
+        condition: service_started
+      # No elasticsearch dependency - using Serverless (ELASTICSEARCH_CLOUD_ID + ELASTICSEARCH_API_KEY)
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      DOCKER_CONTAINER: "true"
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-ecssr_events}
+      SESSION_SECRET: ${SESSION_SECRET:-change-this-to-a-random-secret-in-production}
+      
+      # Elasticsearch configuration
+      # For Serverless: Use ELASTICSEARCH_CLOUD_ID + ELASTICSEARCH_API_KEY
+      # For Traditional: Use ELASTICSEARCH_URL + USERNAME + PASSWORD
+      ELASTICSEARCH_CLOUD_ID: ${ELASTICSEARCH_CLOUD_ID:-}
+      ELASTICSEARCH_API_KEY: ${ELASTICSEARCH_API_KEY:-}
+      # ELASTICSEARCH_URL: ${ELASTICSEARCH_URL:-http://elasticsearch:9200}
+      # ELASTICSEARCH_USERNAME: ${ELASTICSEARCH_USERNAME:-elastic}
+      # ELASTICSEARCH_PASSWORD: ${ELASTICSEARCH_PASSWORD}
+      ELASTICSEARCH_ENABLED: ${ELASTICSEARCH_ENABLED:-true}
+      ES_INDEX_PREFIX: ${ES_INDEX_PREFIX:-eventcal}
+      ES_INDEX_SUFFIX: ${ES_INDEX_SUFFIX:-prod}
+      
+      # Admin credentials (bootstrap)
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
+      
+      # Superadmin Keycloak user
+      SUPERADMIN_EMAIL: ${SUPERADMIN_EMAIL:-admin@ecssr.ae}
+      SUPERADMIN_PASSWORD: ${SUPERADMIN_PASSWORD:-admin123}
+      
+      # Email configuration (Resend)
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      FROM_EMAIL: ${FROM_EMAIL:-noreply@example.com}
+      
+      # Or SMTP configuration
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+      
+      # WhatsApp service configuration
+      WHATSAPP_SERVICE_URL: http://whatsapp-service:3001
+      WHATSAPP_ENABLED: ${WHATSAPP_ENABLED:-false}
+      WHATSAPP_AUTH_PHRASE: ${WHATSAPP_AUTH_PHRASE:-change-this-secure-phrase}
+
+      # Scraper service configuration
+      SCRAPER_SERVICE_URL: http://scraper-service:3002
+      SCRAPER_SERVICE_TOKEN: ${SCRAPER_SERVICE_TOKEN:-change-this-scraper-token}
+      SCRAPER_SERVICE_SECRET: ${SCRAPER_SERVICE_SECRET:-change-this-scraper-secret}
+
+      # Scraper configuration
+      ABU_DHABI_SCRAPER_ENABLED: ${ABU_DHABI_SCRAPER_ENABLED:-false}
+      
+      # Keycloak configuration
+      KEYCLOAK_URL: ${KEYCLOAK_URL:-http://keycloak:8080}
+      KEYCLOAK_REALM: ${KEYCLOAK_REALM:-ecssr-events}
+      KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID:-ecssr-events-app}
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET:-}
+      KEYCLOAK_REDIRECT_URI: ${KEYCLOAK_REDIRECT_URI:-http://localhost:5001/api/auth/callback}
+      KEYCLOAK_SYNC_ENABLED: ${KEYCLOAK_SYNC_ENABLED:-true}
+      KEYCLOAK_SYNC_INTERVAL: ${KEYCLOAK_SYNC_INTERVAL:-3600000}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      
+      # MinIO configuration for Archive Media
+      MINIO_ENDPOINT: ${MINIO_ENDPOINT:-minio}
+      MINIO_PORT: ${MINIO_PORT:-9000}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
+      MINIO_BUCKET: ${MINIO_BUCKET:-ecssr-archive}
+      MINIO_EVENTS_BUCKET: ${MINIO_EVENTS_BUCKET:-ecssr-events}
+      MINIO_USE_SSL: ${MINIO_USE_SSL:-false}
+      
+      # AI Image Generation (optional - for sample data)
+      AI_IMAGE_PROVIDER: ${AI_IMAGE_PROVIDER:-placeholder}
+      AI_IMAGE_API_KEY: ${AI_IMAGE_API_KEY:-}
+      
+      VIRTUAL_HOST: ${API_DOMAIN:-}
+      VIRTUAL_PORT: 5000
+      LETSENCRYPT_HOST: ${API_DOMAIN:-}
+      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL:-admin@example.com}
+    volumes:
+      - uploads_data:/app/uploads
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:5000/api/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - ecssr-network
+      - proxy-network
+
+  # WhatsApp Service (Isolated)
+  whatsapp-service:
+    build:
+      context: ./whatsapp-service
+      dockerfile: Dockerfile
+    container_name: ecssr-whatsapp-service
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      WHATSAPP_AUTH_PHRASE: ${WHATSAPP_AUTH_PHRASE:-change-this-secure-phrase}
+      WHATSAPP_DEFAULT_GROUP: ${WHATSAPP_DEFAULT_GROUP:-ECSSR Events}
+    ports:
+      - "3001:3001"
+    volumes:
+      # Use named volume for WhatsApp session data to avoid permission issues
+      - whatsapp_sessions:/app/auth_info
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    networks:
+      - ecssr-network
+
+  # Scraper Service (Isolated HTTP scraper)
+  scraper-service:
+    build:
+      context: .
+      dockerfile: scraper-service/Dockerfile
+    container_name: ecssr-scraper-service
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3002
+      SCRAPER_SERVICE_TOKEN: ${SCRAPER_SERVICE_TOKEN:-change-this-scraper-token}
+      SCRAPER_SERVICE_SECRET: ${SCRAPER_SERVICE_SECRET:-change-this-scraper-secret}
+    ports:
+      - "3002:3002"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    networks:
+      - ecssr-network
+
+  # Frontend Client
+  client:
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+    container_name: ecssr-events-client
+    restart: unless-stopped
+    depends_on:
+      - server
+    environment:
+      # API base URL will be baked into the build
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:5000}
+      # Use both domains for routing, but only primary domain for cert
+      # This ensures ACME creates proper symlinks for the primary domain
+      VIRTUAL_HOST: ${DOMAIN:-}${WWW_DOMAIN:+,${WWW_DOMAIN}}
+      LETSENCRYPT_HOST: ${DOMAIN:-}
+      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL:-admin@example.com}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - ecssr-network
+      - proxy-network
+
+volumes:
+  postgres_data:
+    driver: local
+  uploads_data:
+    driver: local
+  whatsapp_sessions:
+    driver: local
+  minio_data:
+    driver: local
+  # elasticsearch_data: (removed - using Serverless ES)
+  # SSL certificate volumes (persistent across restarts)
+  nginx_certs:
+    driver: local
+  nginx_vhost:
+    driver: local
+  nginx_html:
+    driver: local
+  acme_state:
+    driver: local
+
+networks:
+  ecssr-network:
+    driver: bridge
+  proxy-network:
+    driver: bridge

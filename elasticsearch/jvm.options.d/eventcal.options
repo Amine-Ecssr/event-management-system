@@ -1,0 +1,17 @@
+# EventVue JVM Options for Elasticsearch
+# Development settings - adjust for production
+
+# Heap size (1GB for dev, increase for production)
+-Xms1g
+-Xmx1g
+
+# GC settings for better performance
+-XX:+UseG1GC
+-XX:G1HeapRegionSize=4m
+-XX:InitiatingHeapOccupancyPercent=75
+
+# Disable swapping - important for ES performance
+-XX:+AlwaysPreTouch
+
+# GC logging (useful for debugging)
+-Xlog:gc*:file=/usr/share/elasticsearch/logs/gc.log:time,tags:filecount=4,filesize=64m

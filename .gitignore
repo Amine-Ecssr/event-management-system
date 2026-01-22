@@ -1,0 +1,26 @@
+node_modules
+dist
+.DS_Store
+server/public
+vite.config.ts.*
+*.tar.gz
+.mudslide-cache
+.local
+.config/replit
+cookies.txt
+auth_info
+
+# Environment files - protect all .env files except examples
+.env
+.env.local
+.env.*.local
+.env.production
+.env.development
+
+# Nginx SSL and configuration files
+nginx-config/certs/*
+nginx-config/acme/*
+!nginx-config/certs/.gitkeep
+!nginx-config/acme/.gitkeep
+
+presentations/

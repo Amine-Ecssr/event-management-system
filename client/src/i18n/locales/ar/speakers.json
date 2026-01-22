@@ -1,0 +1,29 @@
+{
+  "title": "المتحدثون",
+  "description": "اختر جهات الاتصال المؤهلة لإضافتهم كمتحدثين لهذه الفعالية",
+  "addSpeaker": "إضافة متحدث...",
+  "selectSpeaker": "اختر متحدث...",
+  "searchSpeakers": "البحث عن المتحدثين المؤهلين...",
+  "searchContacts": "البحث في جهات الاتصال...",
+  "role": "الدور",
+  "noSpeakersFound": "لم يتم العثور على متحدثين",
+  "noSpeakersSelected": "لم يتم اختيار متحدثين بعد",
+  "noEligibleSpeakers": "لا يوجد متحدثون مؤهلون",
+  "noEligibleSpeakersHint": "حدد جهات الاتصال كـ 'متحدث مؤهل' في صفحة جهات الاتصال لإضافتهم هنا",
+  "selectRole": "اختر الدور",
+  "loading": "جاري التحميل...",
+  "allSpeakersAdded": "تمت إضافة جميع المتحدثين المتاحين",
+  "noSpeakersAvailable": "لا يوجد متحدثين متاحين. قم بتعيين جهات اتصال كمتحدثين من صفحة جهات الاتصال.",
+  "roles": {
+    "keynote": "المتحدث الرئيسي",
+    "panelist": "عضو لجنة",
+    "moderator": "مدير الجلسة",
+    "speaker": "متحدث",
+    "presenter": "مقدم"
+  },
+  "speakerAdded": "تمت إضافة المتحدث بنجاح",
+  "speakerRemoved": "تمت إزالة المتحدث بنجاح",
+  "speakerUpdated": "تم تحديث المتحدث",
+  "failedToAddSpeaker": "فشل في إضافة المتحدث",
+  "failedToRemoveSpeaker": "فشل في إزالة المتحدث"
+}
