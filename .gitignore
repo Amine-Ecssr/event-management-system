@@ -11,11 +11,11 @@ cookies.txt
 auth_info
 
 # Environment files - protect all .env files except examples
-# .env
-# .env.local
-# .env.*.local
-# .env.production
-# .env.development
+.env
+.env.local
+.env.*.local
+.env.production
+.env.development
 
 # Nginx SSL and configuration files
 nginx-config/certs/*
