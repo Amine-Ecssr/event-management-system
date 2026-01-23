@@ -7,7 +7,7 @@ services:
       context: ./elasticsearch
       dockerfile: Dockerfile
     image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
-    container_name: ecssr-events-elasticsearch-dev
+    container_name: ecssr-ems-elasticsearch-dev
     restart: unless-stopped
     environment:
       - node.name=eventcal-es-dev
@@ -45,7 +45,7 @@ services:
   # Kibana for Elasticsearch visualization (development only)
   kibana:
     image: docker.elastic.co/kibana/kibana:8.12.0
-    container_name: ecssr-events-kibana-dev
+    container_name: ecssr-ems-kibana-dev
     restart: unless-stopped
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
@@ -72,7 +72,7 @@ services:
   # PostgreSQL Database
   db:
     image: postgres:16-alpine
-    container_name: ecssr-events-db-dev
+    container_name: ecssr-ems-db-dev
     restart: unless-stopped
     env_file:
       - .env.development
@@ -98,7 +98,7 @@ services:
     build:
       context: .
       dockerfile: server/Dockerfile
-    container_name: ecssr-events-migrate-dev
+    container_name: ecssr-ems-migrate-dev
     depends_on:
       db:
         condition: service_healthy
@@ -113,7 +113,7 @@ services:
   # Keycloak (matches production image but runs locally)
   keycloak:
     image: quay.io/keycloak/keycloak:23.0
-    container_name: ecssr-events-keycloak-dev
+    container_name: ecssr-ems-keycloak-dev
     restart: unless-stopped
     command: start-dev
     env_file:
@@ -147,7 +147,7 @@ services:
   # MinIO Object Storage for Archive Media
   minio:
     image: minio/minio:latest
-    container_name: ecssr-events-minio-dev
+    container_name: ecssr-ems-minio-dev
     restart: unless-stopped
     command: server /data --console-address ":9001"
     environment:
@@ -172,7 +172,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
-    container_name: ecssr-events-app-dev
+    container_name: ecssr-ems-app-dev
     restart: unless-stopped
     env_file:
       - .env.development
@@ -246,6 +246,9 @@ services:
       # AI Image Generation (optional - for sample data)
       AI_IMAGE_PROVIDER: ${AI_IMAGE_PROVIDER:-placeholder}
       AI_IMAGE_API_KEY: ${AI_IMAGE_API_KEY:-}
+      CHOKIDAR_USEPOLLING: "true"
+      CHOKIDAR_INTERVAL: "300"
+      WATCHPACK_POLLING: "true"
     ports:
       - "${PORT:-5050}:${PORT:-5050}"
     volumes:
