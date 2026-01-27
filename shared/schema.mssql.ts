@@ -160,6 +160,10 @@ export const insertEventSchema = createInsertSchema(events, {
   id: true,
 }).refine(
   (data) => {
+    // If either date is missing or not a string, skip this check (other validators will handle required/missing fields)
+    if (typeof data.startDate !== "string" || typeof data.endDate !== "string") {
+      return true;
+    }
     const startDate = new Date(data.startDate);
     const endDate = new Date(data.endDate);
     return endDate >= startDate;

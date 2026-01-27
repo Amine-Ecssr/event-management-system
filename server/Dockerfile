@@ -7,7 +7,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install all dependencies (we need dev dependencies for tsx and types)
-RUN npm ci
+RUN npm install --legacy-peer-deps
 
 # Copy source code and config files
 COPY server ./server

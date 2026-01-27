@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Install dependencies
 COPY package*.json ./
-RUN npm ci --no-check-certificate
+RUN npm install --legacy-peer-deps
 
 # Copy application files (will be overridden by bind mount in docker-compose)
 COPY . .
