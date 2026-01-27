@@ -1,5 +1,5 @@
 /**
- * Lead Repository
+ * Lead Repository (MSSQL version)
  * Handles lead management and contact tasks
  */
 import { BaseRepository } from './base';
@@ -11,34 +11,37 @@ import {
   type ContactTask, type InsertContactTask, type UpdateContactTask,
   type Organization, type Department,
   type InteractionAttachment, type InsertInteractionAttachment
-} from '@shared/schema';
-import { eq, and, or, like, desc, asc, sql, count } from 'drizzle-orm';
+} from '@shared/schema.mssql';
+import { eq, and, or, like, desc, asc, sql, count, SQLWrapper } from 'drizzle-orm';
 
 export class LeadRepository extends BaseRepository {
-  // Lead operations
+
+  /* ---------------------------------------------------------
+   * LEADS
+   * --------------------------------------------------------- */
+
   async getAllLeads(options?: {
     search?: string;
     type?: string;
     status?: string;
-  }): Promise<(Lead & { interactionsCount?: number; tasksCount?: number; pendingTasksCount?: number })[]> {
+  }) {
     const conditions = [];
-    
-    if (options?.type) {
-      conditions.push(eq(leads.type, options.type));
-    }
-    if (options?.status) {
-      conditions.push(eq(leads.status, options.status));
-    }
+
+    if (options?.type) conditions.push(eq(leads.type, options.type));
+    if (options?.status) conditions.push(eq(leads.status, options.status));
     if (options?.search) {
-      conditions.push(or(
-        like(leads.name, `%${options.search}%`),
-        like(leads.nameAr, `%${options.search}%`),
-        like(leads.email, `%${options.search}%`),
-        like(leads.phone, `%${options.search}%`)
-      )!);
+      const pattern = `%${options.search}%`;
+      conditions.push(
+        or(
+          like(leads.name, pattern),
+          like(leads.nameAr, pattern),
+          like(leads.email, pattern),
+          like(leads.phone, pattern)
+        )
+      );
     }
 
-    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+    const whereClause = conditions.length ? and(...conditions) : undefined;
 
     const leadsList = await this.db
       .select()
@@ -46,20 +49,20 @@ export class LeadRepository extends BaseRepository {
       .where(whereClause)
       .orderBy(desc(leads.createdAt));
 
-    const leadsWithCounts = await Promise.all(
-      leadsList.map(async (lead) => {
-        const [interactionResult] = await this.db
-          .select({ count: sql<number>`count(*)::int` })
+    return Promise.all(
+      leadsList.map(async (lead: { id: number | SQLWrapper<unknown>; }) => {
+        const [interactionCount] = await this.db
+          .select({ count: sql<number>`COUNT(*)` })
           .from(leadInteractions)
           .where(eq(leadInteractions.leadId, lead.id));
 
-        const [taskResult] = await this.db
-          .select({ count: sql<number>`count(*)::int` })
+        const [taskCount] = await this.db
+          .select({ count: sql<number>`COUNT(*)` })
           .from(contactTasks)
           .where(eq(contactTasks.leadId, lead.id));
 
-        const [pendingTaskResult] = await this.db
-          .select({ count: sql<number>`count(*)::int` })
+        const [pendingCount] = await this.db
+          .select({ count: sql<number>`COUNT(*)` })
           .from(contactTasks)
           .where(and(
             eq(contactTasks.leadId, lead.id),
@@ -68,91 +71,72 @@ export class LeadRepository extends BaseRepository {
 
         return {
           ...lead,
-          interactionsCount: Number(interactionResult?.count || 0),
-          tasksCount: Number(taskResult?.count || 0),
-          pendingTasksCount: Number(pendingTaskResult?.count || 0),
+          interactionsCount: Number(interactionCount?.count || 0),
+          tasksCount: Number(taskCount?.count || 0),
+          pendingTasksCount: Number(pendingCount?.count || 0),
         };
       })
     );
-
-    return leadsWithCounts;
   }
 
-  async getLead(id: number): Promise<Lead | undefined> {
-    const [lead] = await this.db
-      .select()
-      .from(leads)
-      .where(eq(leads.id, id))
-      .limit(1);
+  async getLead(id: number) {
+    const [lead] = await this.db.select().from(leads).where(eq(leads.id, id)).limit(1);
     return lead;
   }
 
-  async getLeadWithDetails(id: number): Promise<(Lead & { 
-    organization?: Organization;
-    interactionCount?: number;
-    taskCount?: number;
-  }) | undefined> {
-    const [lead] = await this.db
-      .select()
-      .from(leads)
-      .where(eq(leads.id, id))
-      .limit(1);
-
+  async getLeadWithDetails(id: number) {
+    const [lead] = await this.db.select().from(leads).where(eq(leads.id, id)).limit(1);
     if (!lead) return undefined;
 
     let organization: Organization | undefined;
-
     if (lead.organizationId) {
-      const [org] = await this.db
-        .select()
-        .from(organizations)
-        .where(eq(organizations.id, lead.organizationId))
-        .limit(1);
+      const [org] = await this.db.select().from(organizations).where(eq(organizations.id, lead.organizationId));
       organization = org;
     }
 
-    const [interactionResult] = await this.db
-      .select({ count: sql<number>`count(*)` })
+    const [interactionCount] = await this.db
+      .select({ count: sql<number>`COUNT(*)` })
       .from(leadInteractions)
       .where(eq(leadInteractions.leadId, id));
 
-    const [taskResult] = await this.db
-      .select({ count: sql<number>`count(*)` })
+    const [taskCount] = await this.db
+      .select({ count: sql<number>`COUNT(*)` })
       .from(contactTasks)
       .where(eq(contactTasks.leadId, id));
 
     return {
       ...lead,
       organization,
-      interactionCount: interactionResult.count,
-      taskCount: taskResult.count,
+      interactionCount: interactionCount.count,
+      taskCount: taskCount.count,
     };
   }
 
-  async createLead(data: InsertLead): Promise<Lead> {
-    const [lead] = await this.db
-      .insert(leads)
-      .values(data)
-      .returning();
+  async createLead(data: InsertLead) {
+    const [lead] = await this.db.insert(leads).values(data).returning();
     return lead;
   }
 
-  async updateLead(id: number, data: UpdateLead): Promise<Lead | undefined> {
-    const [updated] = await this.db
+  async updateLead(id: number, data: UpdateLead) {
+    await this.db
       .update(leads)
       .set({ ...data, updatedAt: new Date() })
-      .where(eq(leads.id, id))
-      .returning();
+      .where(eq(leads.id, id));
+
+    const [updated] = await this.db.select().from(leads).where(eq(leads.id, id));
     return updated;
   }
 
-  async deleteLead(id: number): Promise<boolean> {
-    await this.db.delete(leads).where(eq(leads.id, id));
-    return true;
+  async deleteLead(id: number) {
+    const result = await this.db.delete(leads).where(eq(leads.id, id));
+    return result.rowsAffected > 0;
   }
 
-  // Lead Interaction operations
-  async getLeadInteractions(leadId: number): Promise<LeadInteraction[]> {
+  /* ---------------------------------------------------------
+   * LEAD INTERACTIONS
+   * --------------------------------------------------------- */
+
+  async getLeadInteractions(leadId: number) {
     return this.db
       .select()
       .from(leadInteractions)
@@ -160,20 +144,18 @@ export class LeadRepository extends BaseRepository {
       .orderBy(desc(leadInteractions.interactionDate));
   }
 
-  async getLeadInteraction(id: number): Promise<LeadInteraction | undefined> {
+  async getLeadInteraction(id: number) {
     const [interaction] = await this.db
       .select()
       .from(leadInteractions)
       .where(eq(leadInteractions.id, id))
       .limit(1);
+
     return interaction;
   }
 
-  async createLeadInteraction(data: InsertLeadInteraction): Promise<LeadInteraction> {
-    const [interaction] = await this.db
-      .insert(leadInteractions)
-      .values(data)
-      .returning();
+  async createLeadInteraction(data: InsertLeadInteraction) {
+    const [interaction] = await this.db.insert(leadInteractions).values(data).returning();
 
     await this.db
       .update(leads)
@@ -183,24 +165,23 @@ export class LeadRepository extends BaseRepository {
     return interaction;
   }
 
-  async updateLeadInteraction(id: number, data: UpdateLeadInteraction): Promise<LeadInteraction | undefined> {
-    const [updated] = await this.db
-      .update(leadInteractions)
-      .set(data)
-      .where(eq(leadInteractions.id, id))
-      .returning();
+  async updateLeadInteraction(id: number, data: UpdateLeadInteraction) {
+    await this.db.update(leadInteractions).set(data).where(eq(leadInteractions.id, id));
+
+    const [updated] = await this.db.select().from(leadInteractions).where(eq(leadInteractions.id, id));
     return updated;
   }
 
-  async deleteLeadInteraction(id: number): Promise<boolean> {
-    await this.db
-      .delete(leadInteractions)
-      .where(eq(leadInteractions.id, id));
-    return true;
+  async deleteLeadInteraction(id: number) {
+    const result = await this.db.delete(leadInteractions).where(eq(leadInteractions.id, id));
+    return result.rowsAffected > 0;
   }
 
-  // Contact Task operations
-  async getContactTasks(leadId: number): Promise<ContactTask[]> {
+  /* ---------------------------------------------------------
+   * CONTACT TASKS
+   * --------------------------------------------------------- */
+
+  async getContactTasks(leadId: number) {
     return this.db
       .select()
       .from(contactTasks)
@@ -208,29 +189,22 @@ export class LeadRepository extends BaseRepository {
       .orderBy(asc(contactTasks.dueDate));
   }
 
-  async getContactTask(id: number): Promise<ContactTask | undefined> {
-    const [task] = await this.db
-      .select()
-      .from(contactTasks)
-      .where(eq(contactTasks.id, id))
-      .limit(1);
+  async getContactTask(id: number) {
+    const [task] = await this.db.select().from(contactTasks).where(eq(contactTasks.id, id));
     return task;
   }
 
-  async getContactTaskWithDepartment(id: number, getDepartment: (id: number) => Promise<Department | undefined>): Promise<(ContactTask & { department?: Department }) | undefined> {
+  async getContactTaskWithDepartment(id: number, getDepartment: (id: number) => Promise<Department | undefined>) {
     const task = await this.getContactTask(id);
     if (!task) return undefined;
 
-    let department: Department | undefined;
-    if (task.departmentId) {
-      department = await getDepartment(task.departmentId);
-    }
+    const department = task.departmentId ? await getDepartment(task.departmentId) : undefined;
 
     return { ...task, department };
   }
 
-  async getContactTasksByDepartment(departmentId: number): Promise<(ContactTask & { contact?: { id: number; name: string; status: string } })[]> {
-    const results = await this.db
+  async getContactTasksByDepartment(departmentId: number) {
+    const rows = await this.db
       .select({
         id: contactTasks.id,
         leadId: contactTasks.leadId,
@@ -261,58 +235,40 @@ export class LeadRepository extends BaseRepository {
       )
       .orderBy(asc(contactTasks.dueDate));
 
-    return results.map(r => ({
-      id: r.id,
-      leadId: r.leadId,
-      partnershipId: null,
-      title: r.title,
-      titleAr: r.titleAr,
-      description: r.description,
-      descriptionAr: r.descriptionAr,
-      status: r.status,
-      priority: r.priority,
-      departmentId: r.departmentId,
-      dueDate: r.dueDate,
-      completedAt: r.completedAt,
-      eventDepartmentId: r.eventDepartmentId,
-      notificationEmails: r.notificationEmails,
-      createdByUserId: r.createdByUserId,
-      createdAt: r.createdAt,
-      updatedAt: r.updatedAt,
-      contact: r.contactName ? { id: r.leadId!, name: r.contactName, status: r.contactStatus || 'active' } : undefined,
+    return rows.map((r: { contactName: any; leadId: any; contactStatus: any; }) => ({
+      ...r,
+      contact: r.contactName
+        ? { id: r.leadId!, name: r.contactName, status: r.contactStatus || 'active' }
+        : undefined,
     }));
   }
 
-  async createContactTask(data: InsertContactTask): Promise<ContactTask> {
-    const [task] = await this.db
-      .insert(contactTasks)
-      .values(data)
-      .returning();
+  async createContactTask(data: InsertContactTask) {
+    const [task] = await this.db.insert(contactTasks).values(data).returning();
     return task;
   }
 
-  async updateContactTask(id: number, data: UpdateContactTask): Promise<ContactTask | undefined> {
+  async updateContactTask(id: number, data: UpdateContactTask) {
     if (data.status === 'completed' && !data.completedAt) {
       data.completedAt = new Date();
     }
-    
-    const [updated] = await this.db
+
+    await this.db
       .update(contactTasks)
       .set({ ...data, updatedAt: new Date() })
-      .where(eq(contactTasks.id, id))
-      .returning();
+      .where(eq(contactTasks.id, id));
+
+    const [updated] = await this.db.select().from(contactTasks).where(eq(contactTasks.id, id));
     return updated;
   }
 
-  async deleteContactTask(id: number): Promise<boolean> {
-    await this.db
-      .delete(contactTasks)
-      .where(eq(contactTasks.id, id));
-    return true;
+  async deleteContactTask(id: number) {
+    const result = await this.db.delete(contactTasks).where(eq(contactTasks.id, id));
+    return result.rowsAffected > 0;
   }
 
-  async getContactTasksForDashboard(departmentId: number): Promise<any[]> {
-    const tasksWithDetails = await this.db
+  async getContactTasksForDashboard(departmentId: number) {
+    const tasks = await this.db
       .select({
         id: contactTasks.id,
         leadId: contactTasks.leadId,
@@ -336,29 +292,25 @@ export class LeadRepository extends BaseRepository {
       .where(eq(contactTasks.departmentId, departmentId))
       .orderBy(desc(contactTasks.createdAt));
 
-    const tasksWithComments = await Promise.all(
-      tasksWithDetails.map(async (task) => {
-        const [commentCountResult] = await this.db
+    return Promise.all(
+      tasks.map(async (task: { id: number | SQLWrapper<unknown>; contactName: any; leadId: any; contactStatus: any; }) => {
+        const [commentCount] = await this.db
           .select({ count: count() })
           .from(contactTaskComments)
           .where(eq(contactTaskComments.taskId, task.id));
-        
+
         return {
           ...task,
-          commentCount: Number(commentCountResult?.count || 0),
-          contact: task.contactName ? {
-            id: task.leadId,
-            name: task.contactName,
-            status: task.contactStatus,
-          } : null,
+          commentCount: Number(commentCount?.count || 0),
+          contact: task.contactName
+            ? { id: task.leadId, name: task.contactName, status: task.contactStatus }
+            : null,
         };
       })
     );
-
-    return tasksWithComments;
   }
 
-  async getContactTaskWithDetails(id: number): Promise<any> {
+  async getContactTaskWithDetails(id: number) {
     const [task] = await this.db
       .select({
         id: contactTasks.id,
@@ -386,29 +338,29 @@ export class LeadRepository extends BaseRepository {
 
     if (!task) return undefined;
 
-    const [commentCountResult] = await this.db
+    const [commentCount] = await this.db
       .select({ count: count() })
       .from(contactTaskComments)
       .where(eq(contactTaskComments.taskId, id));
 
     return {
       ...task,
-      commentCount: Number(commentCountResult?.count || 0),
-      contact: task.contactName ? {
-        id: task.leadId,
-        name: task.contactName,
-        status: task.contactStatus,
-      } : null,
-      department: task.departmentName ? {
-        id: task.departmentId,
-        name: task.departmentName,
-      } : null,
+      commentCount: Number(commentCount?.count || 0),
+      contact: task.contactName
+        ? { id: task.leadId, name: task.contactName, status: task.contactStatus }
+        : null,
+      department: task.departmentName
+        ? { id: task.departmentId, name: task.departmentName }
+        : null,
     };
   }
 
-  // Contact Task Comment operations
-  async getContactTaskComments(contactTaskId: number): Promise<any[]> {
-    const commentsRaw = await this.db
+  /* ---------------------------------------------------------
+   * CONTACT TASK COMMENTS
+   * --------------------------------------------------------- */
+
+  async getContactTaskComments(contactTaskId: number) {
+    const comments = await this.db
       .select({
         id: contactTaskComments.id,
         contactTaskId: contactTaskComments.taskId,
@@ -422,21 +374,19 @@ export class LeadRepository extends BaseRepository {
       .where(eq(contactTaskComments.taskId, contactTaskId))
       .orderBy(asc(contactTaskComments.createdAt));
 
-    const commentsWithAttachments = await Promise.all(
-      commentsRaw.map(async (comment) => {
+    return Promise.all(
+      comments.map(async (comment: { id: number | SQLWrapper<unknown>; }) => {
         const attachments = await this.db
           .select()
           .from(contactTaskCommentAttachments)
           .where(eq(contactTaskCommentAttachments.commentId, comment.id));
-        
+
         return { ...comment, attachments };
       })
     );
-
-    return commentsWithAttachments;
   }
 
-  async createContactTaskComment(data: { contactTaskId: number; authorUserId?: number; body: string }): Promise<any> {
+  async createContactTaskComment(data: { contactTaskId: number; authorUserId?: number; body: string }) {
     const [comment] = await this.db
       .insert(contactTaskComments)
       .values({
@@ -445,17 +395,19 @@ export class LeadRepository extends BaseRepository {
         body: data.body,
       })
       .returning();
+
     return comment;
   }
 
-  async deleteContactTaskComment(id: number): Promise<boolean> {
-    await this.db
-      .delete(contactTaskComments)
-      .where(eq(contactTaskComments.id, id));
-    return true;
+  async deleteContactTaskComment(id: number) {
+    const result = await this.db.delete(contactTaskComments).where(eq(contactTaskComments.id, id));
+    return result.rowsAffected > 0;
   }
 
-  // Contact Task Comment Attachment operations
+  /* ---------------------------------------------------------
+   * CONTACT TASK COMMENT ATTACHMENTS
+   * --------------------------------------------------------- */
+
   async createContactTaskCommentAttachment(data: { 
     commentId: number; 
     fileName: string; 
@@ -463,7 +415,7 @@ export class LeadRepository extends BaseRepository {
     fileSize: number; 
     mimeType: string; 
     uploadedByUserId?: number 
-  }): Promise<any> {
+  }) {
     const [attachment] = await this.db
       .insert(contactTaskCommentAttachments)
       .values({
@@ -475,30 +427,37 @@ export class LeadRepository extends BaseRepository {
         uploadedByUserId: data.uploadedByUserId || null,
       })
       .returning();
+
     return attachment;
   }
 
-  async getContactTaskCommentAttachment(id: number): Promise<any> {
+  async getContactTaskCommentAttachment(id: number) {
     const [attachment] = await this.db
       .select()
       .from(contactTaskCommentAttachments)
       .where(eq(contactTaskCommentAttachments.id, id));
+
     return attachment;
   }
 
-  async deleteContactTaskCommentAttachment(id: number): Promise<boolean> {
-    await this.db
+  async deleteContactTaskCommentAttachment(id: number) {
+    const result = await this.db
       .delete(contactTaskCommentAttachments)
       .where(eq(contactTaskCommentAttachments.id, id));
-    return true;
+
+    return result.rowsAffected > 0;
   }
 
-  // Interaction Attachment operations
-  async getInteractionAttachments(interactionId: number, entityType: 'lead' | 'partnership'): Promise<InteractionAttachment[]> {
-    const condition = entityType === 'lead' 
-      ? eq(interactionAttachments.leadInteractionId, interactionId)
-      : eq(interactionAttachments.partnershipInteractionId, interactionId);
-    
+  /* ---------------------------------------------------------
+   * INTERACTION ATTACHMENTS
+   * --------------------------------------------------------- */
+
+  async getInteractionAttachments(interactionId: number, entityType: 'lead' | 'partnership') {
+    const condition =
+      entityType === 'lead'
+        ? eq(interactionAttachments.leadInteractionId, interactionId)
+        : eq(interactionAttachments.partnershipInteractionId, interactionId);
+
     return this.db
       .select()
       .from(interactionAttachments)
@@ -506,34 +465,34 @@ export class LeadRepository extends BaseRepository {
       .orderBy(desc(interactionAttachments.uploadedAt));
   }
 
-  async getInteractionAttachment(id: number): Promise<InteractionAttachment | undefined> {
+  async getInteractionAttachment(id: number) {
     const [attachment] = await this.db
       .select()
       .from(interactionAttachments)
       .where(eq(interactionAttachments.id, id));
+
     return attachment;
   }
 
-  async createInteractionAttachment(data: InsertInteractionAttachment): Promise<InteractionAttachment> {
+  async createInteractionAttachment(data: InsertInteractionAttachment) {
     const [attachment] = await this.db
       .insert(interactionAttachments)
       .values(data)
       .returning();
+
     return attachment;
   }
 
-  async deleteInteractionAttachment(id: number): Promise<{ objectKey: string } | null> {
+  async deleteInteractionAttachment(id: number) {
     const [attachment] = await this.db
       .select({ objectKey: interactionAttachments.objectKey })
       .from(interactionAttachments)
       .where(eq(interactionAttachments.id, id));
-    
+
     if (!attachment) return null;
-    
-    await this.db
-      .delete(interactionAttachments)
-      .where(eq(interactionAttachments.id, id));
-    
+
+    await this.db.delete(interactionAttachments).where(eq(interactionAttachments.id, id));
+
     return { objectKey: attachment.objectKey };
   }
 }

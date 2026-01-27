@@ -17,7 +17,7 @@ import {
   type AgreementType, type InsertAgreementType,
   type PartnershipInteraction, type InsertPartnershipInteraction, type UpdatePartnershipInteraction,
   type Event
-} from '@shared/schema';
+} from '@shared/schema.mssql';
 import { eq, and, or, like, desc, asc, lte, isNotNull, sql } from 'drizzle-orm';
 
 // Helper function to classify partnership scope based on country
@@ -45,22 +45,33 @@ export class PartnershipRepository extends BaseRepository {
     return type;
   }
 
-  async updatePartnershipType(id: number, data: Partial<InsertPartnershipType>): Promise<PartnershipType | undefined> {
-    const [type] = await this.db
-      .update(partnershipTypes)
-      .set(data)
-      .where(eq(partnershipTypes.id, id))
-      .returning();
-    return type || undefined;
-  }
+    async updatePartnershipType(
+      id: number,
+      data: Partial<InsertPartnershipType>
+    ): Promise<PartnershipType | undefined> {
+      // MSSQL: update().returning() not supported
+      await this.db
+        .update(partnershipTypes)
+        .set(data)
+        .where(eq(partnershipTypes.id, id));
 
-  async deletePartnershipType(id: number): Promise<boolean> {
-    const result = await this.db
-      .delete(partnershipTypes)
-      .where(eq(partnershipTypes.id, id))
-      .returning();
-    return result.length > 0;
-  }
+      // Re-select updated row
+      const [type] = await this.db
+        .select()
+        .from(partnershipTypes)
+        .where(eq(partnershipTypes.id, id));
+
+      return type;
+    }
+
+    async deletePartnershipType(id: number): Promise<boolean> {
+      // MSSQL: delete().returning() not supported
+      const result = await this.db
+        .delete(partnershipTypes)
+        .where(eq(partnershipTypes.id, id));
+
+      return result.rowsAffected > 0;
+    }
 
   // Agreement Type operations
   async getAllAgreementTypes(): Promise<AgreementType[]> {
@@ -78,20 +89,25 @@ export class PartnershipRepository extends BaseRepository {
   }
 
   async updateAgreementType(id: number, data: Partial<InsertAgreementType>): Promise<AgreementType | undefined> {
-    const [type] = await this.db
+    // MSSQL: update().returning() not supported
+    await this.db
       .update(agreementTypes)
       .set(data)
-      .where(eq(agreementTypes.id, id))
-      .returning();
+      .where(eq(agreementTypes.id, id));
+    // Re-select updated row
+    const [type] = await this.db
+      .select()
+      .from(agreementTypes)
+      .where(eq(agreementTypes.id, id));
+
     return type || undefined;
   }
 
   async deleteAgreementType(id: number): Promise<boolean> {
     const result = await this.db
       .delete(agreementTypes)
-      .where(eq(agreementTypes.id, id))
-      .returning();
-    return result.length > 0;
+      .where(eq(agreementTypes.id, id));
+    return result.rowsAffected > 0;
   }
 
   // Partner operations
@@ -139,7 +155,7 @@ export class PartnershipRepository extends BaseRepository {
         orderByClause = desc(organizations.lastActivityDate);
         break;
       case 'oldestActivity':
-        orderByClause = asc(sql`COALESCE(${organizations.lastActivityDate}, '1970-01-01'::timestamp)`);
+        orderByClause = asc(sql`COALESCE(${organizations.lastActivityDate}, CAST('1970-01-01' as datetime2))`);
         break;
       case 'name':
         orderByClause = asc(organizations.nameEn);
@@ -175,7 +191,7 @@ export class PartnershipRepository extends BaseRepository {
         notifyOnInactivity: organizations.notifyOnInactivity,
         lastInactivityNotificationSent: organizations.lastInactivityNotificationSent,
         latestActivityDate: sql<string | null>`(
-          SELECT MAX(start_date)::text
+          SELECT CONVERT(varchar(30), MAX(start_date), 126)
           FROM partnership_activities
           WHERE partnership_activities.organization_id = ${organizations.id}
         )`,
@@ -188,7 +204,7 @@ export class PartnershipRepository extends BaseRepository {
       .offset(offset);
 
     const now = new Date();
-    const partnersWithScope = partners.map(partner => {
+    const partnersWithScope = partners.map((partner: { lastActivityDate: any; country: { code: any; }; }) => {
       const lastActivity = partner.lastActivityDate;
       const daysSinceLastActivity = lastActivity 
         ? Math.floor((now.getTime() - lastActivity.getTime()) / (1000 * 60 * 60 * 24))
@@ -205,11 +221,17 @@ export class PartnershipRepository extends BaseRepository {
   }
 
   async updatePartnership(id: number, data: Partial<InsertOrganization>): Promise<Organization | undefined> {
-    const [updated] = await this.db
+    await this.db
       .update(organizations)
       .set(data)
-      .where(eq(organizations.id, id))
-      .returning();
+      .where(eq(organizations.id, id));
+
+    // Re-select updated row
+    const [updated] = await this.db
+      .select()
+      .from(organizations)
+      .where(eq(organizations.id, id));
+
     return updated;
   }
 
@@ -244,7 +266,7 @@ export class PartnershipRepository extends BaseRepository {
       .from(partnershipAgreements)
       .where(and(
         eq(partnershipAgreements.status, 'active'),
-        lte(partnershipAgreements.expiryDate, ninetyDaysFromNow.toISOString().split('T')[0])
+        lte(partnershipAgreements.expiryDate, ninetyDaysFromNow)
       ));
 
     return {
@@ -313,11 +335,17 @@ export class PartnershipRepository extends BaseRepository {
   }
 
   async updatePartnershipAgreement(id: number, data: UpdatePartnershipAgreement): Promise<PartnershipAgreement | undefined> {
-    const [updated] = await this.db
+     await this.db
       .update(partnershipAgreements)
       .set({ ...data, updatedAt: new Date() })
-      .where(eq(partnershipAgreements.id, id))
-      .returning();
+      .where(eq(partnershipAgreements.id, id));
+
+    // Re-select updated row
+    const [updated] = await this.db
+      .select()
+      .from(partnershipAgreements)
+      .where(eq(partnershipAgreements.id, id));
+
     return updated;
   }
 
@@ -340,15 +368,15 @@ export class PartnershipRepository extends BaseRepository {
       .where(eq(partnershipActivities.organizationId, organizationId))
       .orderBy(desc(partnershipActivities.startDate));
     
-    return results.map(row => ({
+    return results.map((row: { activity: PartnershipActivity; event: Event | null }) => ({
       ...row.activity,
       linkedEventId: row.activity.eventId,
       linkedEvent: row.event ? {
-        id: row.event.id,
-        titleEn: row.event.name,
-        titleAr: row.event.nameAr,
+      id: row.event.id,
+      titleEn: row.event.name,
+      titleAr: row.event.nameAr,
       } : null,
-    }));
+    })) as Array<PartnershipActivity & { linkedEventId: string | null; linkedEvent: { id: string; titleEn: string; titleAr: string } | null }>;
   }
 
   async getActivitiesByEventId(eventId: string): Promise<any[]> {
@@ -364,7 +392,7 @@ export class PartnershipRepository extends BaseRepository {
       .where(eq(partnershipActivities.eventId, eventId))
       .orderBy(desc(partnershipActivities.startDate));
     
-    return results.map(row => ({
+    return results.map((row: { activity: any; organization: { id: any; nameEn: any; nameAr: any; }; createdBy: { id: any; username: any; }; }) => ({
       ...row.activity,
       organization: row.organization ? {
         id: row.organization.id,
@@ -402,11 +430,16 @@ export class PartnershipRepository extends BaseRepository {
   async updatePartnershipActivity(id: number, data: UpdatePartnershipActivity): Promise<PartnershipActivity | undefined> {
     const updateData: any = { ...data, updatedAt: new Date() };
 
-    const [updated] = await this.db
+     await this.db
       .update(partnershipActivities)
       .set(updateData)
-      .where(eq(partnershipActivities.id, id))
-      .returning();
+      .where(eq(partnershipActivities.id, id));
+
+    // Re-select updated row
+    const [updated] = await this.db
+      .select()
+      .from(partnershipActivities)
+      .where(eq(partnershipActivities.id, id));
     
     if (updated && data.startDate) {
       await this.updatePartnershipLastActivity(updated.organizationId, new Date(data.startDate));
@@ -436,7 +469,7 @@ export class PartnershipRepository extends BaseRepository {
       .innerJoin(events, eq(partnershipActivities.eventId, events.id))
       .where(eq(partnershipActivities.organizationId, organizationId));
 
-    return linkedEvents.map(le => le.event);
+    return linkedEvents.map((le: { event: any; }) => le.event);
   }
 
   // Partnership Contact operations
@@ -451,7 +484,7 @@ export class PartnershipRepository extends BaseRepository {
       .where(eq(partnershipContacts.organizationId, organizationId))
       .orderBy(desc(partnershipContacts.isPrimary));
 
-    return result.map(r => ({
+    return result.map((r: { partnershipContact: any; contact: any; }) => ({
       ...r.partnershipContact,
       contact: r.contact,
     }));
@@ -466,11 +499,16 @@ export class PartnershipRepository extends BaseRepository {
   }
 
   async updatePartnershipContact(id: number, data: UpdatePartnershipContact): Promise<PartnershipContact | undefined> {
-    const [updated] = await this.db
+    await this.db
       .update(partnershipContacts)
       .set(data)
-      .where(eq(partnershipContacts.id, id))
-      .returning();
+      .where(eq(partnershipContacts.id, id));
+
+    // Re-select updated row
+    const [updated] = await this.db
+      .select()
+      .from(partnershipContacts)
+      .where(eq(partnershipContacts.id, id));
     return updated;
   }
 
@@ -499,7 +537,7 @@ export class PartnershipRepository extends BaseRepository {
       .where(eq(partnershipComments.organizationId, organizationId))
       .orderBy(desc(partnershipComments.createdAt));
 
-    return results.map(row => ({
+    return results.map((row: any) => ({
       id: row.id,
       organizationId: row.organizationId,
       body: row.body,
@@ -528,11 +566,16 @@ export class PartnershipRepository extends BaseRepository {
   }
 
   async updatePartnershipComment(id: number, data: UpdatePartnershipComment): Promise<PartnershipComment | undefined> {
-    const [updated] = await this.db
+     await this.db
       .update(partnershipComments)
       .set({ ...data, updatedAt: new Date() })
-      .where(eq(partnershipComments.id, id))
-      .returning();
+      .where(eq(partnershipComments.id, id));
+
+    // Re-select updated row
+    const [updated] = await this.db
+      .select()
+      .from(partnershipComments)
+      .where(eq(partnershipComments.id, id));
     return updated;
   }
 
@@ -600,7 +643,7 @@ export class PartnershipRepository extends BaseRepository {
         )
       );
     
-    const inactivePartners = partners.filter(partner => {
+    const inactivePartners = partners.filter((partner: { lastActivityDate: any; inactivityThresholdMonths: number; }) => {
       if (!partner.lastActivityDate) return false;
       
       const thresholdMonths = partner.inactivityThresholdMonths || 6;
@@ -610,7 +653,7 @@ export class PartnershipRepository extends BaseRepository {
       return partner.lastActivityDate < partnerThresholdDate;
     });
     
-    return inactivePartners.map(partner => ({
+    return inactivePartners.map((partner: { lastActivityDate: { getTime: () => any; }; }) => ({
       ...partner,
       daysSinceLastActivity: Math.floor((now.getTime() - (partner.lastActivityDate?.getTime() || now.getTime())) / (1000 * 60 * 60 * 24))
     }));
@@ -633,7 +676,7 @@ export class PartnershipRepository extends BaseRepository {
         .where(eq(organizations.id, organizationId));
     } else {
       const [latestActivity] = await this.db
-        .select({ maxDate: sql<Date>`MAX(start_date::timestamp)` })
+        .select({ maxDate: sql<Date>`MAX(start_date)` })
         .from(partnershipActivities)
         .where(eq(partnershipActivities.organizationId, organizationId));
       
@@ -650,11 +693,17 @@ export class PartnershipRepository extends BaseRepository {
     organizationId: number, 
     settings: { inactivityThresholdMonths?: number; notifyOnInactivity?: boolean }
   ): Promise<Organization | undefined> {
-    const [updated] = await this.db
+    await this.db
       .update(organizations)
       .set(settings)
-      .where(eq(organizations.id, organizationId))
-      .returning();
+      .where(eq(organizations.id, organizationId));
+
+    // Re-select updated row
+    const [updated] = await this.db
+      .select()
+      .from(organizations)
+      .where(eq(organizations.id, organizationId));
+
     return updated;
   }
 
@@ -692,11 +741,17 @@ export class PartnershipRepository extends BaseRepository {
   }
 
   async updatePartnershipInteraction(id: number, data: UpdatePartnershipInteraction): Promise<PartnershipInteraction | undefined> {
-    const [updated] = await this.db
+    await this.db
       .update(partnershipInteractions)
       .set(data)
-      .where(eq(partnershipInteractions.id, id))
-      .returning();
+      .where(eq(partnershipInteractions.id, id));
+
+    // Re-select updated row
+    const [updated] = await this.db
+      .select()
+      .from(partnershipInteractions)
+      .where(eq(partnershipInteractions.id, id));
+
     return updated;
   }
 

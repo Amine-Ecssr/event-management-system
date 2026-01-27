@@ -1,12 +1,16 @@
 /**
- * Auth Repository
+ * Auth Repository (MSSQL version)
  * Handles Keycloak authentication and user-related operations
  */
 import { BaseRepository } from './base';
-import { users, departments, departmentAccounts, type User, type Department, type DepartmentAccount } from '@shared/schema';
+import { 
+  users, departments, departmentAccounts, 
+  type User 
+} from '@shared/schema.mssql';
 import { eq } from 'drizzle-orm';
 
 export class AuthRepository extends BaseRepository {
+
   /**
    * Get user by Keycloak ID
    */
@@ -16,6 +20,7 @@ export class AuthRepository extends BaseRepository {
       .from(users)
       .where(eq(users.keycloakId, keycloakId))
       .limit(1);
+
     return user;
   }
 
@@ -37,7 +42,8 @@ export class AuthRepository extends BaseRepository {
         role: data.role,
         password: null, // Keycloak-only users don't need local password
       })
-      .returning();
+      .returning(); // INSERT returning works in MSSQL
+
     return user;
   }
 
@@ -46,14 +52,27 @@ export class AuthRepository extends BaseRepository {
    */
   async updateUserFromKeycloak(
     userId: number,
-    data: { role?: 'superadmin' | 'admin' | 'department' | 'department_admin'; email?: string; keycloakId?: string }
+    data: { 
+      role?: 'superadmin' | 'admin' | 'department' | 'department_admin'; 
+      email?: string; 
+      keycloakId?: string 
+    }
   ): Promise<User> {
-    const [updated] = await this.db
+
+    // MSSQL: update() cannot return updated rows
+    await this.db
       .update(users)
       .set(data)
+      .where(eq(users.id, userId));
+
+    // Fetch updated user
+    const [updated] = await this.db
+      .select()
+      .from(users)
       .where(eq(users.id, userId))
-      .returning();
-    return updated;
+      .limit(1);
+
+    return updated!;
   }
 
   /**
@@ -66,7 +85,7 @@ export class AuthRepository extends BaseRepository {
       .innerJoin(departmentAccounts, eq(users.id, departmentAccounts.userId))
       .innerJoin(departments, eq(departmentAccounts.departmentId, departments.id))
       .where(eq(departments.name, departmentName));
-    
-    return result.map(r => r.user);
+
+    return result.map((r: { user: any; }) => r.user);
   }
 }

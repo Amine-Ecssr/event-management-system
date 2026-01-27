@@ -1,22 +1,22 @@
-// Database integration with support for both local PostgreSQL and Neon
-import { Pool } from 'pg';
-import { drizzle } from 'drizzle-orm/node-postgres';
-import * as schema from "@shared/schema";
+
+// Database integration with support for PostgreSQL (current) and MSSQL (Phase 2 readiness)
+import * as schema from "@shared/schema.mssql";
+import { drizzle } from "drizzle-orm/node-mssql";
+// Dialect selector:
+// - postgres (default): uses pg Pool + drizzle-orm/node-postgres
+// - mssql: uses drizzle-orm/node-mssql (requires drizzle-orm@beta + mssql driver)
+export type DbDialect = "mssql";
+export const DB_DIALECT: DbDialect = (process.env.DB_DIALECT as DbDialect) || "mssql";
 
 if (!process.env.DATABASE_URL) {
-  throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?",
-  );
+  throw new Error("DATABASE_URL must be set. Did you forget to provision a database?");
 }
 
-export const pool = new Pool({ 
-  connectionString: process.env.DATABASE_URL,
-  // Additional configuration for local development
-  ...(process.env.NODE_ENV === 'development' && {
-    max: 10,
-    idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 2000,
-  })
-});
+type MsSqlClient = unknown;
+export let mssqlClient: MsSqlClient | undefined;
 
-export const db = drizzle(pool, { schema });
+export let db: any;
+export let pool: any;
+
+mssqlClient = process.env.DATABASE_URL;
+db = drizzle(process.env.DATABASE_URL, { schema });

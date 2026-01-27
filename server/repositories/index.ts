@@ -4,8 +4,9 @@
  * Re-exports the Storage class that composes all repositories
  */
 import session from 'express-session';
+import createMemoryStore from "memorystore"; 
 import connectPgSimple from 'connect-pg-simple';
-import { type InsertArchivedEvent, type ArchivedEvent } from '@shared/schema';
+import { type InsertArchivedEvent, type ArchivedEvent } from '@shared/schema.mssql';
 
 // Import all repositories
 import { UserRepository } from './user-repository';
@@ -30,14 +31,26 @@ import { AiChatRepository } from './ai-chat-repository';
 export * from './types';
 
 // Session store configuration
-const PgStore = connectPgSimple(session);
-
-export const sessionStore = new PgStore({
-  conString: process.env.DATABASE_URL,
-  tableName: 'sessions', // Match the table name from our schema
-  createTableIfMissing: false, // Sessions table is managed by Drizzle ORM
-});
-
+// - postgres: uses connect-pg-simple (existing behavior)
+// - mssql: uses memorystore (in-memory) for Phase 2 so the app can run without Postgres.
+//   For production with MSSQL, we will switch to Redis or an MSSQL-backed session store in Phase 3/4.
+const DIALECT = (process.env.DB_DIALECT || "postgres").toLowerCase();
+export const sessionStore: session.Store =
+  DIALECT === "postgres"
+    ? (() => {
+        const PgStore = connectPgSimple(session);
+        return new PgStore({
+          conString: process.env.DATABASE_URL,
+          tableName: "sessions", // Match the table name from our schema
+          createTableIfMissing: false, // Sessions table is managed by Drizzle ORM
+        });
+      })()
+    : (() => {
+        const MemoryStore = createMemoryStore(session);
+        return new MemoryStore({
+          checkPeriod: 24 * 60 * 60 * 1000, // prune expired entries every 24h
+        });
+      })();
 /**
  * Storage class that delegates to individual repositories
  * Implements the IStorage interface
@@ -119,7 +132,7 @@ export class Storage {
   // ==================== Update Operations ====================
   getUpdate = (type: 'weekly' | 'monthly', periodStart: string) => this.updateRepo.getUpdate(type, periodStart);
   getUpdateForDepartment = (type: 'weekly' | 'monthly', periodStart: string, departmentId: number) => 
-    this.updateRepo.getUpdateForDepartment(type, periodStart, departmentId);
+    this.updateRepo.getUpdateForDepartment(type, new Date(periodStart), departmentId);
   getLatestUpdate = (type: 'weekly' | 'monthly') => this.updateRepo.getLatestUpdate(type);
   getLatestUpdateForDepartment = (type: 'weekly' | 'monthly', departmentId: number) => 
     this.updateRepo.getLatestUpdateForDepartment(type, departmentId);

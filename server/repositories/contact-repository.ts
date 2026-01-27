@@ -13,8 +13,8 @@ import {
   type EventSpeaker, type InsertEventSpeaker, type UpdateEventSpeaker,
   type EventAttendee, type InsertEventAttendee,
   type Event, type ArchivedEvent
-} from '@shared/schema';
-import { eq, and, or, like, desc, asc, count, sql, isNotNull, inArray } from 'drizzle-orm';
+} from '@shared/schema.mssql';
+import { eq, and, or, like, desc, asc, count, sql, isNotNull, inArray, SQLWrapper } from 'drizzle-orm';
 
 export class ContactRepository extends BaseRepository {
   // Organization operations
@@ -28,7 +28,7 @@ export class ContactRepository extends BaseRepository {
       .leftJoin(countries, eq(organizations.countryId, countries.id))
       .orderBy(organizations.nameEn);
     
-    return results.map(({ organization, country }) => ({
+    return results.map(({ organization, country }: { organization: Organization; country: Country | null }) => ({
       ...organization,
       country: country || undefined,
     }));
@@ -50,28 +50,40 @@ export class ContactRepository extends BaseRepository {
     return { ...organization, country: country || undefined };
   }
 
-  async createOrganization(data: InsertOrganization): Promise<Organization> {
-    const [organization] = await this.db.insert(organizations).values(data).returning();
+ async createOrganization(data: InsertOrganization): Promise<Organization> {
+  // INSERT returning works on MSSQL
+  const [organization] = await this.db
+    .insert(organizations)
+    .values(data)
+    .returning();
+
+  return organization;
+}
+
+  async updateOrganization(id: number, data: Partial<InsertOrganization>): Promise<Organization | undefined> {
+    // MSSQL: update().returning() is not supported
+    await this.db
+      .update(organizations)
+      .set(data)
+      .where(eq(organizations.id, id));
+
+    // Re-select updated row
+    const [organization] = await this.db
+      .select()
+      .from(organizations)
+      .where(eq(organizations.id, id));
+
     return organization;
   }
 
-  async updateOrganization(id: number, data: Partial<InsertOrganization>): Promise<Organization | undefined> {
-    const [organization] = await this.db
-      .update(organizations)
-      .set(data)
-      .where(eq(organizations.id, id))
-      .returning();
-    return organization || undefined;
-  }
-
   async deleteOrganization(id: number): Promise<boolean> {
+    // MSSQL: delete().returning() is not supported
     const result = await this.db
       .delete(organizations)
-      .where(eq(organizations.id, id))
-      .returning();
-    return result.length > 0;
-  }
+      .where(eq(organizations.id, id));
 
+    return result.rowsAffected > 0;
+  }
   async getOrganizationByName(nameEn: string): Promise<Organization | undefined> {
     const [org] = await this.db
       .select()
@@ -96,22 +108,30 @@ export class ContactRepository extends BaseRepository {
     return position;
   }
 
-  async updatePosition(id: number, data: Partial<InsertPosition>): Promise<Position | undefined> {
-    const [position] = await this.db
-      .update(positions)
-      .set(data)
-      .where(eq(positions.id, id))
-      .returning();
-    return position || undefined;
-  }
+    async updatePosition(id: number, data: Partial<InsertPosition>): Promise<Position | undefined> {
+      // MSSQL: update().returning() not supported
+      await this.db
+        .update(positions)
+        .set(data)
+        .where(eq(positions.id, id));
 
-  async deletePosition(id: number): Promise<boolean> {
-    const result = await this.db
-      .delete(positions)
-      .where(eq(positions.id, id))
-      .returning();
-    return result.length > 0;
-  }
+      // Fetch updated row
+      const [position] = await this.db
+        .select()
+        .from(positions)
+        .where(eq(positions.id, id));
+
+      return position;
+    }
+
+    async deletePosition(id: number): Promise<boolean> {
+      // MSSQL: delete().returning() not supported
+      const result = await this.db
+        .delete(positions)
+        .where(eq(positions.id, id));
+
+      return result.rowsAffected > 0;
+    }
 
   async getPositionByName(nameEn: string): Promise<Position | undefined> {
     const [pos] = await this.db
@@ -207,7 +227,7 @@ export class ContactRepository extends BaseRepository {
       .limit(limit)
       .offset(offset);
 
-    const contactsList = results.map(({ contact, organization, position, country }) => ({
+    const contactsList = results.map(({ contact, organization, position, country }: { contact: Contact; organization: Organization | null; position: Position | null; country: Country | null }) => ({
       ...contact,
       organization: organization || undefined,
       position: position || undefined,
@@ -258,7 +278,7 @@ export class ContactRepository extends BaseRepository {
       .where(eq(contacts.isEligibleSpeaker, true))
       .orderBy(contacts.nameEn);
 
-    return results.map(({ contact, organization, position, country }) => ({
+    return results.map(({ contact, organization, position, country }: { contact: Contact; organization: Organization | null; position: Position | null; country: Country | null }) => ({
       ...contact,
       organization: organization || undefined,
       position: position || undefined,
@@ -271,22 +291,31 @@ export class ContactRepository extends BaseRepository {
     return contact;
   }
 
-  async updateContact(id: number, data: UpdateContact): Promise<Contact | undefined> {
-    const [contact] = await this.db
-      .update(contacts)
-      .set({ ...data, updatedAt: new Date() })
-      .where(eq(contacts.id, id))
-      .returning();
-    return contact || undefined;
-  }
+    async updateContact(id: number, data: UpdateContact): Promise<Contact | undefined> {
+      // MSSQL: update().returning() not supported
+      await this.db
+        .update(contacts)
+        .set({ ...data, updatedAt: new Date() })
+        .where(eq(contacts.id, id));
 
-  async deleteContact(id: number): Promise<boolean> {
-    const result = await this.db
-      .delete(contacts)
-      .where(eq(contacts.id, id))
-      .returning();
-    return result.length > 0;
-  }
+      // Re-select updated row
+      const [contact] = await this.db
+        .select()
+        .from(contacts)
+        .where(eq(contacts.id, id));
+
+      return contact;
+    }
+
+    async deleteContact(id: number): Promise<boolean> {
+      // MSSQL: delete().returning() not supported
+      const result = await this.db
+        .delete(contacts)
+        .where(eq(contacts.id, id));
+
+      return result.rowsAffected > 0;
+    }
+
 
   async getContactByEmail(email: string): Promise<Contact | undefined> {
     const [contact] = await this.db
@@ -328,7 +357,7 @@ export class ContactRepository extends BaseRepository {
       .where(eq(eventSpeakers.eventId, eventId))
       .orderBy(asc(eventSpeakers.displayOrder));
 
-    return results.map(({ eventSpeaker, contact, organization, position, country }) => ({
+    return results.map(({ eventSpeaker, contact, organization, position, country }: { eventSpeaker: EventSpeaker; contact: Contact; organization: Organization | null; position: Position | null; country: Country | null }) => ({
       ...eventSpeaker,
       contact: {
         ...contact,
@@ -348,17 +377,16 @@ export class ContactRepository extends BaseRepository {
     const [speaker] = await this.db
       .update(eventSpeakers)
       .set(data)
-      .where(eq(eventSpeakers.id, id))
-      .returning();
+      .where(eq(eventSpeakers.id, id));
+
     return speaker || undefined;
   }
 
   async removeEventSpeaker(id: number): Promise<boolean> {
     const result = await this.db
       .delete(eventSpeakers)
-      .where(eq(eventSpeakers.id, id))
-      .returning();
-    return result.length > 0;
+      .where(eq(eventSpeakers.id, id));
+    return result.rowsAffected > 0;
   }
 
   async deleteEventSpeakers(eventId: string): Promise<boolean> {
@@ -384,8 +412,8 @@ export class ContactRepository extends BaseRepository {
       .orderBy(desc(archivedEvents.startDate));
 
     return {
-      events: activeEventResults.map(r => r.event),
-      archivedEvents: archivedEventResults.map(r => r.archivedEvent),
+      events: activeEventResults.map((r: { event: any; }) => r.event),
+      archivedEvents: archivedEventResults.map((r: { archivedEvent: any; }) => r.archivedEvent),
     };
   }
 
@@ -407,15 +435,29 @@ export class ContactRepository extends BaseRepository {
       .where(eq(eventAttendees.eventId, eventId))
       .orderBy(desc(eventAttendees.attendedAt));
 
-    return results.map(({ eventAttendee, contact, organization, position, country }) => ({
-      ...eventAttendee,
-      contact: {
-        ...contact,
-        organization: organization || undefined,
-        position: position || undefined,
-        country: country || undefined,
-      },
-    }));
+    return results.map(
+      ({
+        eventAttendee,
+        contact,
+        organization,
+        position,
+        country,
+      }: {
+        eventAttendee: EventAttendee;
+        contact: Contact;
+        organization: Organization | null;
+        position: Position | null;
+        country: Country | null;
+      }) => ({
+        ...eventAttendee,
+        contact: {
+          ...contact,
+          organization: organization || undefined,
+          position: position || undefined,
+          country: country || undefined,
+        },
+      })
+    );
   }
 
   async addEventAttendee(data: InsertEventAttendee): Promise<EventAttendee> {
@@ -426,9 +468,8 @@ export class ContactRepository extends BaseRepository {
   async removeEventAttendee(eventId: string, contactId: number): Promise<boolean> {
     const result = await this.db
       .delete(eventAttendees)
-      .where(and(eq(eventAttendees.eventId, eventId), eq(eventAttendees.contactId, contactId)))
-      .returning();
-    return result.length > 0;
+      .where(and(eq(eventAttendees.eventId, eventId), eq(eventAttendees.contactId, contactId)));
+    return result.rowsAffected > 0;
   }
 
   async getContactAttendedEvents(contactId: number): Promise<Event[]> {
@@ -439,7 +480,7 @@ export class ContactRepository extends BaseRepository {
       .where(eq(eventAttendees.contactId, contactId))
       .orderBy(desc(events.startDate));
 
-    return results.map(r => r.event);
+    return results.map((r: { event: any; }) => r.event);
   }
 
   // Contact Statistics
@@ -466,11 +507,11 @@ export class ContactRepository extends BaseRepository {
       registrations: number;
     }>;
   }> {
-    const totalContactsResult = await this.db.select({ count: sql<number>`count(*)::int` }).from(contacts);
+    const totalContactsResult = await this.db.select({ count: sql<number>`CAST(count(*) as int)` }).from(contacts);
     const totalContacts = totalContactsResult[0]?.count || 0;
 
     const contactsWithEventsResult = await this.db
-      .select({ count: sql<number>`count(distinct ${contacts.id})::int` })
+      .select({ count: sql<number>`CAST(count(distinct ${contacts.id}) as int)` })
       .from(contacts)
       .leftJoin(eventAttendees, eq(contacts.id, eventAttendees.contactId))
       .leftJoin(eventSpeakers, eq(contacts.id, eventSpeakers.contactId))
@@ -485,15 +526,15 @@ export class ContactRepository extends BaseRepository {
     const contactsWithoutEvents = totalContacts - contactsWithEvents;
 
     const totalAttendancesResult = await this.db
-      .select({ count: sql<number>`count(*)::int` })
+      .select({ count: sql<number>`CAST(count(*) as int)` })
       .from(eventAttendees);
     const totalEventAttendances = totalAttendancesResult[0]?.count || 0;
 
     const invitationStatsResult = await this.db
       .select({ 
-        totalInvitations: sql<number>`count(*)::int`,
-        totalRSVPs: sql<number>`count(*) filter (where ${eventInvitees.rsvp} = true)::int`,
-        totalRegistrations: sql<number>`count(*) filter (where ${eventInvitees.registered} = true)::int`
+        totalInvitations: sql<number>`CAST(count(*) as int)`,
+        totalRSVPs: sql<number>`CAST(SUM(CASE WHEN ${eventInvitees.rsvp} = 1 THEN 1 ELSE 0 END) as int)`,
+        totalRegistrations: sql<number>`CAST(SUM(CASE WHEN ${eventInvitees.registered} = 1 THEN 1 ELSE 0 END) as int)`
       })
       .from(eventInvitees);
     
@@ -517,11 +558,11 @@ export class ContactRepository extends BaseRepository {
         nameEn: contacts.nameEn,
         nameAr: contacts.nameAr,
         organizationNameEn: organizations.nameEn,
-        eventsAttended: sql<number>`count(distinct ${eventAttendees.id})::int`,
-        speakerAppearances: sql<number>`count(distinct ${eventSpeakers.id})::int`,
-        invitationsReceived: sql<number>`count(distinct ${eventInvitees.id})::int`,
-        rsvpConfirmed: sql<number>`count(distinct ${eventInvitees.id}) filter (where ${eventInvitees.rsvp} = true)::int`,
-        registrations: sql<number>`count(distinct ${eventInvitees.id}) filter (where ${eventInvitees.registered} = true)::int`,
+        eventsAttended: sql<number>`CAST(count(distinct ${eventAttendees.id}) as int)`,
+        speakerAppearances: sql<number>`CAST(count(distinct ${eventSpeakers.id}) as int)`,
+        invitationsReceived: sql<number>`CAST(count(distinct ${eventInvitees.id}) as int)`,
+        rsvpConfirmed: sql<number>`CAST(COUNT(DISTINCT CASE WHEN ${eventInvitees.rsvp} = 1 THEN ${eventInvitees.id} END) as int)`,
+        registrations: sql<number>`CAST(COUNT(DISTINCT CASE WHEN ${eventInvitees.registered} = 1 THEN ${eventInvitees.id} END) as int)`,
       })
       .from(contacts)
       .leftJoin(eventAttendees, eq(contacts.id, eventAttendees.contactId))
@@ -533,7 +574,7 @@ export class ContactRepository extends BaseRepository {
       .orderBy(desc(sql`count(distinct ${eventAttendees.id})`))
       .limit(limit);
 
-    const topAttendees = topAttendeesQuery.map(row => ({
+    const topAttendees = topAttendeesQuery.map((row: { leadId: any; nameEn: any; nameAr: any; organizationNameEn: any; eventsAttended: any; speakerAppearances: any; invitationsReceived: any; rsvpConfirmed: any; registrations: any; }) => ({
       leadId: row.leadId,
       nameEn: row.nameEn,
       nameAr: row.nameAr || '',
@@ -639,12 +680,12 @@ export class ContactRepository extends BaseRepository {
         categoryId: categories.id,
         categoryNameEn: categories.nameEn,
         categoryNameAr: categories.nameAr,
-        totalEvents: sql<number>`count(distinct ${events.id})::int`,
-        totalInvitees: sql<number>`count(distinct ${eventInvitees.id})::int`,
-        totalRegistrations: sql<number>`count(distinct ${eventInvitees.id}) filter (where ${eventInvitees.registered} = true)::int`,
-        totalRSVPs: sql<number>`count(distinct ${eventInvitees.id}) filter (where ${eventInvitees.rsvp} = true)::int`,
-        totalAttendees: sql<number>`count(distinct ${eventAttendees.id})::int`,
-        totalSpeakers: sql<number>`count(distinct ${eventSpeakers.id})::int`,
+        totalEvents: sql<number>`CAST(count(distinct ${events.id}) as int)`,
+        totalInvitees: sql<number>`CAST(count(distinct ${eventInvitees.id}) as int)`,
+        totalRegistrations: sql<number>`CAST(COUNT(DISTINCT CASE WHEN ${eventInvitees.registered} = 1 THEN ${eventInvitees.id} END) as int)`,
+        totalRSVPs: sql<number>`CAST(COUNT(DISTINCT CASE WHEN ${eventInvitees.rsvp} = 1 THEN ${eventInvitees.id} END) as int)`,
+        totalAttendees: sql<number>`CAST(count(distinct ${eventAttendees.id}) as int)`,
+        totalSpeakers: sql<number>`CAST(count(distinct ${eventSpeakers.id}) as int)`,
       })
       .from(categories)
       .leftJoin(events, eq(categories.id, events.categoryId))
@@ -655,7 +696,7 @@ export class ContactRepository extends BaseRepository {
       .having(sql`count(distinct ${events.id}) > 0`)
       .orderBy(desc(sql`count(distinct ${eventAttendees.id})`));
 
-    const categoryMetrics = engagementByCategory.map(cat => ({
+    const categoryMetrics = engagementByCategory.map((cat: { totalInvitees: number; totalRegistrations: number; totalRSVPs: number; totalAttendees: number; }) => ({
       ...cat,
       registrationRate: cat.totalInvitees > 0 ? (cat.totalRegistrations / cat.totalInvitees) * 100 : 0,
       rsvpRate: cat.totalInvitees > 0 ? (cat.totalRSVPs / cat.totalInvitees) * 100 : 0,
@@ -666,34 +707,34 @@ export class ContactRepository extends BaseRepository {
     // 2. Engagement by Month (Seasonal Trends)
     const engagementByMonth = await this.db
       .select({
-        month: sql<number>`extract(month from ${events.startDate})::int`,
-        year: sql<number>`extract(year from ${events.startDate})::int`,
-        totalEvents: sql<number>`count(distinct ${events.id})::int`,
-        totalInvitees: sql<number>`count(distinct ${eventInvitees.id})::int`,
-        totalRegistrations: sql<number>`count(distinct ${eventInvitees.id}) filter (where ${eventInvitees.registered} = true)::int`,
-        totalRSVPs: sql<number>`count(distinct ${eventInvitees.id}) filter (where ${eventInvitees.rsvp} = true)::int`,
-        totalAttendees: sql<number>`count(distinct ${eventAttendees.id})::int`,
+        month: sql<number>`CAST(MONTH(${events.startDate}) as int)`,
+        year: sql<number>`CAST(YEAR(${events.startDate}) as int)`,
+        totalEvents: sql<number>`CAST(count(distinct ${events.id}) as int)`,
+        totalInvitees: sql<number>`CAST(count(distinct ${eventInvitees.id}) as int)`,
+        totalRegistrations: sql<number>`CAST(COUNT(DISTINCT CASE WHEN ${eventInvitees.registered} = 1 THEN ${eventInvitees.id} END) as int)`,
+        totalRSVPs: sql<number>`CAST(COUNT(DISTINCT CASE WHEN ${eventInvitees.rsvp} = 1 THEN ${eventInvitees.id} END) as int)`,
+        totalAttendees: sql<number>`CAST(count(distinct ${eventAttendees.id}) as int)`,
       })
       .from(events)
       .leftJoin(eventInvitees, eq(events.id, eventInvitees.eventId))
       .leftJoin(eventAttendees, eq(events.id, eventAttendees.eventId))
-      .where(sql`${events.startDate} >= current_date - interval '12 months'`)
-      .groupBy(sql`extract(month from ${events.startDate})`, sql`extract(year from ${events.startDate})`)
-      .orderBy(sql`extract(year from ${events.startDate})`, sql`extract(month from ${events.startDate})`);
+      .where(sql`${events.startDate} >= DATEADD(month, -12, CAST(GETDATE() AS date))`)
+      .groupBy(sql`MONTH(${events.startDate})`, sql`YEAR(${events.startDate})`)
+      .orderBy(sql`YEAR(${events.startDate})`, sql`MONTH(${events.startDate})`);
 
     // 3. Conversion Funnel (Overall)
     const conversionFunnel = await this.db
       .select({
-        totalInvited: sql<number>`count(distinct ${eventInvitees.id})::int`,
-        totalEmailsSent: sql<number>`count(distinct ${eventInvitees.id}) filter (where ${eventInvitees.inviteEmailSent} = true)::int`,
-        totalRegistered: sql<number>`count(distinct ${eventInvitees.id}) filter (where ${eventInvitees.registered} = true)::int`,
-        totalRSVPed: sql<number>`count(distinct ${eventInvitees.id}) filter (where ${eventInvitees.rsvp} = true)::int`,
+        totalInvited: sql<number>`CAST(count(distinct ${eventInvitees.id}) as int)`,
+        totalEmailsSent: sql<number>`CAST(COUNT(DISTINCT CASE WHEN ${eventInvitees.inviteEmailSent} = 1 THEN ${eventInvitees.id} END) as int)`,
+        totalRegistered: sql<number>`CAST(COUNT(DISTINCT CASE WHEN ${eventInvitees.registered} = 1 THEN ${eventInvitees.id} END) as int)`,
+        totalRSVPed: sql<number>`CAST(COUNT(DISTINCT CASE WHEN ${eventInvitees.rsvp} = 1 THEN ${eventInvitees.id} END) as int)`,
       })
       .from(eventInvitees);
 
     const totalAttendedResult = await this.db
       .select({
-        totalAttended: sql<number>`count(distinct ${eventAttendees.id})::int`,
+        totalAttended: sql<number>`CAST(count(distinct ${eventAttendees.id}) as int)`,
       })
       .from(eventAttendees);
 
@@ -728,8 +769,8 @@ export class ContactRepository extends BaseRepository {
         eventDate: events.startDate,
         categoryName: categories.nameEn,
         categoryNameAr: categories.nameAr,
-        totalInvitees: sql<number>`count(distinct ${eventInvitees.id})::int`,
-        totalAttendees: sql<number>`count(distinct ${eventAttendees.id})::int`,
+        totalInvitees: sql<number>`CAST(count(distinct ${eventInvitees.id}) as int)`,
+        totalAttendees: sql<number>`CAST(count(distinct ${eventAttendees.id}) as int)`,
       })
       .from(events)
       .leftJoin(categories, eq(events.categoryId, categories.id))
@@ -740,7 +781,7 @@ export class ContactRepository extends BaseRepository {
       .orderBy(desc(sql`count(distinct ${eventAttendees.id})`))
       .limit(10);
 
-    const topPerformingEvents = topEvents.map(evt => ({
+    const topPerformingEvents = topEvents.map((evt: { totalInvitees: number; totalAttendees: number; }) => ({
       ...evt,
       attendanceRate: evt.totalInvitees > 0 ? (evt.totalAttendees / evt.totalInvitees) * 100 : 0,
     }));
@@ -749,17 +790,17 @@ export class ContactRepository extends BaseRepository {
     const contactEngagementQuery = await this.db
       .select({
         leadId: contacts.id,
-        eventsAttended: sql<number>`count(distinct ${eventAttendees.id})::int`,
+        eventsAttended: sql<number>`CAST(count(distinct ${eventAttendees.id}) as int)`,
       })
       .from(contacts)
       .leftJoin(eventAttendees, eq(contacts.id, eventAttendees.contactId))
       .groupBy(contacts.id);
 
     const engagementTiers = {
-      highly_engaged: contactEngagementQuery.filter(c => c.eventsAttended >= 5).length,
-      moderately_engaged: contactEngagementQuery.filter(c => c.eventsAttended >= 2 && c.eventsAttended < 5).length,
-      low_engaged: contactEngagementQuery.filter(c => c.eventsAttended === 1).length,
-      not_engaged: contactEngagementQuery.filter(c => c.eventsAttended === 0).length,
+      highly_engaged: contactEngagementQuery.filter((c: { eventsAttended: number; }) => c.eventsAttended >= 5).length,
+      moderately_engaged: contactEngagementQuery.filter((c: { eventsAttended: number; }) => c.eventsAttended >= 2 && c.eventsAttended < 5).length,
+      low_engaged: contactEngagementQuery.filter((c: { eventsAttended: number; }) => c.eventsAttended === 1).length,
+      not_engaged: contactEngagementQuery.filter((c: { eventsAttended: number; }) => c.eventsAttended === 0).length,
     };
 
     // 6. Geographic Distribution
@@ -768,9 +809,9 @@ export class ContactRepository extends BaseRepository {
         countryCode: countries.code,
         countryNameEn: countries.nameEn,
         countryNameAr: countries.nameAr,
-        uniqueContacts: sql<number>`count(distinct ${contacts.id})::int`,
-        totalInvitations: sql<number>`count(distinct ${eventInvitees.id})::int`,
-        totalAttendances: sql<number>`count(distinct ${eventAttendees.id})::int`,
+        uniqueContacts: sql<number>`CAST(count(distinct ${contacts.id}) as int)`,
+        totalInvitations: sql<number>`CAST(count(distinct ${eventInvitees.id}) as int)`,
+        totalAttendances: sql<number>`CAST(count(distinct ${eventAttendees.id}) as int)`,
       })
       .from(countries)
       .leftJoin(contacts, eq(countries.id, contacts.countryId))
@@ -786,10 +827,10 @@ export class ContactRepository extends BaseRepository {
       .select({
         eventType: events.eventType,
         eventScope: events.eventScope,
-        totalEvents: sql<number>`count(distinct ${events.id})::int`,
-        totalInvitees: sql<number>`count(distinct ${eventInvitees.id})::int`,
-        totalAttendees: sql<number>`count(distinct ${eventAttendees.id})::int`,
-        averageAttendance: sql<number>`avg(${events.expectedAttendance})::int`,
+        totalEvents: sql<number>`CAST(count(distinct ${events.id}) as int)`,
+        totalInvitees: sql<number>`CAST(count(distinct ${eventInvitees.id}) as int)`,
+        totalAttendees: sql<number>`CAST(count(distinct ${eventAttendees.id}) as int)`,
+        averageAttendance: sql<number>`CAST(avg(${events.expectedAttendance}) as int)`,
       })
       .from(events)
       .leftJoin(eventInvitees, eq(events.id, eventInvitees.eventId))
@@ -797,7 +838,7 @@ export class ContactRepository extends BaseRepository {
       .groupBy(events.eventType, events.eventScope)
       .orderBy(desc(sql`count(distinct ${eventAttendees.id})`));
 
-    const eventTypeMetrics = eventTypeEngagement.map(evt => ({
+    const eventTypeMetrics = eventTypeEngagement.map((evt: { totalInvitees: number; totalAttendees: number; }) => ({
       ...evt,
       attendanceRate: evt.totalInvitees > 0 ? (evt.totalAttendees / evt.totalInvitees) * 100 : 0,
     }));
@@ -842,7 +883,7 @@ export class ContactRepository extends BaseRepository {
   }> {
     const { limit, sortBy, sortOrder } = options;
 
-    const totalOrgsResult = await this.db.select({ count: sql<number>`count(*)::int` }).from(organizations);
+    const totalOrgsResult = await this.db.select({ count: sql<number>`CAST(count(*) as int)` }).from(organizations);
     const totalOrganizations = totalOrgsResult[0]?.count || 0;
 
     const orgStatsQuery = await this.db
@@ -850,11 +891,11 @@ export class ContactRepository extends BaseRepository {
         organizationId: organizations.id,
         organizationNameEn: organizations.nameEn,
         organizationNameAr: organizations.nameAr,
-        totalContacts: sql<number>`count(distinct ${contacts.id})::int`,
-        activeContacts: sql<number>`count(distinct case when ${eventAttendees.id} is not null then ${contacts.id} end)::int`,
-        totalEventAttendances: sql<number>`count(distinct ${eventAttendees.id})::int`,
-        uniqueEventsAttended: sql<number>`count(distinct ${eventAttendees.eventId})::int`,
-        speakerAppearances: sql<number>`count(distinct ${eventSpeakers.id})::int`,
+        totalContacts: sql<number>`CAST(count(distinct ${contacts.id}) as int)`,
+        activeContacts: sql<number>`CAST(count(distinct case when ${eventAttendees.id} is not null then ${contacts.id} end) as int)`,
+        totalEventAttendances: sql<number>`CAST(count(distinct ${eventAttendees.id}) as int)`,
+        uniqueEventsAttended: sql<number>`CAST(count(distinct ${eventAttendees.eventId}) as int)`,
+        speakerAppearances: sql<number>`CAST(count(distinct ${eventSpeakers.id}) as int)`,
       })
       .from(organizations)
       .leftJoin(contacts, eq(organizations.id, contacts.organizationId))
@@ -863,7 +904,7 @@ export class ContactRepository extends BaseRepository {
       .groupBy(organizations.id);
 
     const organizationStatistics = await Promise.all(
-      orgStatsQuery.map(async (org) => {
+      orgStatsQuery.map(async (org: { totalContacts: number; activeContacts: number; totalEventAttendances: number; organizationId: number | SQLWrapper<unknown>; organizationNameEn: any; organizationNameAr: any; uniqueEventsAttended: any; speakerAppearances: any; }) => {
         const attendanceRate = org.totalContacts > 0 
           ? (org.activeContacts / org.totalContacts) * 100 
           : 0;
@@ -878,7 +919,7 @@ export class ContactRepository extends BaseRepository {
             .select({
               leadId: contacts.id,
               nameEn: contacts.nameEn,
-              eventsAttended: sql<number>`count(distinct ${eventAttendees.id})::int`,
+              eventsAttended: sql<number>`CAST(count(distinct ${eventAttendees.id}) as int)`,
             })
             .from(contacts)
             .innerJoin(eventAttendees, eq(contacts.id, eventAttendees.contactId))
@@ -1044,12 +1085,24 @@ export class ContactRepository extends BaseRepository {
         .limit(contactsPerGroup)
         .offset(offset);
       
-      const contactsList = contactResults.map(({ contact, organization, position, country }) => ({
-        ...contact,
-        organization: organization || undefined,
-        position: position || undefined,
-        country: country || undefined,
-      }));
+      const contactsList = contactResults.map(
+        ({
+          contact,
+          organization,
+          position,
+          country,
+        }: {
+          contact: Contact;
+          organization: Organization | null;
+          position: Position | null;
+          country: Country | null;
+        }) => ({
+          ...contact,
+          organization: organization || undefined,
+          position: position || undefined,
+          country: country || undefined,
+        })
+      );
       
       return {
         groups: [{
@@ -1076,8 +1129,8 @@ export class ContactRepository extends BaseRepository {
       .orderBy(desc(count()));
 
     const validGroupIds = groupsWithCounts
-      .filter(g => g.groupId !== null)
-      .map(g => ({ id: g.groupId!, count: Number(g.contactCount) }));
+      .filter((g: { groupId: null; }) => g.groupId !== null)
+      .map((g: { groupId: any; contactCount: any; }) => ({ id: g.groupId!, count: Number(g.contactCount) }));
     
     if (validGroupIds.length === 0) {
       return { groups: [], totalGroups: 0 };
@@ -1086,9 +1139,11 @@ export class ContactRepository extends BaseRepository {
     const groupDetails = await this.db
       .select()
       .from(groupTable)
-      .where(inArray(groupTable.id, validGroupIds.map(g => g.id)));
+      .where(inArray(groupTable.id, validGroupIds.map((g: { id: any; }) => g.id)));
 
-    const groupDetailsMap = new Map(groupDetails.map(g => [g.id, g]));
+    const groupDetailsMap = new Map<number, { id: number; nameEn: string; nameAr: string | null }>(
+      groupDetails.map((g: any) => [g.id, g])
+    );
 
     const result: Array<{
       id: number;
@@ -1120,12 +1175,24 @@ export class ContactRepository extends BaseRepository {
         .orderBy(contacts.nameEn)
         .limit(contactsPerGroup);
 
-      const contactsList = contactResults.map(({ contact, organization, position, country }) => ({
-        ...contact,
-        organization: organization || undefined,
-        position: position || undefined,
-        country: country || undefined,
-      }));
+      const contactsList = contactResults.map(
+        ({
+          contact,
+          organization,
+          position,
+          country,
+        }: {
+          contact: Contact;
+          organization: Organization | null;
+          position: Position | null;
+          country: Country | null;
+        }) => ({
+          ...contact,
+          organization: organization || undefined,
+          position: position || undefined,
+          country: country || undefined,
+        })
+      );
 
       result.push({
         id: groupDetail.id,
@@ -1157,13 +1224,13 @@ export class ContactRepository extends BaseRepository {
     const results = await this.db
       .select({
         organizationId: contacts.organizationId,
-        count: sql<number>`count(*)::int`,
+        count: sql<number>`CAST(count(*) as int)`,
       })
       .from(contacts)
       .where(isNotNull(contacts.organizationId))
       .groupBy(contacts.organizationId);
 
-    return results.map(r => ({
+    return results.map((r: { organizationId: any; count: any; }) => ({
       organizationId: r.organizationId!,
       count: r.count,
     }));

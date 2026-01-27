@@ -1,21 +1,22 @@
 /**
- * Reminder Repository
+ * Reminder Repository (MSSQL version)
  * Handles all reminder queue database operations
  */
 import { BaseRepository } from './base';
-import { reminderQueue, events, type ReminderQueue, type InsertReminderQueue, type Event } from '@shared/schema';
+import { reminderQueue, events, type ReminderQueue, type InsertReminderQueue, type Event } from '@shared/schema.mssql';
 import { eq, and, lte, sql } from 'drizzle-orm';
 
 export class ReminderRepository extends BaseRepository {
+
   async enqueueReminder(insertReminder: InsertReminderQueue): Promise<ReminderQueue> {
-    // Use onConflictDoNothing to handle duplicate reminders gracefully
+    // INSERT returning works on MSSQL
     const [reminder] = await this.db
       .insert(reminderQueue)
       .values(insertReminder)
       .onConflictDoNothing()
       .returning();
-    
-    // If no reminder was inserted (due to conflict), query for the existing one
+
+    // If conflict prevented insert, fetch existing row
     if (!reminder) {
       const [existing] = await this.db
         .select()
@@ -28,19 +29,20 @@ export class ReminderRepository extends BaseRepository {
           )
         )
         .limit(1);
+
       return existing;
     }
-    
+
     return reminder;
   }
 
   async getPendingReminders(beforeTime: Date): Promise<ReminderQueue[]> {
-    // Mark reminders older than 24 hours as expired to avoid sending stale reminders
     const oneDayAgo = new Date(beforeTime.getTime() - 24 * 60 * 60 * 1000);
-    
+
+    // Expire stale reminders
     await this.db
       .update(reminderQueue)
-      .set({ 
+      .set({
         status: 'expired',
         errorMessage: 'Reminder expired - more than 24 hours old'
       })
@@ -50,9 +52,9 @@ export class ReminderRepository extends BaseRepository {
           lte(reminderQueue.scheduledFor, oneDayAgo)
         )
       );
-    
-    // Return only pending reminders that are due but not expired
-    return await this.db
+
+    // Return pending reminders that are due
+    return this.db
       .select()
       .from(reminderQueue)
       .where(
@@ -66,19 +68,19 @@ export class ReminderRepository extends BaseRepository {
   async markReminderSent(id: number): Promise<void> {
     await this.db
       .update(reminderQueue)
-      .set({ 
-        status: 'sent', 
+      .set({
+        status: 'sent',
         sentAt: new Date(),
         attempts: sql`${reminderQueue.attempts} + 1`
       })
       .where(eq(reminderQueue.id, id));
   }
 
-  async markReminderError(id: number, errorMessage: string, isFinal: boolean = false): Promise<void> {
+  async markReminderError(id: number, errorMessage: string, isFinal = false): Promise<void> {
     await this.db
       .update(reminderQueue)
-      .set({ 
-        status: isFinal ? 'error' : 'pending', // Keep pending for retry unless max attempts exceeded
+      .set({
+        status: isFinal ? 'error' : 'pending',
         errorMessage,
         lastAttempt: new Date(),
         attempts: sql`${reminderQueue.attempts} + 1`
@@ -93,13 +95,13 @@ export class ReminderRepository extends BaseRepository {
   }
 
   async getAllRemindersWithEvents(): Promise<Array<ReminderQueue & { event: Event }>> {
-    const results = await this.db
+    const rows = await this.db
       .select()
       .from(reminderQueue)
       .leftJoin(events, eq(reminderQueue.eventId, events.id))
       .orderBy(reminderQueue.scheduledFor);
-    
-    return results.map(row => ({
+
+    return rows.map((row: { reminder_queue: any; events: any; }) => ({
       ...row.reminder_queue,
       event: row.events!
     }));
@@ -110,11 +112,13 @@ export class ReminderRepository extends BaseRepository {
       .select()
       .from(reminderQueue)
       .where(eq(reminderQueue.id, id));
-    return reminder || undefined;
+
+    return reminder;
   }
 
   async resetReminderForResend(id: number, scheduledFor: Date): Promise<ReminderQueue | undefined> {
-    const [reminder] = await this.db
+    // MSSQL: update().returning() not supported
+    await this.db
       .update(reminderQueue)
       .set({
         status: 'pending',
@@ -124,17 +128,22 @@ export class ReminderRepository extends BaseRepository {
         sentAt: null,
         errorMessage: null,
       })
-      .where(eq(reminderQueue.id, id))
-      .returning();
+      .where(eq(reminderQueue.id, id));
 
-    return reminder || undefined;
+    const [reminder] = await this.db
+      .select()
+      .from(reminderQueue)
+      .where(eq(reminderQueue.id, id));
+
+    return reminder;
   }
 
   async deleteReminder(id: number): Promise<boolean> {
+    // MSSQL: delete().returning() not supported
     const result = await this.db
       .delete(reminderQueue)
-      .where(eq(reminderQueue.id, id))
-      .returning();
-    return result.length > 0;
+      .where(eq(reminderQueue.id, id));
+
+    return result.rowsAffected > 0;
   }
 }

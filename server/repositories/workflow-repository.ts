@@ -1,5 +1,5 @@
 /**
- * Workflow Repository
+ * Workflow Repository (MSSQL version)
  * Handles task workflows and prerequisites
  */
 import { BaseRepository } from './base';
@@ -10,167 +10,170 @@ import {
   type EventWorkflow, type InsertEventWorkflow,
   type WorkflowTask, type InsertWorkflowTask,
   type Task, type Department, type Event, type DepartmentRequirement
-} from '@shared/schema';
+} from '@shared/schema.mssql';
 import { eq, and, asc, desc, sql } from 'drizzle-orm';
 
 export class WorkflowRepository extends BaseRepository {
-  // Task Template Prerequisite operations
-  async getTaskTemplatePrerequisites(taskTemplateId: number): Promise<TaskTemplatePrerequisite[]> {
-    return await this.db
+
+  /* ---------------------------------------------------------
+   * TASK TEMPLATE PREREQUISITES
+   * --------------------------------------------------------- */
+
+  async getTaskTemplatePrerequisites(taskTemplateId: number) {
+    return this.db
       .select()
       .from(taskTemplatePrerequisites)
       .where(eq(taskTemplatePrerequisites.taskTemplateId, taskTemplateId));
   }
 
-  async getAllPrerequisitesForTemplate(taskTemplateId: number): Promise<DepartmentRequirement[]> {
+  async getAllPrerequisitesForTemplate(taskTemplateId: number) {
     const visited = new Set<number>();
     const prerequisites: DepartmentRequirement[] = [];
-    
-    const collectPrerequisites = async (templateId: number) => {
+
+    const collect = async (templateId: number) => {
       if (visited.has(templateId)) return;
       visited.add(templateId);
-      
-      const directPrereqs = await this.db
+
+      const rows = await this.db
         .select({ requirement: departmentRequirements })
         .from(taskTemplatePrerequisites)
-        .innerJoin(departmentRequirements, eq(taskTemplatePrerequisites.prerequisiteTemplateId, departmentRequirements.id))
+        .innerJoin(
+          departmentRequirements,
+          eq(taskTemplatePrerequisites.prerequisiteTemplateId, departmentRequirements.id)
+        )
         .where(eq(taskTemplatePrerequisites.taskTemplateId, templateId));
-      
-      for (const { requirement } of directPrereqs) {
-        if (!prerequisites.find(p => p.id === requirement.id)) {
+
+      for (const { requirement } of rows) {
+        if (!prerequisites.some(p => p.id === requirement.id)) {
           prerequisites.push(requirement);
-          await collectPrerequisites(requirement.id);
+          await collect(requirement.id);
         }
       }
     };
-    
-    await collectPrerequisites(taskTemplateId);
+
+    await collect(taskTemplateId);
     return prerequisites;
   }
 
-  async getTaskTemplatesWithPrerequisites(departmentId: number, getDepartmentRequirements: (departmentId: number) => Promise<DepartmentRequirement[]>): Promise<Array<DepartmentRequirement & { prerequisites: DepartmentRequirement[] }>> {
+  async getTaskTemplatesWithPrerequisites(
+    departmentId: number,
+    getDepartmentRequirements: (departmentId: number) => Promise<DepartmentRequirement[]>
+  ) {
     const templates = await getDepartmentRequirements(departmentId);
-    
-    const templatesWithPrereqs = await Promise.all(
+
+    return Promise.all(
       templates.map(async (template) => {
         const prereqs = await this.db
           .select({ requirement: departmentRequirements })
           .from(taskTemplatePrerequisites)
-          .innerJoin(departmentRequirements, eq(taskTemplatePrerequisites.prerequisiteTemplateId, departmentRequirements.id))
+          .innerJoin(
+            departmentRequirements,
+            eq(taskTemplatePrerequisites.prerequisiteTemplateId, departmentRequirements.id)
+          )
           .where(eq(taskTemplatePrerequisites.taskTemplateId, template.id));
-        
+
         return {
           ...template,
-          prerequisites: prereqs.map(p => p.requirement),
+          prerequisites: prereqs.map((p: { requirement: any; }) => p.requirement),
         };
       })
     );
-    
-    return templatesWithPrereqs;
   }
 
-  async createTaskTemplatePrerequisite(data: InsertTaskTemplatePrerequisite): Promise<TaskTemplatePrerequisite> {
+  async createTaskTemplatePrerequisite(data: InsertTaskTemplatePrerequisite) {
     const [prereq] = await this.db.insert(taskTemplatePrerequisites).values(data).returning();
     return prereq;
   }
 
-  async deleteTaskTemplatePrerequisite(taskTemplateId: number, prerequisiteTemplateId: number): Promise<boolean> {
+  async deleteTaskTemplatePrerequisite(taskTemplateId: number, prerequisiteTemplateId: number) {
     const result = await this.db
       .delete(taskTemplatePrerequisites)
       .where(and(
         eq(taskTemplatePrerequisites.taskTemplateId, taskTemplateId),
         eq(taskTemplatePrerequisites.prerequisiteTemplateId, prerequisiteTemplateId)
-      ))
-      .returning();
-    return result.length > 0;
+      ));
+
+    return result.rowsAffected > 0;
   }
 
-  async getAvailablePrerequisites(taskTemplateId: number): Promise<DepartmentRequirement[]> {
+  async getAvailablePrerequisites(taskTemplateId: number) {
     const allTemplates = await this.db.select().from(departmentRequirements);
-    
-    const dependentTemplates = new Set<number>();
-    const findDependents = async (templateId: number) => {
-      const dependents = await this.db
+
+    const dependent = new Set<number>();
+
+    const findDependents = async (id: number) => {
+      const rows = await this.db
         .select()
         .from(taskTemplatePrerequisites)
-        .where(eq(taskTemplatePrerequisites.prerequisiteTemplateId, templateId));
-      
-      for (const dep of dependents) {
-        if (!dependentTemplates.has(dep.taskTemplateId)) {
-          dependentTemplates.add(dep.taskTemplateId);
-          await findDependents(dep.taskTemplateId);
+        .where(eq(taskTemplatePrerequisites.prerequisiteTemplateId, id));
+
+      for (const row of rows) {
+        if (!dependent.has(row.taskTemplateId)) {
+          dependent.add(row.taskTemplateId);
+          await findDependents(row.taskTemplateId);
         }
       }
     };
-    
+
     await findDependents(taskTemplateId);
-    
-    return allTemplates.filter(
-      t => t.id !== taskTemplateId && !dependentTemplates.has(t.id)
-    );
+
+    return allTemplates.filter((t: { id: number; }) => t.id !== taskTemplateId && !dependent.has(t.id));
   }
 
-  // Event Workflow operations
-  async getEventWorkflows(eventId: string): Promise<EventWorkflow[]> {
-    return await this.db
+  /* ---------------------------------------------------------
+   * EVENT WORKFLOWS
+   * --------------------------------------------------------- */
+
+  async getEventWorkflows(eventId: string) {
+    return this.db
       .select()
       .from(eventWorkflows)
       .where(eq(eventWorkflows.eventId, eventId))
       .orderBy(desc(eventWorkflows.createdAt));
   }
 
-  async getAllWorkflowsWithDetails(): Promise<Array<EventWorkflow & { 
-    tasks: Array<WorkflowTask & { task: Task & { department: Department; event: Event } }>;
-    event: Event;
-  }>> {
-    // Get all workflows
-    const allWorkflows = await this.db
+  async getAllWorkflowsWithDetails() {
+    const all = await this.db
       .select()
       .from(eventWorkflows)
       .orderBy(desc(eventWorkflows.createdAt));
 
-    const workflows: Array<EventWorkflow & { 
-      tasks: Array<WorkflowTask & { task: Task & { department: Department; event: Event } }>;
-      event: Event;
-    }> = [];
+    const workflows = [];
 
-    for (const workflow of allWorkflows) {
-      const workflowWithTasks = await this.getWorkflowWithTasks(workflow.id);
-      if (workflowWithTasks) {
-        const [event] = await this.db
-          .select()
-          .from(events)
-          .where(eq(events.id, workflow.eventId))
-          .limit(1);
+    for (const wf of all) {
+      const wfWithTasks = await this.getWorkflowWithTasks(wf.id);
+      if (!wfWithTasks) continue;
 
-        if (event) {
-          workflows.push({
-            ...workflowWithTasks,
-            event,
-          });
-        }
+      const [event] = await this.db
+        .select()
+        .from(events)
+        .where(eq(events.id, wf.eventId));
+
+      if (event) {
+        workflows.push({
+          ...wfWithTasks,
+          event,
+        });
       }
     }
 
     return workflows;
   }
 
-  async getWorkflow(workflowId: number): Promise<EventWorkflow | undefined> {
+  async getWorkflow(workflowId: number) {
     const [workflow] = await this.db
       .select()
       .from(eventWorkflows)
-      .where(eq(eventWorkflows.id, workflowId))
-      .limit(1);
+      .where(eq(eventWorkflows.id, workflowId));
+
     return workflow;
   }
 
-  async getWorkflowWithTasks(workflowId: number): Promise<(EventWorkflow & { 
-    tasks: Array<WorkflowTask & { task: Task & { department: Department; event: Event } }> 
-  }) | undefined> {
+  async getWorkflowWithTasks(workflowId: number) {
     const workflow = await this.getWorkflow(workflowId);
     if (!workflow) return undefined;
 
-    const workflowTasksData = await this.db
+    const rows = await this.db
       .select({
         workflowTask: workflowTasks,
         task: tasks,
@@ -188,7 +191,7 @@ export class WorkflowRepository extends BaseRepository {
 
     return {
       ...workflow,
-      tasks: workflowTasksData.map(wt => ({
+      tasks: rows.map((wt: { workflowTask: any; task: any; department: any; event: any; }) => ({
         ...wt.workflowTask,
         task: {
           ...wt.task,
@@ -199,63 +202,65 @@ export class WorkflowRepository extends BaseRepository {
     };
   }
 
-  async createEventWorkflow(data: InsertEventWorkflow): Promise<EventWorkflow> {
+  async createEventWorkflow(data: InsertEventWorkflow) {
     const [workflow] = await this.db.insert(eventWorkflows).values(data).returning();
     return workflow;
   }
 
-  async deleteEventWorkflow(workflowId: number): Promise<boolean> {
-    const result = await this.db
-      .delete(eventWorkflows)
-      .where(eq(eventWorkflows.id, workflowId))
-      .returning();
-    return result.length > 0;
+  async deleteEventWorkflow(workflowId: number) {
+    const result = await this.db.delete(eventWorkflows).where(eq(eventWorkflows.id, workflowId));
+    return result.rowsAffected > 0;
   }
 
-  // Workflow Task operations
-  async getWorkflowTasks(workflowId: number): Promise<WorkflowTask[]> {
-    return await this.db
+  /* ---------------------------------------------------------
+   * WORKFLOW TASKS
+   * --------------------------------------------------------- */
+
+  async getWorkflowTasks(workflowId: number) {
+    return this.db
       .select()
       .from(workflowTasks)
       .where(eq(workflowTasks.workflowId, workflowId))
       .orderBy(asc(workflowTasks.orderIndex));
   }
 
-  async addTaskToWorkflow(data: InsertWorkflowTask): Promise<WorkflowTask> {
+  async addTaskToWorkflow(data: InsertWorkflowTask) {
     const [workflowTask] = await this.db.insert(workflowTasks).values(data).returning();
     return workflowTask;
   }
 
-  async removeTaskFromWorkflow(workflowId: number, taskId: number): Promise<boolean> {
+  async removeTaskFromWorkflow(workflowId: number, taskId: number) {
     const result = await this.db
       .delete(workflowTasks)
       .where(and(
         eq(workflowTasks.workflowId, workflowId),
         eq(workflowTasks.taskId, taskId)
-      ))
-      .returning();
-    return result.length > 0;
+      ));
+
+    return result.rowsAffected > 0;
   }
 
-  async getTaskWorkflow(taskId: number): Promise<(EventWorkflow & { tasks: WorkflowTask[] }) | undefined> {
-    const [workflowTaskEntry] = await this.db
+  async getTaskWorkflow(taskId: number) {
+    const [entry] = await this.db
       .select()
       .from(workflowTasks)
-      .where(eq(workflowTasks.taskId, taskId))
-      .limit(1);
+      .where(eq(workflowTasks.taskId, taskId));
 
-    if (!workflowTaskEntry) return undefined;
+    if (!entry) return undefined;
 
-    const workflow = await this.getWorkflow(workflowTaskEntry.workflowId);
+    const workflow = await this.getWorkflow(entry.workflowId);
     if (!workflow) return undefined;
 
     const allTasks = await this.getWorkflowTasks(workflow.id);
     return { ...workflow, tasks: allTasks };
   }
 
-  // Workflow Status Management
-  async getWaitingTasksForPrerequisite(prerequisiteTaskId: number): Promise<Task[]> {
-    const waitingTasksData = await this.db
+  /* ---------------------------------------------------------
+   * WORKFLOW STATUS MANAGEMENT
+   * --------------------------------------------------------- */
+
+  async getWaitingTasksForPrerequisite(prerequisiteTaskId: number) {
+    const rows = await this.db
       .select({ task: tasks })
       .from(workflowTasks)
       .innerJoin(tasks, eq(workflowTasks.taskId, tasks.id))
@@ -264,51 +269,51 @@ export class WorkflowRepository extends BaseRepository {
         eq(tasks.status, 'waiting')
       ));
 
-    return waitingTasksData.map(wt => wt.task);
+    return rows.map((r: { task: any; }) => r.task);
   }
 
-  async activateWaitingTasks(prerequisiteTaskId: number): Promise<Task[]> {
-    const waitingTasks = await this.getWaitingTasksForPrerequisite(prerequisiteTaskId);
-    
-    if (waitingTasks.length === 0) return [];
+  async activateWaitingTasks(prerequisiteTaskId: number) {
+    const waiting = await this.getWaitingTasksForPrerequisite(prerequisiteTaskId);
+    if (!waiting.length) return [];
 
-    const activatedTasks: Task[] = [];
-    for (const task of waitingTasks) {
-      const taskWorkflowEntry = await this.db
+    const activated: Task[] = [];
+
+    for (const task of waiting) {
+      const [wfEntry] = await this.db
         .select()
         .from(workflowTasks)
-        .where(eq(workflowTasks.taskId, task.id))
-        .limit(1);
+        .where(eq(workflowTasks.taskId, task.id));
 
-      if (taskWorkflowEntry.length > 0 && taskWorkflowEntry[0].prerequisiteTaskId) {
-        const [prereqTask] = await this.db
+      if (!wfEntry?.prerequisiteTaskId) continue;
+
+      const [prereq] = await this.db
+        .select()
+        .from(tasks)
+        .where(eq(tasks.id, wfEntry.prerequisiteTaskId));
+
+      if (prereq?.status === 'completed') {
+        await this.db
+          .update(tasks)
+          .set({ status: 'pending', updatedAt: new Date() })
+          .where(eq(tasks.id, task.id));
+
+        const [updated] = await this.db
           .select()
           .from(tasks)
-          .where(eq(tasks.id, taskWorkflowEntry[0].prerequisiteTaskId))
-          .limit(1);
+          .where(eq(tasks.id, task.id));
 
-        if (prereqTask && prereqTask.status === 'completed') {
-          const [updated] = await this.db
-            .update(tasks)
-            .set({ status: 'pending', updatedAt: new Date() })
-            .where(eq(tasks.id, task.id))
-            .returning();
-          
-          if (updated) {
-            activatedTasks.push(updated);
-          }
-        }
+        if (updated) activated.push(updated);
       }
     }
 
-    return activatedTasks;
+    return activated;
   }
 
-  // Department Workflow Visibility
-  async getWorkflowsForDepartment(departmentId: number): Promise<Array<EventWorkflow & { 
-    tasks: Array<WorkflowTask & { task: Task & { department: Department; event: Event } }>;
-    event: Event;
-  }>> {
+  /* ---------------------------------------------------------
+   * DEPARTMENT WORKFLOW VISIBILITY
+   * --------------------------------------------------------- */
+
+  async getWorkflowsForDepartment(departmentId: number) {
     const workflowIds = await this.db
       .selectDistinct({ workflowId: workflowTasks.workflowId })
       .from(workflowTasks)
@@ -316,35 +321,31 @@ export class WorkflowRepository extends BaseRepository {
       .innerJoin(eventDepartments, eq(tasks.eventDepartmentId, eventDepartments.id))
       .where(eq(eventDepartments.departmentId, departmentId));
 
-    const workflows: Array<EventWorkflow & { 
-      tasks: Array<WorkflowTask & { task: Task & { department: Department; event: Event } }>;
-      event: Event;
-    }> = [];
+    const workflows = [];
 
     for (const { workflowId } of workflowIds) {
-      const workflow = await this.getWorkflowWithTasks(workflowId);
-      if (workflow) {
-        const [event] = await this.db
-          .select()
-          .from(events)
-          .where(eq(events.id, workflow.eventId))
-          .limit(1);
+      const wf = await this.getWorkflowWithTasks(workflowId);
+      if (!wf) continue;
 
-        if (event) {
-          workflows.push({
-            ...workflow,
-            event,
-          });
-        }
+      const [event] = await this.db
+        .select()
+        .from(events)
+        .where(eq(events.id, wf.eventId));
+
+      if (event) {
+        workflows.push({
+          ...wf,
+          event,
+        });
       }
     }
 
     return workflows;
   }
 
-  async canDepartmentViewWorkflow(departmentId: number, workflowId: number): Promise<boolean> {
-    const result = await this.db
-      .select({ count: sql<number>`count(*)` })
+  async canDepartmentViewWorkflow(departmentId: number, workflowId: number) {
+    const rows = await this.db
+      .select({ count: sql<number>`COUNT(*)` })
       .from(workflowTasks)
       .innerJoin(tasks, eq(workflowTasks.taskId, tasks.id))
       .innerJoin(eventDepartments, eq(tasks.eventDepartmentId, eventDepartments.id))
@@ -353,26 +354,29 @@ export class WorkflowRepository extends BaseRepository {
         eq(eventDepartments.departmentId, departmentId)
       ));
 
-    return result[0]?.count > 0;
+    return rows[0]?.count > 0;
   }
 
-  // Task dependency checks
-  async isTaskPrerequisiteForOthers(taskId: number): Promise<boolean> {
-    const result = await this.db
-      .select({ count: sql<number>`count(*)` })
+  /* ---------------------------------------------------------
+   * TASK DEPENDENCY CHECKS
+   * --------------------------------------------------------- */
+
+  async isTaskPrerequisiteForOthers(taskId: number) {
+    const rows = await this.db
+      .select({ count: sql<number>`COUNT(*)` })
       .from(workflowTasks)
       .where(eq(workflowTasks.prerequisiteTaskId, taskId));
 
-    return result[0]?.count > 0;
+    return rows[0]?.count > 0;
   }
 
-  async getDependentTasks(taskId: number): Promise<Task[]> {
-    const dependentTasksData = await this.db
+  async getDependentTasks(taskId: number) {
+    const rows = await this.db
       .select({ task: tasks })
       .from(workflowTasks)
       .innerJoin(tasks, eq(workflowTasks.taskId, tasks.id))
       .where(eq(workflowTasks.prerequisiteTaskId, taskId));
 
-    return dependentTasksData.map(dt => dt.task);
+    return rows.map((r: { task: any; }) => r.task);
   }
 }

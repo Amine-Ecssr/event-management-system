@@ -1,5 +1,5 @@
 /**
- * Department Repository
+ * Department Repository (MSSQL version)
  * Handles all department/stakeholder-related database operations
  */
 import { BaseRepository } from './base';
@@ -13,358 +13,288 @@ import {
   type DepartmentAccount, type InsertDepartmentAccount,
   type AuthIdentity, type InsertAuthIdentity,
   type Event, type Task
-} from '@shared/schema';
-import { eq, and, inArray, sql, desc } from 'drizzle-orm';
+} from '@shared/schema.mssql';
+import { eq, and, inArray, desc, SQLWrapper } from 'drizzle-orm';
 
 export class DepartmentRepository extends BaseRepository {
-  // Core Department operations
+
+  /* ---------------------------------------------------------
+   * DEPARTMENTS
+   * --------------------------------------------------------- */
+
   async getAllDepartments(): Promise<Array<Department & { emails: DepartmentEmail[], requirements: DepartmentRequirement[] }>> {
-    const allStakeholders = await this.db.select().from(departments).orderBy(departments.name);
-    
-    const result = await Promise.all(
-      allStakeholders.map(async (stakeholder) => {
-        const emails = await this.getDepartmentEmails(stakeholder.id);
-        const requirements = await this.getDepartmentRequirements(stakeholder.id);
-        return { ...stakeholder, emails, requirements };
-      })
+    const all = await this.db.select().from(departments).orderBy(departments.name);
+
+    return Promise.all(
+      all.map(async (d: { id: number; }) => ({
+        ...d,
+        emails: await this.getDepartmentEmails(d.id),
+        requirements: await this.getDepartmentRequirements(d.id)
+      }))
     );
-    
-    return result;
   }
 
-  async getDepartment(id: number): Promise<(Department & { emails: DepartmentEmail[], requirements: DepartmentRequirement[] }) | undefined> {
-    const [stakeholder] = await this.db.select().from(departments).where(eq(departments.id, id));
-    if (!stakeholder) return undefined;
-    
-    const emails = await this.getDepartmentEmails(id);
-    const requirements = await this.getDepartmentRequirements(id);
-    
-    return { ...stakeholder, emails, requirements };
+  async getDepartment(id: number) {
+    const [dept] = await this.db.select().from(departments).where(eq(departments.id, id));
+    if (!dept) return undefined;
+
+    return {
+      ...dept,
+      emails: await this.getDepartmentEmails(id),
+      requirements: await this.getDepartmentRequirements(id)
+    };
   }
 
-  async getDepartmentsWithoutAccounts(): Promise<Array<Department & { emails: DepartmentEmail[], requirements: DepartmentRequirement[] }>> {
-    const allStakeholdersWithDetails = await this.getAllDepartments();
-    const accountsData = await this.db.select().from(departmentAccounts);
-    const departmentIdsWithAccounts = new Set(accountsData.map(acc => acc.departmentId));
-    
-    return allStakeholdersWithDetails.filter(
-      stakeholder => !departmentIdsWithAccounts.has(stakeholder.id)
-    );
+  async getDepartmentsWithoutAccounts() {
+    const all = await this.getAllDepartments();
+    const accounts = await this.db.select().from(departmentAccounts);
+    const withAccounts = new Set(accounts.map((a: { departmentId: any; }) => a.departmentId));
+
+    return all.filter(d => !withAccounts.has(d.id));
   }
 
   async createDepartment(data: InsertDepartment): Promise<Department> {
-    const [stakeholder] = await this.db
-      .insert(departments)
-      .values(data)
-      .returning();
-    return stakeholder;
+    const [dept] = await this.db.insert(departments).values(data).returning();
+    return dept;
   }
 
-  async updateDepartment(id: number, data: Partial<InsertDepartment>): Promise<Department | undefined> {
-    const [stakeholder] = await this.db
-      .update(departments)
-      .set(data)
-      .where(eq(departments.id, id))
-      .returning();
-    return stakeholder || undefined;
+  async updateDepartment(id: number, data: Partial<InsertDepartment>) {
+    await this.db.update(departments).set(data).where(eq(departments.id, id));
+
+    const [updated] = await this.db.select().from(departments).where(eq(departments.id, id));
+    return updated;
   }
 
   async deleteDepartment(id: number): Promise<boolean> {
-    const result = await this.db
-      .delete(departments)
-      .where(eq(departments.id, id))
-      .returning();
-    return result.length > 0;
+    const result = await this.db.delete(departments).where(eq(departments.id, id));
+    return result.rowsAffected > 0;
   }
 
-  // Department Email operations
+  /* ---------------------------------------------------------
+   * DEPARTMENT EMAILS
+   * --------------------------------------------------------- */
+
   async getDepartmentEmails(departmentId: number): Promise<DepartmentEmail[]> {
-    return await this.db
+    return this.db
       .select()
       .from(departmentEmails)
       .where(eq(departmentEmails.departmentId, departmentId))
       .orderBy(departmentEmails.isPrimary);
   }
 
-  async createDepartmentEmail(data: InsertDepartmentEmail): Promise<DepartmentEmail> {
-    const [email] = await this.db
-      .insert(departmentEmails)
-      .values(data)
-      .returning();
+  async createDepartmentEmail(data: InsertDepartmentEmail) {
+    const [email] = await this.db.insert(departmentEmails).values(data).returning();
     return email;
   }
 
-  async updateDepartmentEmail(id: number, data: Partial<InsertDepartmentEmail>): Promise<DepartmentEmail | undefined> {
-    const [email] = await this.db
-      .update(departmentEmails)
-      .set(data)
-      .where(eq(departmentEmails.id, id))
-      .returning();
-    return email || undefined;
+  async updateDepartmentEmail(id: number, data: Partial<InsertDepartmentEmail>) {
+    await this.db.update(departmentEmails).set(data).where(eq(departmentEmails.id, id));
+
+    const [email] = await this.db.select().from(departmentEmails).where(eq(departmentEmails.id, id));
+    return email;
   }
 
   async deleteDepartmentEmail(id: number): Promise<boolean> {
-    const result = await this.db
-      .delete(departmentEmails)
-      .where(eq(departmentEmails.id, id))
-      .returning();
-    return result.length > 0;
+    const result = await this.db.delete(departmentEmails).where(eq(departmentEmails.id, id));
+    return result.rowsAffected > 0;
   }
 
-  // Department Requirement operations
-  async getDepartmentRequirements(departmentId: number): Promise<DepartmentRequirement[]> {
-    return await this.db
+  /* ---------------------------------------------------------
+   * DEPARTMENT REQUIREMENTS
+   * --------------------------------------------------------- */
+
+  async getDepartmentRequirements(departmentId: number) {
+    return this.db
       .select()
       .from(departmentRequirements)
       .where(eq(departmentRequirements.departmentId, departmentId))
       .orderBy(departmentRequirements.isDefault);
   }
 
-  async getRequirementById(id: number): Promise<DepartmentRequirement | undefined> {
-    const [requirement] = await this.db
-      .select()
-      .from(departmentRequirements)
-      .where(eq(departmentRequirements.id, id));
-    return requirement || undefined;
+  async getRequirementById(id: number) {
+    const [req] = await this.db.select().from(departmentRequirements).where(eq(departmentRequirements.id, id));
+    return req;
   }
 
-  async getAllRequirements(): Promise<DepartmentRequirement[]> {
-    return await this.db
+  async getAllRequirements() {
+    return this.db
       .select()
       .from(departmentRequirements)
       .orderBy(departmentRequirements.departmentId, departmentRequirements.title);
   }
 
-  async createDepartmentRequirement(data: InsertDepartmentRequirement): Promise<DepartmentRequirement> {
-    const [requirement] = await this.db
-      .insert(departmentRequirements)
-      .values(data)
-      .returning();
-    return requirement;
+  async createDepartmentRequirement(data: InsertDepartmentRequirement) {
+    const [req] = await this.db.insert(departmentRequirements).values(data).returning();
+    return req;
   }
 
-  async updateDepartmentRequirement(id: number, data: Partial<InsertDepartmentRequirement>): Promise<DepartmentRequirement | undefined> {
-    const [requirement] = await this.db
-      .update(departmentRequirements)
-      .set(data)
-      .where(eq(departmentRequirements.id, id))
-      .returning();
-    return requirement || undefined;
+  async updateDepartmentRequirement(id: number, data: Partial<InsertDepartmentRequirement>) {
+    await this.db.update(departmentRequirements).set(data).where(eq(departmentRequirements.id, id));
+
+    const [req] = await this.db.select().from(departmentRequirements).where(eq(departmentRequirements.id, id));
+    return req;
   }
 
   async deleteDepartmentRequirement(id: number): Promise<boolean> {
-    const result = await this.db
-      .delete(departmentRequirements)
-      .where(eq(departmentRequirements.id, id))
-      .returning();
-    return result.length > 0;
+    const result = await this.db.delete(departmentRequirements).where(eq(departmentRequirements.id, id));
+    return result.rowsAffected > 0;
   }
 
-  // Event Department operations
-  async getEventDepartments(eventId: string): Promise<EventDepartment[]> {
-    return await this.db
-      .select()
-      .from(eventDepartments)
-      .where(eq(eventDepartments.eventId, eventId));
+  /* ---------------------------------------------------------
+   * EVENT DEPARTMENTS
+   * --------------------------------------------------------- */
+
+  async getEventDepartments(eventId: string) {
+    return this.db.select().from(eventDepartments).where(eq(eventDepartments.eventId, eventId));
   }
 
-  async getAllEventDepartmentsForAdmin(): Promise<Array<EventDepartment & { event: Event, department: Department }>> {
-    const allEventDepartments = await this.db
-      .select()
-      .from(eventDepartments);
-    
-    const result = await Promise.all(
-      allEventDepartments.map(async (es) => {
-        const [event] = await this.db.select().from(events).where(eq(events.id, es.eventId));
-        const stakeholder = await this.getDepartment(es.departmentId);
-        
-        if (!event || !stakeholder) {
-          throw new Error(`Event or stakeholder not found for event-stakeholder ${es.id}`);
+  async getAllEventDepartmentsForAdmin() {
+    const all = await this.db.select().from(eventDepartments);
+
+    return Promise.all(
+      all.map(async (ed: { eventId: string | SQLWrapper<unknown>; departmentId: number; id: any; }) => {
+        const [event] = await this.db.select().from(events).where(eq(events.id, ed.eventId));
+        const dept = await this.getDepartment(ed.departmentId);
+
+        if (!event || !dept) {
+          throw new Error(`Missing event or department for eventDepartment ${ed.id}`);
         }
-        
+
         return {
-          ...es,
+          ...ed,
           event,
           department: {
-            id: stakeholder.id,
-            name: stakeholder.name,
-            nameAr: stakeholder.nameAr,
-            keycloakGroupId: stakeholder.keycloakGroupId,
-            active: stakeholder.active,
-            ccList: stakeholder.ccList,
-            createdAt: stakeholder.createdAt,
-          },
+            id: dept.id,
+            name: dept.name,
+            nameAr: dept.nameAr,
+            keycloakGroupId: dept.keycloakGroupId,
+            active: dept.active,
+            ccList: dept.ccList,
+            createdAt: dept.createdAt
+          }
         };
       })
     );
-    
-    return result;
   }
 
-  async getEventDepartmentByEventAndDepartment(eventId: string, departmentId: number): Promise<EventDepartment | undefined> {
+  async getEventDepartmentByEventAndDepartment(eventId: string, departmentId: number) {
     const [existing] = await this.db
       .select()
       .from(eventDepartments)
-      .where(and(eq(eventDepartments.eventId, eventId), eq(eventDepartments.departmentId, departmentId)))
-      .limit(1);
+      .where(and(eq(eventDepartments.eventId, eventId), eq(eventDepartments.departmentId, departmentId)));
 
     return existing;
   }
 
-  async createEventDepartment(data: InsertEventDepartment): Promise<EventDepartment> {
-    const [eventStakeholder] = await this.db
-      .insert(eventDepartments)
-      .values(data)
-      .returning();
-    return eventStakeholder;
+  async createEventDepartment(data: InsertEventDepartment) {
+    const [ed] = await this.db.insert(eventDepartments).values(data).returning();
+    return ed;
   }
 
-  async deleteEventDepartments(eventId: string): Promise<void> {
-    await this.db
-      .delete(eventDepartments)
-      .where(eq(eventDepartments.eventId, eventId));
+  async deleteEventDepartments(eventId: string) {
+    await this.db.delete(eventDepartments).where(eq(eventDepartments.eventId, eventId));
   }
 
-  async getEventDepartmentsWithDetails(
-    eventId: string,
-    taskRepo: { getTasksByEventDepartment(id: number): Promise<Task[]> }
-  ): Promise<Array<EventDepartment & { stakeholder: Department, emails: DepartmentEmail[], requirements: DepartmentRequirement[], tasks: Task[] }>> {
-    const eventStakeholderRecords = await this.getEventDepartments(eventId);
-    
-    const result = await Promise.all(
-      eventStakeholderRecords.map(async (es) => {
-        const stakeholder = await this.getDepartment(es.departmentId);
-        if (!stakeholder) {
-          throw new Error(`Stakeholder ${es.departmentId} not found`);
-        }
-        
-        // Fetch tasks for this event stakeholder
-        const tasksList = await taskRepo.getTasksByEventDepartment(es.id);
-        
+  async getEventDepartmentsWithDetails(eventId: string, taskRepo: { getTasksByEventDepartment(id: number): Promise<Task[]> }) {
+    const records = await this.getEventDepartments(eventId);
+
+    return Promise.all(
+      records.map(async (ed: { departmentId: number; id: number; }) => {
+        const dept = await this.getDepartment(ed.departmentId);
+        if (!dept) throw new Error(`Department ${ed.departmentId} not found`);
+
+        const tasks = await taskRepo.getTasksByEventDepartment(ed.id);
+
         return {
-          ...es,
+          ...ed,
           stakeholder: {
-            id: stakeholder.id,
-            name: stakeholder.name,
-            nameAr: stakeholder.nameAr,
-            keycloakGroupId: stakeholder.keycloakGroupId,
-            active: stakeholder.active,
-            ccList: stakeholder.ccList,
-            createdAt: stakeholder.createdAt,
+            id: dept.id,
+            name: dept.name,
+            nameAr: dept.nameAr,
+            keycloakGroupId: dept.keycloakGroupId,
+            active: dept.active,
+            ccList: dept.ccList,
+            createdAt: dept.createdAt
           },
-          emails: stakeholder.emails,
-          requirements: stakeholder.requirements,
-          tasks: tasksList,
+          emails: dept.emails,
+          requirements: dept.requirements,
+          tasks
         };
       })
     );
-    
-    return result;
   }
 
-  async getEventsByDepartment(departmentId: number): Promise<Event[]> {
-    const eventStakeholderRecords = await this.db
-      .select()
-      .from(eventDepartments)
-      .where(eq(eventDepartments.departmentId, departmentId));
-    
-    const eventIds = eventStakeholderRecords.map(es => es.eventId);
-    if (eventIds.length === 0) {
-      return [];
-    }
-    
-    const eventRecords = await this.db
-      .select()
-      .from(events)
-      .where(inArray(events.id, eventIds))
-      .orderBy(events.startDate);
-    
-    return eventRecords;
+  async getEventsByDepartment(departmentId: number) {
+    const links = await this.db.select().from(eventDepartments).where(eq(eventDepartments.departmentId, departmentId));
+    const ids = links.map((l: { eventId: any; }) => l.eventId);
+
+    if (ids.length === 0) return [];
+
+    return this.db.select().from(events).where(inArray(events.id, ids)).orderBy(events.startDate);
   }
 
-  async isDepartmentAssignedToEvent(departmentId: number, eventId: string): Promise<boolean> {
-    const [assignment] = await this.db
+  async isDepartmentAssignedToEvent(departmentId: number, eventId: string) {
+    const [row] = await this.db
       .select()
       .from(eventDepartments)
-      .where(
-        and(
-          eq(eventDepartments.departmentId, departmentId),
-          eq(eventDepartments.eventId, eventId)
-        )
-      );
-    return !!assignment;
+      .where(and(eq(eventDepartments.departmentId, departmentId), eq(eventDepartments.eventId, eventId)));
+
+    return !!row;
   }
 
-  async getEventDepartmentsByDepartmentId(eventId: string, departmentId: number): Promise<Array<EventDepartment & { stakeholder: Department, emails: DepartmentEmail[], requirements: DepartmentRequirement[] }>> {
-    const eventStakeholderRecords = await this.db
+  async getEventDepartmentsByDepartmentId(eventId: string, departmentId: number) {
+    const records = await this.db
       .select()
       .from(eventDepartments)
-      .where(
-        and(
-          eq(eventDepartments.eventId, eventId),
-          eq(eventDepartments.departmentId, departmentId)
-        )
-      );
-    
-    const result = await Promise.all(
-      eventStakeholderRecords.map(async (es) => {
-        const stakeholder = await this.getDepartment(es.departmentId);
-        if (!stakeholder) {
-          throw new Error(`Stakeholder ${es.departmentId} not found`);
-        }
+      .where(and(eq(eventDepartments.eventId, eventId), eq(eventDepartments.departmentId, departmentId)));
+
+    return Promise.all(
+      records.map(async (ed: { departmentId: number; }) => {
+        const dept = await this.getDepartment(ed.departmentId);
+        if (!dept) throw new Error(`Department ${ed.departmentId} not found`);
+
         return {
-          ...es,
+          ...ed,
           stakeholder: {
-            id: stakeholder.id,
-            name: stakeholder.name,
-            nameAr: stakeholder.nameAr,
-            keycloakGroupId: stakeholder.keycloakGroupId,
-            active: stakeholder.active,
-            ccList: stakeholder.ccList,
-            createdAt: stakeholder.createdAt,
+            id: dept.id,
+            name: dept.name,
+            nameAr: dept.nameAr,
+            keycloakGroupId: dept.keycloakGroupId,
+            active: dept.active,
+            ccList: dept.ccList,
+            createdAt: dept.createdAt
           },
-          emails: stakeholder.emails,
-          requirements: stakeholder.requirements,
+          emails: dept.emails,
+          requirements: dept.requirements
         };
       })
     );
-    
-    return result;
   }
 
-  async getEventDepartment(eventDepartmentId: number): Promise<EventDepartment | undefined> {
-    const [eventStakeholder] = await this.db
-      .select()
-      .from(eventDepartments)
-      .where(eq(eventDepartments.id, eventDepartmentId));
-    return eventStakeholder || undefined;
+  async getEventDepartment(eventDepartmentId: number) {
+    const [row] = await this.db.select().from(eventDepartments).where(eq(eventDepartments.id, eventDepartmentId));
+    return row;
   }
 
-  async updateEventDepartmentLastReminder(id: number): Promise<void> {
-    await this.db
-      .update(eventDepartments)
-      .set({ lastReminderSentAt: new Date() })
-      .where(eq(eventDepartments.id, id));
+  async updateEventDepartmentLastReminder(id: number) {
+    await this.db.update(eventDepartments).set({ lastReminderSentAt: new Date() }).where(eq(eventDepartments.id, id));
   }
 
-  // Department Account operations
-  async getDepartmentAccountByUserId(userId: number): Promise<DepartmentAccount | undefined> {
-    const [account] = await this.db
-      .select()
-      .from(departmentAccounts)
-      .where(eq(departmentAccounts.userId, userId));
-    return account || undefined;
+  /* ---------------------------------------------------------
+   * DEPARTMENT ACCOUNTS
+   * --------------------------------------------------------- */
+
+  async getDepartmentAccountByUserId(userId: number) {
+    const [acc] = await this.db.select().from(departmentAccounts).where(eq(departmentAccounts.userId, userId));
+    return acc;
   }
 
-  async updateDepartmentAccountLastLogin(userId: number): Promise<void> {
-    await this.db
-      .update(departmentAccounts)
-      .set({ lastLoginAt: new Date() })
-      .where(eq(departmentAccounts.userId, userId));
+  async updateDepartmentAccountLastLogin(userId: number) {
+    await this.db.update(departmentAccounts).set({ lastLoginAt: new Date() }).where(eq(departmentAccounts.userId, userId));
   }
 
-  async getAllDepartmentAccounts(): Promise<Array<DepartmentAccount & { departmentName: string, username: string, primaryEmail: string }>> {
-    const results = await this.db
+  async getAllDepartmentAccounts() {
+    return this.db
       .select({
         id: departmentAccounts.id,
         userId: departmentAccounts.userId,
@@ -374,122 +304,99 @@ export class DepartmentRepository extends BaseRepository {
         createdAt: departmentAccounts.createdAt,
         departmentName: departments.name,
         username: users.username,
-        primaryEmail: departmentEmails.email,
+        primaryEmail: departmentEmails.email
       })
       .from(departmentAccounts)
       .innerJoin(departments, eq(departmentAccounts.departmentId, departments.id))
       .innerJoin(users, eq(departmentAccounts.userId, users.id))
       .innerJoin(departmentEmails, eq(departmentAccounts.primaryEmailId, departmentEmails.id))
       .orderBy(departments.name);
-    
-    return results;
   }
 
-  async getDepartmentAccountByDepartmentId(departmentId: number): Promise<DepartmentAccount | undefined> {
-    const [account] = await this.db
-      .select()
-      .from(departmentAccounts)
-      .where(eq(departmentAccounts.departmentId, departmentId));
-    return account || undefined;
+  async getDepartmentAccountByDepartmentId(departmentId: number) {
+    const [acc] = await this.db.select().from(departmentAccounts).where(eq(departmentAccounts.departmentId, departmentId));
+    return acc;
   }
 
-  async createDepartmentAccount(data: InsertDepartmentAccount): Promise<DepartmentAccount> {
-    const [account] = await this.db
-      .insert(departmentAccounts)
-      .values(data)
-      .returning();
-    return account;
+  async createDepartmentAccount(data: InsertDepartmentAccount) {
+    const [acc] = await this.db.insert(departmentAccounts).values(data).returning();
+    return acc;
   }
 
   async deleteDepartmentAccount(id: number): Promise<boolean> {
-    const result = await this.db
-      .delete(departmentAccounts)
-      .where(eq(departmentAccounts.id, id))
-      .returning();
-    return result.length > 0;
+    const result = await this.db.delete(departmentAccounts).where(eq(departmentAccounts.id, id));
+    return result.rowsAffected > 0;
   }
 
-  async createAuthIdentity(data: InsertAuthIdentity): Promise<AuthIdentity> {
-    const [identity] = await this.db
-      .insert(authIdentities)
-      .values(data)
-      .returning();
+  /* ---------------------------------------------------------
+   * AUTH IDENTITIES
+   * --------------------------------------------------------- */
+
+  async createAuthIdentity(data: InsertAuthIdentity) {
+    const [identity] = await this.db.insert(authIdentities).values(data).returning();
     return identity;
   }
 
-  // Keycloak-related department operations
-  async getDepartmentByKeycloakGroupId(keycloakGroupId: string): Promise<Department | undefined> {
-    const [department] = await this.db
+  /* ---------------------------------------------------------
+   * KEYCLOAK DEPARTMENT SYNC
+   * --------------------------------------------------------- */
+
+  async getDepartmentByKeycloakGroupId(keycloakGroupId: string) {
+    const [dept] = await this.db
       .select()
       .from(departments)
-      .where(eq(departments.keycloakGroupId, keycloakGroupId))
-      .limit(1);
-    return department;
+      .where(eq(departments.keycloakGroupId, keycloakGroupId));
+
+    return dept;
   }
 
-  async getOrCreateDepartmentByName(name: string, keycloakGroupId?: string): Promise<Department> {
-    // First, try to find by Keycloak group ID if provided
+  async getOrCreateDepartmentByName(name: string, keycloakGroupId?: string) {
     if (keycloakGroupId) {
-      const [existingByGroupId] = await this.db
+      const [existing] = await this.db
         .select()
         .from(departments)
-        .where(eq(departments.keycloakGroupId, keycloakGroupId))
-        .limit(1);
-      
-      if (existingByGroupId) {
-        return existingByGroupId;
-      }
-    }
-    
-    // Try to find by name
-    const [existingByName] = await this.db
-      .select()
-      .from(departments)
-      .where(eq(departments.name, name))
-      .limit(1);
-    
-    if (existingByName) {
-      // Update Keycloak group ID if provided and not set
-      if (keycloakGroupId && !existingByName.keycloakGroupId) {
-        const [updated] = await this.db
-          .update(departments)
-          .set({ keycloakGroupId })
-          .where(eq(departments.id, existingByName.id))
-          .returning();
-        return updated;
-      }
-      return existingByName;
+        .where(eq(departments.keycloakGroupId, keycloakGroupId));
+
+      if (existing) return existing;
     }
 
-    // Create new department with placeholder name
+    const [byName] = await this.db.select().from(departments).where(eq(departments.name, name));
+
+    if (byName) {
+      if (keycloakGroupId && !byName.keycloakGroupId) {
+        await this.db.update(departments).set({ keycloakGroupId }).where(eq(departments.id, byName.id));
+
+        const [updated] = await this.db.select().from(departments).where(eq(departments.id, byName.id));
+        return updated;
+      }
+      return byName;
+    }
+
     const [created] = await this.db
       .insert(departments)
-      .values({ 
-        name: name,
-        keycloakGroupId,
-        nameAr: null,
-      })
+      .values({ name, keycloakGroupId, nameAr: null })
       .returning();
-    
-    console.log(`[DepartmentRepository] Created department placeholder: ${name} (Keycloak group: ${keycloakGroupId})`);
+
+    console.log(`[DepartmentRepository] Created placeholder department: ${name}`);
     return created;
   }
 
-  async linkUserToDepartment(userId: number, departmentId: number, primaryEmailId: number): Promise<DepartmentAccount> {
-    const [account] = await this.db
+  async linkUserToDepartment(userId: number, departmentId: number, primaryEmailId: number) {
+    const [acc] = await this.db
       .insert(departmentAccounts)
       .values({ userId, departmentId, primaryEmailId })
       .returning();
-    return account;
+
+    return acc;
   }
 
-  async getUserDepartments(userId: number): Promise<Department[]> {
-    const result = await this.db
+  async getUserDepartments(userId: number) {
+    const rows = await this.db
       .select({ department: departments })
       .from(departments)
       .innerJoin(departmentAccounts, eq(departments.id, departmentAccounts.departmentId))
       .where(eq(departmentAccounts.userId, userId));
-    
-    return result.map(r => r.department);
+
+    return rows.map((r: { department: any; }) => r.department);
   }
 }

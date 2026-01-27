@@ -51,7 +51,7 @@ export type {
   ContactTaskCommentAttachment, InsertContactTaskCommentAttachment,
   PartnershipInteraction, InsertPartnershipInteraction, UpdatePartnershipInteraction,
   InteractionAttachment, InsertInteractionAttachment,
-} from '@shared/schema';
+} from '@shared/schema.mssql';
 
 // Import for IStorage interface
 import type { SettingsUpdate } from '../services/configService';
@@ -83,7 +83,7 @@ import type {
   UpdatePartnershipContact, InsertPartnershipComment, UpdatePartnershipComment, InsertAgreementAttachment,
   InsertLead, UpdateLead, InsertLeadInteraction, UpdateLeadInteraction, InsertContactTask,
   UpdateContactTask, InsertPartnershipInteraction, UpdatePartnershipInteraction, InsertInteractionAttachment,
-} from '@shared/schema';
+} from '@shared/schema.mssql';
 
 /**
  * IStorage Interface
@@ -100,7 +100,7 @@ export interface IStorage {
   getAllUsers(): Promise<User[]>;
   createUser(user: InsertUser): Promise<User>;
   updateUserPassword(id: number, hashedPassword: string): Promise<void>;
-  updateUserRole(id: number, role: 'admin' | 'superadmin' | 'department' | 'department_admin'): Promise<void>;
+  updateUserRole(id: number, role: 'admin' | 'superadmin' | 'department' | 'department_admin' | 'staff' | 'event_lead' | 'viewer'): Promise<void>;
   deleteUser(id: number): Promise<boolean>;
   
   // Event operations

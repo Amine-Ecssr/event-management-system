@@ -1,17 +1,18 @@
 /**
- * Event Repository
+ * Event Repository (MSSQL version)
  * Handles all event-related database operations
  */
 import { BaseRepository } from './base';
 import { 
   events, categories, eventAttendees, contacts, organizations, positions, countries,
   type Event, type InsertEvent, type EventAttendee, type Contact, type Organization, type Position, type Country
-} from '@shared/schema';
-import { eq, and } from 'drizzle-orm';
+} from '@shared/schema.mssql';
+import { eq } from 'drizzle-orm';
 
 export class EventRepository extends BaseRepository {
+
   async getAllEvents(): Promise<Event[]> {
-    const eventsWithCategories = await this.db
+    const rows = await this.db
       .select({
         event: events,
         category: categories,
@@ -20,8 +21,7 @@ export class EventRepository extends BaseRepository {
       .leftJoin(categories, eq(events.categoryId, categories.id))
       .orderBy(events.startDate);
 
-    // Map the results to include category names
-    return eventsWithCategories.map(({ event, category }) => ({
+    return rows.map(({ event, category }: { event: Event; category: typeof categories.$inferSelect | null }) => ({
       ...event,
       category: category?.nameEn || event.category,
       categoryAr: category?.nameAr || event.categoryAr,
@@ -29,7 +29,7 @@ export class EventRepository extends BaseRepository {
   }
 
   async getEvent(id: string): Promise<Event | undefined> {
-    const result = await this.db
+    const rows = await this.db
       .select({
         event: events,
         category: categories,
@@ -39,9 +39,9 @@ export class EventRepository extends BaseRepository {
       .where(eq(events.id, id))
       .limit(1);
 
-    if (result.length === 0) return undefined;
+    if (rows.length === 0) return undefined;
 
-    const { event, category } = result[0];
+    const { event, category }: { event: Event; category: typeof categories.$inferSelect | null } = rows[0];
     return {
       ...event,
       category: category?.nameEn || event.category,
@@ -50,28 +50,38 @@ export class EventRepository extends BaseRepository {
   }
 
   async createEvent(insertEvent: InsertEvent): Promise<Event> {
+    // INSERT returning works on MSSQL
     const [event] = await this.db
       .insert(events)
       .values(insertEvent)
       .returning();
+
     return event;
   }
 
   async updateEvent(id: string, updateData: Partial<InsertEvent>): Promise<Event | undefined> {
-    const [event] = await this.db
+    // MSSQL: update().returning() is not supported
+    await this.db
       .update(events)
       .set(updateData)
-      .where(eq(events.id, id))
-      .returning();
-    return event || undefined;
+      .where(eq(events.id, id));
+
+    // Re-select updated row
+    const [event] = await this.db
+      .select()
+      .from(events)
+      .where(eq(events.id, id));
+
+    return event;
   }
 
   async deleteEvent(id: string): Promise<boolean> {
+    // MSSQL: delete().returning() is not supported
     const result = await this.db
       .delete(events)
-      .where(eq(events.id, id))
-      .returning();
-    return result.length > 0;
+      .where(eq(events.id, id));
+
+    return result.rowsAffected > 0;
   }
 
   async deleteAllEvents(): Promise<void> {
@@ -85,8 +95,16 @@ export class EventRepository extends BaseRepository {
       .where(eq(events.id, eventId));
   }
 
-  async getEventAttendees(eventId: string): Promise<Array<EventAttendee & { contact: Contact & { organization?: Organization; position?: Position; country?: Country } }>> {
-    const attendeeRecords = await this.db
+  async getEventAttendees(eventId: string): Promise<
+    Array<EventAttendee & { 
+      contact: Contact & { 
+        organization?: Organization; 
+        position?: Position; 
+        country?: Country 
+      } 
+    }>
+  > {
+    const rows = await this.db
       .select({
         attendee: eventAttendees,
         contact: contacts,
@@ -102,7 +120,7 @@ export class EventRepository extends BaseRepository {
       .where(eq(eventAttendees.eventId, eventId))
       .orderBy(contacts.nameEn);
 
-    return attendeeRecords.map(record => ({
+    return rows.map((record: { attendee: any; contact: any; organization: any; position: any; country: any; }) => ({
       ...record.attendee,
       contact: {
         ...record.contact,

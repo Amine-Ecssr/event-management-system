@@ -11,22 +11,22 @@ export abstract class BaseRepository {
    * Helper to return first result or undefined from a query
    */
   protected async findOne<T>(query: Promise<T[]>): Promise<T | undefined> {
-    const [result] = await query;
-    return result || undefined;
+    const results = await query;
+    return results.length > 0 ? results[0] : undefined;
   }
 
   /**
    * Helper to check if a record exists
    */
-  protected async exists(query: Promise<any[]>): Promise<boolean> {
-    const result = await query;
-    return result.length > 0;
+  protected async exists(query: Promise<unknown[]>): Promise<boolean> {
+    const results = await query;
+    return results.length > 0;
   }
 
   /**
    * Helper to return boolean based on result length
    */
-  protected hasResults(result: any[]): boolean {
+  protected hasResults(result: unknown[]): boolean {
     return result.length > 0;
   }
 }
