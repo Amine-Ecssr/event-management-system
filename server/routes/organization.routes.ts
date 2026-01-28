@@ -734,7 +734,7 @@ router.post("/api/contacts/:id/profile-picture", isAdminOrSuperAdmin, contactPho
 
 router.post("/api/contacts", isAdminOrSuperAdmin, async (req, res) => {
   try {
-    const { insertContactSchema } = await import("@shared/schema");
+    const { insertContactSchema } = await import("@shared/schema.mssql");
     const result = insertContactSchema.safeParse(req.body);
     if (!result.success) {
       return res.status(400).json({ error: fromError(result.error).toString() });
@@ -755,7 +755,7 @@ router.post("/api/contacts", isAdminOrSuperAdmin, async (req, res) => {
 router.patch("/api/contacts/:id", isAdminOrSuperAdmin, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    const { updateContactSchema } = await import("@shared/schema");
+    const { updateContactSchema } = await import("@shared/schema.mssql");
     const result = updateContactSchema.safeParse(req.body);
     if (!result.success) {
       return res.status(400).json({ error: fromError(result.error).toString() });

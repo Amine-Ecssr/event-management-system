@@ -102,7 +102,7 @@ mkdir -p /home/runner/work/eventcal/eventcal/server/routes
 ```typescript
 import type { Express, RequestHandler } from "express";
 import { storage } from "../storage";
-import type { Event } from "@shared/schema";
+import type { Event } from "@shared/schema.mssql";
 import { deleteAgendaFile } from '../fileUpload';
 
 // Copy helper functions and types here
@@ -214,7 +214,7 @@ import { isAdminOrSuperAdmin } from "../auth";
 ```typescript
 import { Router } from "express";
 import { storage } from "../storage";
-import { insertEventSchema, type Event } from "@shared/schema";
+import { insertEventSchema, type Event } from "@shared/schema.mssql";
 import { fromError } from "zod-validation-error";
 import { isAuthenticated, isSuperAdmin, isAdminOrSuperAdmin } from "../auth";
 import { emailService } from "../email";

@@ -1,7 +1,7 @@
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
-import { User, InsertUser } from "@shared/schema";
+import { User, InsertUser } from "@shared/schema.mssql";
 
 const scryptAsync = promisify(scrypt);
 

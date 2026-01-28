@@ -169,7 +169,7 @@ npm run docker:prod:down  # Stop
 import { Router } from "express";
 import { storage } from "../repositories";
 import { isAuthenticated, isAdminOrSuperAdmin } from "../auth";
-import { insertResourceSchema } from "@shared/schema";
+import { insertResourceSchema } from "@shared/schema.mssql";
 
 const router = Router();
 

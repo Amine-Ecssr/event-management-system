@@ -1,7 +1,7 @@
 import { db } from '../db';
-import { events, categories } from '@shared/schema';
+import { events, categories } from '@shared/schema.mssql';
 import { eq, and } from 'drizzle-orm';
-import type { InsertEvent } from '@shared/schema';
+import type { InsertEvent } from '@shared/schema.mssql';
 import type { ScrapedEvent } from '@shared/scraper-types';
 import { scraperClient } from '../scraper-client';
 
@@ -21,7 +21,7 @@ export class ScraperService {
       .select()
       .from(categories)
       .where(eq(categories.nameEn, nameEn))
-      .limit(1);
+      .offset(1);
     
     if (existing) {
       // Update Arabic name if provided and different

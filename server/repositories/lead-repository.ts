@@ -80,12 +80,12 @@ export class LeadRepository extends BaseRepository {
   }
 
   async getLead(id: number) {
-    const [lead] = await this.db.select().from(leads).where(eq(leads.id, id)).limit(1);
+    const [lead] = await this.db.select().from(leads).where(eq(leads.id, id)).offset(1);
     return lead;
   }
 
   async getLeadWithDetails(id: number) {
-    const [lead] = await this.db.select().from(leads).where(eq(leads.id, id)).limit(1);
+    const [lead] = await this.db.select().from(leads).where(eq(leads.id, id)).offset(1);
     if (!lead) return undefined;
 
     let organization: Organization | undefined;
@@ -149,7 +149,7 @@ export class LeadRepository extends BaseRepository {
       .select()
       .from(leadInteractions)
       .where(eq(leadInteractions.id, id))
-      .limit(1);
+      .offset(1);
 
     return interaction;
   }
@@ -157,10 +157,10 @@ export class LeadRepository extends BaseRepository {
   async createLeadInteraction(data: InsertLeadInteraction) {
     const [interaction] = await this.db.insert(leadInteractions).values(data).returning();
 
-    await this.db
-      .update(leads)
-      .set({ updatedAt: new Date() })
-      .where(eq(leads.id, data.leadId));
+  await this.db
+        .update(leads)
+        .set({ updatedAt: new Date() })
+        .where(eq(leads.id, data.leadId));
 
     return interaction;
   }

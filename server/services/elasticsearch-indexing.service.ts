@@ -29,7 +29,7 @@ import {
   ArchivedEvent, 
   Update,
   Department,
-} from '@shared/schema';
+} from '@shared/schema.mssql';
 
 // Logger
 const logger = {

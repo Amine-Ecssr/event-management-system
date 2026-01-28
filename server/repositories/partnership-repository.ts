@@ -200,7 +200,7 @@ export class PartnershipRepository extends BaseRepository {
       .leftJoin(countries, eq(organizations.countryId, countries.id))
       .where(whereClause)
       .orderBy(orderByClause)
-      .limit(limit)
+      .offset(limit)
       .offset(offset);
 
     const now = new Date();
@@ -322,7 +322,7 @@ export class PartnershipRepository extends BaseRepository {
       .select()
       .from(partnershipAgreements)
       .where(eq(partnershipAgreements.id, id))
-      .limit(1);
+      .offset(1);
     return agreement;
   }
 
@@ -411,7 +411,7 @@ export class PartnershipRepository extends BaseRepository {
       .select()
       .from(partnershipActivities)
       .where(eq(partnershipActivities.id, id))
-      .limit(1);
+      .offset(1);
     return activity;
   }
 
@@ -422,7 +422,8 @@ export class PartnershipRepository extends BaseRepository {
       .returning();
     
     const activityDate = data.startDate ? new Date(data.startDate) : new Date();
-    await this.updatePartnershipLastActivity(data.organizationId, activityDate);
+         await this.updatePartnershipLastActivity(data.organizationId, activityDate);
+
     
     return activity;
   }
@@ -600,7 +601,7 @@ export class PartnershipRepository extends BaseRepository {
       .select()
       .from(agreementAttachments)
       .where(eq(agreementAttachments.id, id))
-      .limit(1);
+      .offset(1);
     return attachment;
   }
 
@@ -609,7 +610,7 @@ export class PartnershipRepository extends BaseRepository {
       .select()
       .from(agreementAttachments)
       .where(eq(agreementAttachments.objectKey, objectKey))
-      .limit(1);
+      .offset(1);
     return attachment;
   }
 
@@ -665,7 +666,7 @@ export class PartnershipRepository extends BaseRepository {
         .select({ lastActivityDate: organizations.lastActivityDate })
         .from(organizations)
         .where(eq(organizations.id, organizationId))
-        .limit(1);
+        .offset(1);
       
       const currentLastActivity = org?.lastActivityDate;
       const newLastActivity = activityDate > (currentLastActivity || new Date(0)) ? activityDate : currentLastActivity;
@@ -728,7 +729,7 @@ export class PartnershipRepository extends BaseRepository {
       .select()
       .from(partnershipInteractions)
       .where(eq(partnershipInteractions.id, id))
-      .limit(1);
+      .offset(1);
     return interaction;
   }
 

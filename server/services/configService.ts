@@ -11,7 +11,7 @@ import {
   type WhatsappConfig,
   type WhatsappTemplate,
   type Settings
-} from "../../shared/schema";
+} from "../../shared/schema.mssql";
 import { z } from "zod";
 
 /**
@@ -43,17 +43,17 @@ const defaultCoreSettings: Omit<Settings, "id"> = {
 };
 
 async function ensureConfigDefaults() {
-  const [coreSettings] = await db.select().from(settings).limit(1);
+  const [coreSettings] = await db.select().from(settings).offset(1);
   if (!coreSettings) {
     await db.insert(settings).values(defaultCoreSettings).returning();
   }
 
-  const [emailConf] = await db.select().from(emailConfig).limit(1);
+  const [emailConf] = await db.select().from(emailConfig).offset(1);
   if (!emailConf) {
     await db.insert(emailConfig).values({}).returning();
   }
 
-  const [whatsappConf] = await db.select().from(whatsappConfig).limit(1);
+  const [whatsappConf] = await db.select().from(whatsappConfig).offset(1);
   if (!whatsappConf) {
     await db.insert(whatsappConfig).values({}).returning();
   }
@@ -63,7 +63,7 @@ async function ensureConfigDefaults() {
   const templatesToInsert: Array<{ type: string; language: TemplateLanguage; template: string }> = [];
 
   const ensureTemplate = (type: string, language: TemplateLanguage, template: string) => {
-    if (!existingTemplates.some((t) => t.type === type && t.language === language)) {
+    if (!existingTemplates.some((t: { type: string; language: string; }) => t.type === type && t.language === language)) {
       templatesToInsert.push({ type, language, template });
     }
   };
@@ -88,25 +88,25 @@ export async function loadAppConfig(): Promise<AppConfig> {
   await ensureConfigDefaults();
 
   // Load core settings
-  const [coreSettings] = await db.select().from(settings).limit(1);
+  const [coreSettings] = await db.select().from(settings).offset(1);
 
   // Load email configuration
-  const [emailConf] = await db.select().from(emailConfig).limit(1);
+  const [emailConf] = await db.select().from(emailConfig).offset(1);
   
   // Load all email templates
   const emailTemplatesList = await db.select().from(emailTemplates);
   const emailTemplatesMap = new Map<string, EmailTemplate>();
-  emailTemplatesList.forEach(template => {
+  emailTemplatesList.forEach((template: { id: number; language: string; createdAt: Date; updatedAt: Date; type: string; subject: string | null; body: string | null; greeting: string | null; footer: string | null; requirementsTitle: string | null; customRequirementsTitle: string | null; requirementItemTemplate: string | null; brandColor: string | null; textColor: string | null; bgColor: string | null; fontFamily: string | null; fontSize: string | null; requirementsBrandColor: string | null; requirementsTextColor: string | null; requirementsBgColor: string | null; requirementsFontFamily: string | null; requirementsFontSize: string | null; footerBrandColor: string | null; footerTextColor: string | null; footerBgColor: string | null; footerFontFamily: string | null; footerFontSize: string | null; isRtl: boolean; additionalConfig: string | null; }) => {
     emailTemplatesMap.set(`${template.type}_${template.language}`, template);
   });
   
   // Load WhatsApp configuration
-  const [whatsappConf] = await db.select().from(whatsappConfig).limit(1);
+  const [whatsappConf] = await db.select().from(whatsappConfig).offset(1);
   
   // Load all WhatsApp templates
   const whatsappTemplatesList = await db.select().from(whatsappTemplates);
   const whatsappTemplatesMap = new Map<string, WhatsappTemplate>();
-  whatsappTemplatesList.forEach(template => {
+  whatsappTemplatesList.forEach((template: { id: number; language: string; createdAt: Date; updatedAt: Date; type: string; template: string; }) => {
     whatsappTemplatesMap.set(`${template.type}_${template.language}`, template);
   });
   
@@ -678,7 +678,7 @@ export async function updateSettingsPayload(updates: SettingsUpdate): Promise<Ap
     });
 
   if (Object.keys(coreUpdates).length > 0) {
-    const [current] = await db.select().from(settings).limit(1);
+    const [current] = await db.select().from(settings).offset(1);
     if (current) {
       await db.update(settings).set(coreUpdates).where(eq(settings.id, current.id));
     }
@@ -725,7 +725,7 @@ export async function updateSettingsPayload(updates: SettingsUpdate): Promise<Ap
   });
 
   if (Object.keys(emailUpdates).length > 0) {
-    const [currentEmailConfig] = await db.select().from(emailConfig).limit(1);
+    const [currentEmailConfig] = await db.select().from(emailConfig).offset(1);
     if (currentEmailConfig) {
       await db.update(emailConfig).set(emailUpdates).where(eq(emailConfig.id, currentEmailConfig.id));
     }
@@ -751,7 +751,7 @@ export async function updateSettingsPayload(updates: SettingsUpdate): Promise<Ap
   });
 
   if (Object.keys(whatsappUpdates).length > 0) {
-    const [currentWhatsappConfig] = await db.select().from(whatsappConfig).limit(1);
+    const [currentWhatsappConfig] = await db.select().from(whatsappConfig).offset(1);
     if (currentWhatsappConfig) {
       await db.update(whatsappConfig).set(whatsappUpdates).where(eq(whatsappConfig.id, currentWhatsappConfig.id));
     } else {

@@ -89,7 +89,7 @@ export class ContactRepository extends BaseRepository {
       .select()
       .from(organizations)
       .where(eq(organizations.nameEn, nameEn))
-      .limit(1);
+      .offset(1);
     return org || undefined;
   }
 
@@ -138,7 +138,7 @@ export class ContactRepository extends BaseRepository {
       .select()
       .from(positions)
       .where(eq(positions.nameEn, nameEn))
-      .limit(1);
+      .offset(1);
     return pos || undefined;
   }
 
@@ -157,7 +157,7 @@ export class ContactRepository extends BaseRepository {
       .select()
       .from(countries)
       .where(eq(countries.code, code.toUpperCase()))
-      .limit(1);
+      .offset(1);
     return country || undefined;
   }
 
@@ -224,7 +224,7 @@ export class ContactRepository extends BaseRepository {
       .leftJoin(countries, eq(contacts.countryId, countries.id))
       .where(whereClause)
       .orderBy(desc(contacts.createdAt))
-      .limit(limit)
+      .offset(limit)
       .offset(offset);
 
     const contactsList = results.map(({ contact, organization, position, country }: { contact: Contact; organization: Organization | null; position: Position | null; country: Country | null }) => ({
@@ -250,7 +250,7 @@ export class ContactRepository extends BaseRepository {
       .leftJoin(positions, eq(contacts.positionId, positions.id))
       .leftJoin(countries, eq(contacts.countryId, countries.id))
       .where(eq(contacts.id, id))
-      .limit(1);
+      .offset(1);
 
     if (results.length === 0) return undefined;
 
@@ -322,7 +322,7 @@ export class ContactRepository extends BaseRepository {
       .select()
       .from(contacts)
       .where(eq(contacts.email, email))
-      .limit(1);
+      .offset(1);
     return contact || undefined;
   }
 
@@ -335,7 +335,7 @@ export class ContactRepository extends BaseRepository {
       .select()
       .from(contacts)
       .where(and(...conditions))
-      .limit(1);
+      .offset(1);
     return contact || undefined;
   }
 
@@ -572,7 +572,7 @@ export class ContactRepository extends BaseRepository {
       .groupBy(contacts.id, organizations.nameEn)
       .having(sql`count(distinct ${eventAttendees.id}) > 0`)
       .orderBy(desc(sql`count(distinct ${eventAttendees.id})`))
-      .limit(limit);
+      .offset(limit);
 
     const topAttendees = topAttendeesQuery.map((row: { leadId: any; nameEn: any; nameAr: any; organizationNameEn: any; eventsAttended: any; speakerAppearances: any; invitationsReceived: any; rsvpConfirmed: any; registrations: any; }) => ({
       leadId: row.leadId,
@@ -779,7 +779,7 @@ export class ContactRepository extends BaseRepository {
       .groupBy(events.id, events.name, events.nameAr, events.startDate, categories.nameEn, categories.nameAr)
       .having(sql`count(distinct ${eventAttendees.id}) > 0`)
       .orderBy(desc(sql`count(distinct ${eventAttendees.id})`))
-      .limit(10);
+      .offset(10);
 
     const topPerformingEvents = topEvents.map((evt: { totalInvitees: number; totalAttendees: number; }) => ({
       ...evt,
@@ -820,7 +820,7 @@ export class ContactRepository extends BaseRepository {
       .groupBy(countries.code, countries.nameEn, countries.nameAr)
       .having(sql`count(distinct ${contacts.id}) > 0`)
       .orderBy(desc(sql`count(distinct ${eventAttendees.id})`))
-      .limit(15);
+      .offset(15);
 
     // 7. Event Type Performance
     const eventTypeEngagement = await this.db
@@ -926,7 +926,7 @@ export class ContactRepository extends BaseRepository {
             .where(eq(contacts.organizationId, org.organizationId))
             .groupBy(contacts.id)
             .orderBy(desc(sql`count(distinct ${eventAttendees.id})`))
-            .limit(1);
+            .offset(1);
 
           if (topAttendeeQuery.length > 0) {
             topAttendee = {
@@ -1057,7 +1057,7 @@ export class ContactRepository extends BaseRepository {
         .select()
         .from(groupTable)
         .where(eq(groupTable.id, options.groupId))
-        .limit(1);
+        .offset(1);
       
       if (!groupInfo) {
         return { groups: [], totalGroups: 0 };
@@ -1082,7 +1082,7 @@ export class ContactRepository extends BaseRepository {
         .leftJoin(countries, eq(contacts.countryId, countries.id))
         .where(whereClause)
         .orderBy(contacts.nameEn)
-        .limit(contactsPerGroup)
+        .offset(contactsPerGroup)
         .offset(offset);
       
       const contactsList = contactResults.map(
@@ -1173,7 +1173,7 @@ export class ContactRepository extends BaseRepository {
         .leftJoin(countries, eq(contacts.countryId, countries.id))
         .where(groupWhereClause)
         .orderBy(contacts.nameEn)
-        .limit(contactsPerGroup);
+        .offset(contactsPerGroup);
 
       const contactsList = contactResults.map(
         ({
@@ -1215,7 +1215,7 @@ export class ContactRepository extends BaseRepository {
       .select()
       .from(contacts)
       .where(eq(contacts.id, id))
-      .limit(1);
+      .offset(1);
     return contact || undefined;
   }
 

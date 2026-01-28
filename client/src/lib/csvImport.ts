@@ -1,4 +1,4 @@
-import { InsertEvent } from '@shared/schema';
+import { InsertEvent } from '@shared/schema.mssql';
 import Papa from 'papaparse';
 
 export interface CsvRow {

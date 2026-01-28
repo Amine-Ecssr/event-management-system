@@ -33,7 +33,7 @@ export class AiChatRepository extends BaseRepository {
       .from(aiChatConversations)
       .where(and(...conditions))
       .orderBy(desc(aiChatConversations.updatedAt))
-      .limit(50);
+      .offset(50);
   }
 
   async getConversation(conversationId: string, userId: number): Promise<AiChatConversation | undefined> {
@@ -46,7 +46,7 @@ export class AiChatRepository extends BaseRepository {
           eq(aiChatConversations.userId, userId)
         )
       )
-      .limit(1);
+      .offset(1);
 
     return conversation;
   }
@@ -117,7 +117,7 @@ export class AiChatRepository extends BaseRepository {
         .select()
         .from(aiChatMessages)
         .where(eq(aiChatMessages.conversationId, conversationId))
-        .limit(2);
+        .offset(2);
 
       if (existingMessages.length === 1) {
         const sentenceMatch = message.content.match(/^[^.!?\n]+[.!?]?/);
@@ -162,7 +162,7 @@ export class AiChatRepository extends BaseRepository {
       .from(aiChatMessages)
       .where(eq(aiChatMessages.conversationId, conversationId))
       .orderBy(desc(aiChatMessages.createdAt))
-      .limit(limit);
+      .offset(limit);
   }
 
   async getOrCreateActiveConversation(userId: number): Promise<AiChatConversation> {
@@ -176,7 +176,7 @@ export class AiChatRepository extends BaseRepository {
         )
       )
       .orderBy(desc(aiChatConversations.updatedAt))
-      .limit(1);
+      .offset(1);
 
     if (recent) return recent;
 

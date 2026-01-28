@@ -1,6 +1,6 @@
 import "../config/loadEnv";
 import { db } from "../db";
-import { settings } from "@shared/schema";
+import { settings } from "@shared/schema.mssql";
 import { sql } from "drizzle-orm";
 
 async function addArchiveEnabledSetting() {
@@ -10,7 +10,7 @@ async function addArchiveEnabledSetting() {
   await db.execute(sql`ALTER TABLE settings ADD COLUMN IF NOT EXISTS archive_enabled boolean NOT NULL DEFAULT true`);
 
   // Ensure existing row has archiveEnabled set to true
-  const [current] = await db.select().from(settings).limit(1);
+  const [current] = await db.select().from(settings).offset(1);
   if (current && (current as any).archiveEnabled === null) {
     await db.update(settings).set({ archiveEnabled: true }).where(sql`1=1`);
   }

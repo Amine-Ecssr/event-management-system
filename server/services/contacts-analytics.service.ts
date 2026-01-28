@@ -18,7 +18,7 @@ import {
   leads,
   leadInteractions,
   events,
-} from "@shared/schema";
+} from "@shared/schema.mssql";
 import { eq, and, sql, count, desc, asc, isNotNull, gte, lte } from "drizzle-orm";
 import { getOptionalElasticsearchClient, isElasticsearchEnabled } from '../elasticsearch/client';
 import { ES_INDEX_PREFIX, ES_INDEX_SUFFIX } from '../elasticsearch/config';
@@ -337,7 +337,7 @@ class ContactsAnalyticsService {
           .select({ nameEn: countries.nameEn, code: countries.code })
           .from(countries)
           .where(eq(countries.id, bucket.key))
-          .limit(1);
+          .offset(1);
         if (countryData) {
           byCountry.push({
             countryId: bucket.key,
@@ -588,7 +588,7 @@ class ContactsAnalyticsService {
       .leftJoin(organizations, eq(contacts.organizationId, organizations.id))
       .groupBy(contacts.organizationId, organizations.nameEn)
       .orderBy(desc(count()))
-      .limit(15);
+      .offset(15);
 
     const total = result.reduce((sum: number, r: { count: number }) => sum + r.count, 0);
 
@@ -615,7 +615,7 @@ class ContactsAnalyticsService {
       .leftJoin(countries, eq(contacts.countryId, countries.id))
       .groupBy(contacts.countryId, countries.nameEn, countries.code)
       .orderBy(desc(count()))
-      .limit(15);
+      .offset(15);
 
     const total = result.reduce((sum: number, r: { count: number }) => sum + r.count, 0);
 
@@ -642,7 +642,7 @@ class ContactsAnalyticsService {
       .leftJoin(positions, eq(contacts.positionId, positions.id))
       .groupBy(contacts.positionId, positions.nameEn)
       .orderBy(desc(count()))
-      .limit(15);
+      .offset(15);
 
     const total = result.reduce((sum: number, r: { count: number }) => sum + r.count, 0);
 

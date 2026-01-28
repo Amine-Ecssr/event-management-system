@@ -9,7 +9,7 @@
  */
 
 import { db } from '../db';
-import { events, eventAttendees, eventDepartments, departments, categories, archivedEvents } from '@shared/schema';
+import { events, eventAttendees, eventDepartments, departments, categories, archivedEvents } from '@shared/schema.mssql';
 import { sql, eq, gte, lte, and, count, desc, asc, isNull, not, inArray } from 'drizzle-orm';
 import { ElasticsearchAggregationsService } from './elasticsearch-aggregations.service';
 import { isElasticsearchEnabled } from '../elasticsearch/client';
@@ -293,7 +293,7 @@ export class EventsAnalyticsService {
       })
         .from(events)
         .where(and(...dayConditions))
-        .limit(5);
+        .offset(5);
 
       heatmapData.push({
         date: row.date,
@@ -446,7 +446,7 @@ export class EventsAnalyticsService {
       .leftJoin(categories, eq(events.categoryId, categories.id))
       .where(and(...conditions))
       .orderBy(asc(events.startDate))
-      .limit(100);
+      .offset(100);
 
     // Get department names for events
     const eventIds = result.map(e => e.id);
@@ -513,7 +513,7 @@ export class EventsAnalyticsService {
       .where(and(...conditions))
       .groupBy(events.location)
       .orderBy(desc(count()))
-      .limit(10);
+      .offset(10);
 
     return result.map(r => ({
       location: r.location || 'Unknown',

@@ -8,7 +8,7 @@
 
 import type { RequestHandler, Response } from "express";
 import { storage } from "../storage";
-import type { Event } from "@shared/schema";
+import type { Event } from "@shared/schema.mssql";
 import { deleteAgendaFile } from '../fileUpload';
 import { startOfDay, startOfWeek, endOfWeek } from 'date-fns';
 

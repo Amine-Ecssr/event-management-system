@@ -1,5 +1,5 @@
 import { spawn, ChildProcess } from 'child_process';
-import type { Event } from '@shared/schema';
+import type { Event } from '@shared/schema.mssql';
 import { format } from 'date-fns';
 import path from 'path';
 import { rm, mkdir } from 'fs/promises';

@@ -35,17 +35,7 @@ export * from './types';
 // - mssql: uses memorystore (in-memory) for Phase 2 so the app can run without Postgres.
 //   For production with MSSQL, we will switch to Redis or an MSSQL-backed session store in Phase 3/4.
 const DIALECT = (process.env.DB_DIALECT || "postgres").toLowerCase();
-export const sessionStore: session.Store =
-  DIALECT === "postgres"
-    ? (() => {
-        const PgStore = connectPgSimple(session);
-        return new PgStore({
-          conString: process.env.DATABASE_URL,
-          tableName: "sessions", // Match the table name from our schema
-          createTableIfMissing: false, // Sessions table is managed by Drizzle ORM
-        });
-      })()
-    : (() => {
+export const sessionStore: session.Store = (() => {
         const MemoryStore = createMemoryStore(session);
         return new MemoryStore({
           checkPeriod: 24 * 60 * 60 * 1000, // prune expired entries every 24h

@@ -1,5 +1,5 @@
 import { addDays, format } from 'date-fns';
-import type { Event } from '@shared/schema';
+import type { Event } from '@shared/schema.mssql';
 
 function escapeText(value?: string | null): string {
   if (!value) return '';

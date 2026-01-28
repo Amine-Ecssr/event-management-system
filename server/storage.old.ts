@@ -53,7 +53,7 @@ import {
   partnershipInteractions, type PartnershipInteraction, type InsertPartnershipInteraction, type UpdatePartnershipInteraction,
   // Interaction Attachments
   interactionAttachments, type InteractionAttachment, type InsertInteractionAttachment,
-} from "@shared/schema";
+} from "@shared/schema.mssql";
 import { db } from "./db";
 import { eq, and, lte, sql, inArray, desc, isNull, isNotNull, gte, like, or, asc, count } from "drizzle-orm";
 import session from "express-session";
@@ -798,7 +798,7 @@ export class DatabaseStorage implements IStorage {
       .from(events)
       .leftJoin(categories, eq(events.categoryId, categories.id))
       .where(eq(events.id, id))
-      .limit(1);
+      .offset(1);
 
     if (result.length === 0) return undefined;
 
@@ -908,7 +908,7 @@ export class DatabaseStorage implements IStorage {
             eq(reminderQueue.reminderType, insertReminder.reminderType)
           )
         )
-        .limit(1);
+        .offset(1);
       return existing;
     }
     
@@ -1208,7 +1208,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(eventDepartments)
       .where(and(eq(eventDepartments.eventId, eventId), eq(eventDepartments.departmentId, departmentId)))
-      .limit(1);
+      .offset(1);
 
     return existing;
   }
@@ -1796,7 +1796,7 @@ export class DatabaseStorage implements IStorage {
           .select()
           .from(leads)
           .where(eq(leads.id, task.leadId))
-          .limit(1);
+          .offset(1);
         
         if (!contactData) {
           continue;
@@ -1840,7 +1840,7 @@ export class DatabaseStorage implements IStorage {
           .select()
           .from(organizations)
           .where(eq(organizations.id, task.partnershipId))
-          .limit(1);
+          .offset(1);
         
         if (!orgData) {
           continue;
@@ -1983,7 +1983,7 @@ export class DatabaseStorage implements IStorage {
       .from(updates)
       .where(and(eq(updates.type, type), isNull(updates.departmentId)))
       .orderBy(desc(updates.periodStart))
-      .limit(1);
+      .offset(1);
     return update || undefined;
   }
   
@@ -2001,7 +2001,7 @@ export class DatabaseStorage implements IStorage {
       .from(updates)
       .where(and(eq(updates.type, type), eq(updates.departmentId, departmentId)))
       .orderBy(desc(updates.periodStart))
-      .limit(1);
+      .offset(1);
     return update || undefined;
   }
   
@@ -2073,7 +2073,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(users)
       .where(eq(users.keycloakId, keycloakId))
-      .limit(1);
+      .offset(1);
     return user;
   }
 
@@ -2177,7 +2177,7 @@ export class DatabaseStorage implements IStorage {
         .select()
         .from(departments)
         .where(eq(departments.keycloakGroupId, keycloakGroupId))
-        .limit(1);
+        .offset(1);
       
       if (existingByGroupId) {
         return existingByGroupId;
@@ -2189,7 +2189,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(departments)
       .where(eq(departments.name, name))
-      .limit(1);
+      .offset(1);
     
     if (existingByName) {
       // Update Keycloak group ID if provided and not set
@@ -2227,7 +2227,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(departments)
       .where(eq(departments.keycloakGroupId, keycloakGroupId))
-      .limit(1);
+      .offset(1);
     return department;
   }
 
@@ -2291,8 +2291,8 @@ export class DatabaseStorage implements IStorage {
 
     // Execute queries with proper typing
     const eventsResult = whereCondition 
-      ? await db.select().from(archivedEvents).where(whereCondition).orderBy(desc(archivedEvents.startDate)).limit(limit).offset(offset)
-      : await db.select().from(archivedEvents).orderBy(desc(archivedEvents.startDate)).limit(limit).offset(offset);
+      ? await db.select().from(archivedEvents).where(whereCondition).orderBy(desc(archivedEvents.startDate)).offset(limit).offset(offset)
+      : await db.select().from(archivedEvents).orderBy(desc(archivedEvents.startDate)).offset(limit).offset(offset);
     
     const countResult = whereCondition
       ? await db.select({ count: count() }).from(archivedEvents).where(whereCondition)
@@ -2366,7 +2366,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(archivedEvents)
       .where(eq(archivedEvents.id, id))
-      .limit(1);
+      .offset(1);
     
     if (archivedEvent.length === 0) {
       console.log(`[Archive] Delete: No archived event found with id ${id}`);
@@ -2436,7 +2436,7 @@ export class DatabaseStorage implements IStorage {
         like(archivedEvents.highlightsAr, searchPattern)
       ))
       .orderBy(desc(archivedEvents.startDate))
-      .limit(50);
+      .offset(50);
   }
 
   async getArchiveStats(): Promise<{
@@ -2971,7 +2971,7 @@ export class DatabaseStorage implements IStorage {
       .leftJoin(countries, eq(contacts.countryId, countries.id))
       .where(whereClause)
       .orderBy(desc(contacts.createdAt))
-      .limit(limit)
+      .offset(limit)
       .offset(offset);
 
     const contactsList = results.map(({ contact, organization, position, country }) => ({
@@ -3056,7 +3056,7 @@ export class DatabaseStorage implements IStorage {
         .select()
         .from(groupTable)
         .where(eq(groupTable.id, options.groupId))
-        .limit(1);
+        .offset(1);
       
       if (!groupInfo) {
         return { groups: [], totalGroups: 0 };
@@ -3083,7 +3083,7 @@ export class DatabaseStorage implements IStorage {
         .leftJoin(countries, eq(contacts.countryId, countries.id))
         .where(whereClause)
         .orderBy(contacts.nameEn)
-        .limit(contactsPerGroup)
+        .offset(contactsPerGroup)
         .offset(offset);
       
       const contactsList = contactResults.map(({ contact, organization, position, country }) => ({
@@ -3167,7 +3167,7 @@ export class DatabaseStorage implements IStorage {
         .leftJoin(countries, eq(contacts.countryId, countries.id))
         .where(groupWhereClause)
         .orderBy(contacts.nameEn)
-        .limit(contactsPerGroup);
+        .offset(contactsPerGroup);
 
       const contactsList = contactResults.map(({ contact, organization, position, country }) => ({
         ...contact,
@@ -3204,7 +3204,7 @@ export class DatabaseStorage implements IStorage {
       .leftJoin(positions, eq(contacts.positionId, positions.id))
       .leftJoin(countries, eq(contacts.countryId, countries.id))
       .where(eq(contacts.id, id))
-      .limit(1);
+      .offset(1);
 
     if (results.length === 0) return undefined;
 
@@ -3268,7 +3268,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(contacts)
       .where(eq(contacts.email, email))
-      .limit(1);
+      .offset(1);
     return contact || undefined;
   }
 
@@ -3281,7 +3281,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(contacts)
       .where(and(...conditions))
-      .limit(1);
+      .offset(1);
     return contact || undefined;
   }
 
@@ -3290,7 +3290,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(organizations)
       .where(eq(organizations.nameEn, nameEn))
-      .limit(1);
+      .offset(1);
     return org || undefined;
   }
 
@@ -3299,7 +3299,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(positions)
       .where(eq(positions.nameEn, nameEn))
-      .limit(1);
+      .offset(1);
     return pos || undefined;
   }
 
@@ -3308,7 +3308,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(countries)
       .where(eq(countries.code, code.toUpperCase()))
-      .limit(1);
+      .offset(1);
     return country || undefined;
   }
 
@@ -3488,7 +3488,7 @@ export class DatabaseStorage implements IStorage {
       .groupBy(contacts.id, organizations.nameEn)
       .having(sql`count(distinct ${eventAttendees.id}) > 0`)
       .orderBy(desc(sql`count(distinct ${eventAttendees.id})`))
-      .limit(limit);
+      .offset(limit);
 
     const topAttendees = topAttendeesQuery.map(row => ({
       leadId: row.leadId,
@@ -3593,7 +3593,7 @@ export class DatabaseStorage implements IStorage {
             .where(eq(contacts.organizationId, org.organizationId))
             .groupBy(contacts.id)
             .orderBy(desc(sql`count(distinct ${eventAttendees.id})`))
-            .limit(1);
+            .offset(1);
 
           if (topAttendeeQuery.length > 0) {
             topAttendee = {
@@ -3773,7 +3773,7 @@ export class DatabaseStorage implements IStorage {
       .groupBy(events.id, events.name, events.nameAr, events.startDate, categories.nameEn, categories.nameAr)
       .having(sql`count(distinct ${eventAttendees.id}) > 0`)
       .orderBy(desc(sql`count(distinct ${eventAttendees.id})`))
-      .limit(10);
+      .offset(10);
 
     const topPerformingEvents = topEvents.map(evt => ({
       ...evt,
@@ -3814,7 +3814,7 @@ export class DatabaseStorage implements IStorage {
       .groupBy(countries.code, countries.nameEn, countries.nameAr)
       .having(sql`count(distinct ${contacts.id}) > 0`)
       .orderBy(desc(sql`count(distinct ${eventAttendees.id})`))
-      .limit(15);
+      .offset(15);
 
     // 7. Event Type Performance
     const eventTypeEngagement = await db
@@ -3969,7 +3969,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(emailTemplates)
       .where(and(eq(emailTemplates.type, type), eq(emailTemplates.language, language)))
-      .limit(1);
+      .offset(1);
 
     return template;
   }
@@ -3980,7 +3980,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(eventCustomEmails)
       .where(and(eq(eventCustomEmails.eventId, eventId), eq(eventCustomEmails.isActive, true)))
-      .limit(1);
+      .offset(1);
 
     return customEmail;
   }
@@ -4154,7 +4154,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(eventWorkflows)
       .where(eq(eventWorkflows.id, workflowId))
-      .limit(1);
+      .offset(1);
     return workflow;
   }
 
@@ -4237,7 +4237,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(workflowTasks)
       .where(eq(workflowTasks.taskId, taskId))
-      .limit(1);
+      .offset(1);
 
     if (!workflowTaskEntry) return undefined;
 
@@ -4277,14 +4277,14 @@ export class DatabaseStorage implements IStorage {
         .select()
         .from(workflowTasks)
         .where(eq(workflowTasks.taskId, task.id))
-        .limit(1);
+        .offset(1);
 
       if (taskWorkflowEntry.length > 0 && taskWorkflowEntry[0].prerequisiteTaskId) {
         const [prereqTask] = await db
           .select()
           .from(tasks)
           .where(eq(tasks.id, taskWorkflowEntry[0].prerequisiteTaskId))
-          .limit(1);
+          .offset(1);
 
         // Only activate if prerequisite is completed
         if (prereqTask && prereqTask.status === 'completed') {
@@ -4329,7 +4329,7 @@ export class DatabaseStorage implements IStorage {
           .select()
           .from(events)
           .where(eq(events.id, workflow.eventId))
-          .limit(1);
+          .offset(1);
 
         if (event) {
           workflows.push({
@@ -4477,7 +4477,7 @@ export class DatabaseStorage implements IStorage {
       .leftJoin(countries, eq(organizations.countryId, countries.id))
       .where(whereClause)
       .orderBy(orderByClause)
-      .limit(limit)
+      .offset(limit)
       .offset(offset);
 
     // Map partners to include computed fields
@@ -4599,7 +4599,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(partnershipAgreements)
       .where(eq(partnershipAgreements.id, id))
-      .limit(1);
+      .offset(1);
     return agreement;
   }
 
@@ -4681,7 +4681,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(partnershipActivities)
       .where(eq(partnershipActivities.id, id))
-      .limit(1);
+      .offset(1);
     return activity;
   }
 
@@ -4861,7 +4861,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(agreementAttachments)
       .where(eq(agreementAttachments.id, id))
-      .limit(1);
+      .offset(1);
     return attachment;
   }
 
@@ -4870,7 +4870,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(agreementAttachments)
       .where(eq(agreementAttachments.objectKey, objectKey))
-      .limit(1);
+      .offset(1);
     return attachment;
   }
 
@@ -4942,7 +4942,7 @@ export class DatabaseStorage implements IStorage {
         .select({ lastActivityDate: organizations.lastActivityDate })
         .from(organizations)
         .where(eq(organizations.id, organizationId))
-        .limit(1);
+        .offset(1);
       
       const currentLastActivity = org?.lastActivityDate;
       const newLastActivity = activityDate > (currentLastActivity || new Date(0)) ? activityDate : currentLastActivity;
@@ -5066,7 +5066,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(leads)
       .where(eq(leads.id, id))
-      .limit(1);
+      .offset(1);
     return contact;
   }
 
@@ -5079,7 +5079,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(leads)
       .where(eq(leads.id, id))
-      .limit(1);
+      .offset(1);
 
     if (!contact) return undefined;
 
@@ -5090,7 +5090,7 @@ export class DatabaseStorage implements IStorage {
         .select()
         .from(organizations)
         .where(eq(organizations.id, contact.organizationId))
-        .limit(1);
+        .offset(1);
       organization = org;
     }
 
@@ -5150,7 +5150,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(leadInteractions)
       .where(eq(leadInteractions.id, id))
-      .limit(1);
+      .offset(1);
     return interaction;
   }
 
@@ -5199,7 +5199,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(partnershipInteractions)
       .where(eq(partnershipInteractions.id, id))
-      .limit(1);
+      .offset(1);
     return interaction;
   }
 
@@ -5360,7 +5360,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(contactTasks)
       .where(eq(contactTasks.id, id))
-      .limit(1);
+      .offset(1);
     return task;
   }
 

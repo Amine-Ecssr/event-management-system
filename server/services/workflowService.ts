@@ -17,7 +17,7 @@ import type {
   InsertTask,
   Department,
   Event,
-} from '@shared/schema';
+} from '@shared/schema.mssql';
 
 interface ResolvedTemplates {
   selectedTemplates: DepartmentRequirement[];

@@ -74,8 +74,8 @@ export class ArchiveRepository extends BaseRepository {
     const whereCondition = buildWhereCondition();
 
     const eventsResult = whereCondition
-      ? await this.db.select().from(archivedEvents).where(whereCondition).orderBy(desc(archivedEvents.startDate)).limit(limit).offset(offset)
-      : await this.db.select().from(archivedEvents).orderBy(desc(archivedEvents.startDate)).limit(limit).offset(offset);
+      ? await this.db.select().from(archivedEvents).where(whereCondition).orderBy(desc(archivedEvents.startDate)).offset(limit).offset(offset)
+      : await this.db.select().from(archivedEvents).orderBy(desc(archivedEvents.startDate)).offset(limit).offset(offset);
 
     const countResult = whereCondition
       ? await this.db.select({ count: count() }).from(archivedEvents).where(whereCondition)
@@ -194,7 +194,7 @@ export class ArchiveRepository extends BaseRepository {
         like(archivedEvents.highlightsAr, searchPattern)
       ))
       .orderBy(desc(archivedEvents.startDate))
-      .limit(50);
+      .offset(50);
   }
 
   async getArchiveStats() {

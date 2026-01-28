@@ -32,7 +32,7 @@ import { storage } from "../storage";
 import { isAdminOrSuperAdmin } from "../auth";
 import { minioService } from "../services/minio";
 import { indexingService } from "../services/elasticsearch-indexing.service";
-import { insertArchivedEventSchema, updateArchivedEventSchema } from "@shared/schema";
+import { insertArchivedEventSchema, updateArchivedEventSchema } from "@shared/schema.mssql";
 import { fromError } from "zod-validation-error";
 
 const router = Router();

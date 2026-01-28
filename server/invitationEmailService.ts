@@ -10,7 +10,7 @@ import {
   type EventInvitee,
   type Contact,
   type EventCustomEmail
-} from '@shared/schema';
+} from '@shared/schema.mssql';
 import { eq, and, sql } from 'drizzle-orm';
 import { emailService } from './email';
 import { storage } from './storage';
@@ -55,7 +55,7 @@ class InvitationEmailService {
       .select()
       .from(invitationEmailJobs)
       .where(eq(invitationEmailJobs.id, jobId))
-      .limit(1);
+      .offset(1);
 
     return job;
   }
@@ -129,7 +129,7 @@ class InvitationEmailService {
         .select()
         .from(events)
         .where(eq(events.id, job.eventId))
-        .limit(1);
+        .offset(1);
 
       if (!event) {
         throw new Error(`Event ${job.eventId} not found`);
@@ -147,7 +147,7 @@ class InvitationEmailService {
               eq(eventCustomEmails.isActive, true)
             )
           )
-          .limit(1);
+          .offset(1);
 
         if (customEmail) {
           emailTemplate = {

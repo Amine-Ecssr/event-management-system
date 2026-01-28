@@ -28,7 +28,7 @@ import {
   eventAttendees,
   eventInvitees,
   departments,
-} from '@shared/schema';
+} from '@shared/schema.mssql';
 
 const router = Router();
 

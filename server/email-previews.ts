@@ -1,4 +1,4 @@
-import type { Event, Stakeholder, StakeholderRequirement } from '@shared/schema';
+import type { Event, Stakeholder, StakeholderRequirement } from '@shared/schema.mssql';
 import type { AppSettings } from './services/configService';
 import { format } from 'date-fns';
 import { replaceTemplateVariables, formatRequirementItem } from './email-helpers';

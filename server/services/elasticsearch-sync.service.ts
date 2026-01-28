@@ -31,7 +31,7 @@ import {
   categories,
   eventDepartments,
   countries,
-} from '@shared/schema';
+} from '@shared/schema.mssql';
 import { eq, gte, sql, inArray } from 'drizzle-orm';
 
 // Logger
@@ -405,7 +405,7 @@ export class ElasticsearchSyncService {
         })
         .from(events)
         .leftJoin(categories, eq(events.categoryId, categories.id))
-        .limit(this.BATCH_SIZE)
+        .offset(this.BATCH_SIZE)
         .offset(offset);
       
       // Get attendee/invitee/registered counts for each event in batch
@@ -497,7 +497,7 @@ export class ElasticsearchSyncService {
     while (offset < total) {
       const batch = await db.select()
         .from(archivedEvents)
-        .limit(this.BATCH_SIZE)
+        .offset(this.BATCH_SIZE)
         .offset(offset);
       
       // Fetch speakers for each archived event in the batch
@@ -716,7 +716,7 @@ export class ElasticsearchSyncService {
     while (offset < total) {
       const batch = await db.select()
         .from(contacts)
-        .limit(this.BATCH_SIZE)
+        .offset(this.BATCH_SIZE)
         .offset(offset);
       
       // Use bulk indexing for performance with enrichment data
@@ -773,7 +773,7 @@ export class ElasticsearchSyncService {
     while (offset < total) {
       const batch = await db.select()
         .from(organizations)
-        .limit(this.BATCH_SIZE)
+        .offset(this.BATCH_SIZE)
         .offset(offset);
       
       // Use bulk indexing for performance with country enrichment
@@ -825,7 +825,7 @@ export class ElasticsearchSyncService {
     while (offset < total) {
       const batch = await db.select()
         .from(leads)
-        .limit(this.BATCH_SIZE)
+        .offset(this.BATCH_SIZE)
         .offset(offset);
       
       // Use bulk indexing for performance
@@ -879,7 +879,7 @@ export class ElasticsearchSyncService {
       })
         .from(partnershipAgreements)
         .leftJoin(agreementTypes, eq(partnershipAgreements.agreementTypeId, agreementTypes.id))
-        .limit(this.BATCH_SIZE)
+        .offset(this.BATCH_SIZE)
         .offset(offset);
       
       // Use bulk indexing for performance - include enrichment data
@@ -967,7 +967,7 @@ export class ElasticsearchSyncService {
         .leftJoin(organizations, eq(contacts.organizationId, organizations.id))
         .leftJoin(categories, eq(events.categoryId, categories.id))
         .leftJoin(countries, eq(contacts.countryId, countries.id))
-        .limit(this.BATCH_SIZE)
+        .offset(this.BATCH_SIZE)
         .offset(offset);
       
       // Build enrichment data and create bulk operations
@@ -1081,7 +1081,7 @@ export class ElasticsearchSyncService {
         .leftJoin(organizations, eq(contacts.organizationId, organizations.id))
         .leftJoin(categories, eq(events.categoryId, categories.id))
         .leftJoin(countries, eq(contacts.countryId, countries.id))
-        .limit(this.BATCH_SIZE)
+        .offset(this.BATCH_SIZE)
         .offset(offset);
       
       // Build enrichment data and create bulk operations
@@ -1188,7 +1188,7 @@ export class ElasticsearchSyncService {
     while (offset < total) {
       const batch = await db.select()
         .from(leadInteractions)
-        .limit(this.BATCH_SIZE)
+        .offset(this.BATCH_SIZE)
         .offset(offset);
       
       // Use bulk indexing for performance
@@ -1237,7 +1237,7 @@ export class ElasticsearchSyncService {
     while (offset < total) {
       const batch = await db.select()
         .from(partnershipActivities)
-        .limit(this.BATCH_SIZE)
+        .offset(this.BATCH_SIZE)
         .offset(offset);
       
       // Use bulk indexing for performance - include organization name enrichment
@@ -1284,7 +1284,7 @@ export class ElasticsearchSyncService {
     while (offset < total) {
       const batch = await db.select()
         .from(partnershipInteractions)
-        .limit(this.BATCH_SIZE)
+        .offset(this.BATCH_SIZE)
         .offset(offset);
       
       // Use bulk indexing for performance
@@ -1329,7 +1329,7 @@ export class ElasticsearchSyncService {
     while (offset < total) {
       const batch = await db.select()
         .from(updates)
-        .limit(this.BATCH_SIZE)
+        .offset(this.BATCH_SIZE)
         .offset(offset);
       
       // Use bulk indexing for performance

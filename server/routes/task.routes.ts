@@ -18,7 +18,7 @@ import {
   type User,
   taskComments,
   taskCommentAttachments,
-} from "@shared/schema";
+} from "@shared/schema.mssql";
 import { fromError } from "zod-validation-error";
 import { isDepartmentScopedRole, isDepartmentOrStakeholderRole } from "./utils";
 import { upload, deleteFile, getFilePath } from "../fileUpload";

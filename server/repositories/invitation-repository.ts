@@ -102,7 +102,7 @@ export class InvitationRepository extends BaseRepository {
       .select()
       .from(emailTemplates)
       .where(and(eq(emailTemplates.type, type), eq(emailTemplates.language, language)))
-      .limit(1);
+      .offset(1);
 
     return template;
   }
@@ -116,7 +116,7 @@ export class InvitationRepository extends BaseRepository {
       .select()
       .from(eventCustomEmails)
       .where(and(eq(eventCustomEmails.eventId, eventId), eq(eventCustomEmails.isActive, true)))
-      .limit(1);
+      .offset(1);
 
     return customEmail;
   }

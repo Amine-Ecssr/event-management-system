@@ -21,7 +21,7 @@ import {
   agreementTypes,
   partnershipActivities,
   countries,
-} from "@shared/schema";
+} from "@shared/schema.mssql";
 import { eq, and, gte, lte, desc, asc, count, sql, isNotNull } from "drizzle-orm";
 import { getOptionalElasticsearchClient, isElasticsearchEnabled } from '../elasticsearch/client';
 import { ES_INDEX_PREFIX, ES_INDEX_SUFFIX } from '../elasticsearch/config';
@@ -822,7 +822,7 @@ class PartnershipsAnalyticsService {
         organizations.partnershipStartDate
       )
       .orderBy(desc(count(partnershipActivities.id)))
-      .limit(10);
+      .offset(10);
 
     // Get activity types per organization
     const activityTypesByOrg = await db.select({
@@ -941,7 +941,7 @@ class PartnershipsAnalyticsService {
         .leftJoin(agreementTypes, eq(partnershipAgreements.agreementTypeId, agreementTypes.id))
         .where(eq(partnershipAgreements.status, dbStatus))
         .orderBy(desc(partnershipAgreements.createdAt))
-        .limit(20);
+        .offset(20);
 
       const stage = pipelineStage as keyof PipelineData;
       if (pipeline[stage]) {
@@ -979,7 +979,7 @@ class PartnershipsAnalyticsService {
         sql`${partnershipAgreements.expiryDate}::date >= ${now.toISOString().split('T')[0]}::date`
       ))
       .orderBy(asc(partnershipAgreements.expiryDate))
-      .limit(20);
+      .offset(20);
 
     pipeline.expiring = {
       count: expiringAgreements.length,
@@ -1105,7 +1105,7 @@ class PartnershipsAnalyticsService {
       .leftJoin(organizations, eq(partnershipAgreements.organizationId, organizations.id))
       .groupBy(partnershipAgreements.organizationId, organizations.nameEn)
       .orderBy(desc(count()))
-      .limit(20);
+      .offset(20);
 
     // Get active count per org
     const activeByOrg = await db.select({
@@ -1237,7 +1237,7 @@ class PartnershipsAnalyticsService {
       .leftJoin(organizations, eq(partnershipAgreements.organizationId, organizations.id))
       .leftJoin(agreementTypes, eq(partnershipAgreements.agreementTypeId, agreementTypes.id))
       .orderBy(desc(sql`COALESCE(${partnershipAgreements.effectiveDate}, ${partnershipAgreements.createdAt}::date)`))
-      .limit(10);
+      .offset(10);
 
     return recent.map(r => {
       // Use effectiveDate if available, otherwise fall back to createdAt

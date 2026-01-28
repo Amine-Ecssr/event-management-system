@@ -1,4 +1,8 @@
 npx drizzle-kit generate --name=init_mssql
 npx drizzle-kit migrate
 
-object - added value - features - BRD
+eCSsr2o264@2026!
+
+docker exec -it ecssr-ems-mssql-dev bash
+/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "eCSsr2o264@2026!" -C
+SELECT name FROM sys.databases;

@@ -19,7 +19,7 @@ export class AuthRepository extends BaseRepository {
       .select()
       .from(users)
       .where(eq(users.keycloakId, keycloakId))
-      .limit(1);
+      .offset(1);
 
     return user;
   }
@@ -70,7 +70,7 @@ export class AuthRepository extends BaseRepository {
       .select()
       .from(users)
       .where(eq(users.id, userId))
-      .limit(1);
+      .offset(1);
 
     return updated!;
   }

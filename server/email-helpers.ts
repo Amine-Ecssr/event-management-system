@@ -1,4 +1,4 @@
-import type { Event, Stakeholder, StakeholderRequirement } from '@shared/schema';
+import type { Event, Stakeholder, StakeholderRequirement } from '@shared/schema.mssql';
 import { format } from 'date-fns';
 
 /**

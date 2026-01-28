@@ -2,7 +2,7 @@ import Keycloak from 'keycloak-connect';
 import { Express, Request, Response, NextFunction } from 'express';
 import session from 'express-session';
 import { storage } from './storage';
-import { User as SelectUser } from '@shared/schema';
+import { User as SelectUser } from '@shared/schema.mssql';
 
 declare global {
   namespace Express {

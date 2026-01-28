@@ -1,4 +1,4 @@
-import type { Event, Settings, Stakeholder, StakeholderRequirement, Task } from '@shared/schema';
+import type { Event, Settings, Stakeholder, StakeholderRequirement, Task } from '@shared/schema.mssql';
 import { format } from 'date-fns';
 import { createEmailProvider } from './emailProvider';
 

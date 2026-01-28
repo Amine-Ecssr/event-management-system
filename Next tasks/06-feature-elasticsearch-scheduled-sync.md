@@ -32,7 +32,7 @@ import { indexingService } from './elasticsearch-indexing.service';
 import { storage } from '../repositories';
 import { logger } from '../utils/logger';
 import { db } from '../db';
-import { events, tasks, contacts, organizations, leads, partnershipAgreements } from '@shared/schema';
+import { events, tasks, contacts, organizations, leads, partnershipAgreements } from '@shared/schema.mssql';
 import { gt, gte, sql, and, eq } from 'drizzle-orm';
 
 interface SyncState {
@@ -238,7 +238,7 @@ export class ElasticsearchSyncService {
     while (offset < total) {
       const batch = await db.select()
         .from(events)
-        .limit(this.BATCH_SIZE)
+        .offset(this.BATCH_SIZE)
         .offset(offset);
       
       const operations = batch.map(event => ({
@@ -287,7 +287,7 @@ export class ElasticsearchSyncService {
     
     let offset = 0;
     while (offset < total) {
-      const batch = await db.select().from(tasks).limit(this.BATCH_SIZE).offset(offset);
+      const batch = await db.select().from(tasks).offset(this.BATCH_SIZE).offset(offset);
       
       const operations = batch.map(task => ({
         action: 'index' as const,

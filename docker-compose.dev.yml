@@ -3,7 +3,6 @@ services:
     build:
       context: ./elasticsearch
       dockerfile: Dockerfile
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
     container_name: ecssr-ems-elasticsearch-dev
     restart: unless-stopped
     environment:
@@ -45,10 +44,12 @@ services:
     image: docker.elastic.co/kibana/kibana:8.12.0
     container_name: ecssr-ems-kibana-dev
     restart: unless-stopped
+    env_file:
+      - .env.development
     environment:
     - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     - ELASTICSEARCH_USERNAME=kibana_system
-    - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD:-kibana-dev-password-2024}
+    - ELASTICSEARCH_PASSWORD=${ELASTICSEARCH_PASSWORD:-eventcal-dev-password-2024}
     - SERVER_NAME=eventcal-kibana-dev
     - SERVER_PUBLICBASEURL=http://localhost:5601
     - XPACK_SECURITY_ENABLED=true
@@ -103,7 +104,7 @@ services:
     env_file:
     - .env.development
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-ecssr_events_dev}
+      DATABASE_URL: "mssql://${MSSQL_USER:-sa}:${MSSQL_SA_PASSWORD}@mssql:1433/${MSSQL_DB_NAME:-EMS}?trustServerCertificate=true"
     command: npm run db:migrate
     restart: 'no'
     volumes:
@@ -159,11 +160,7 @@ services:
     - 9000:9000
     - 9001:9001
     healthcheck:
-      test:
-      - CMD
-      - mc
-      - ready
-      - local
+      test: ["CMD-SHELL", "curl -f http://localhost:9000/minio/health/ready || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -190,7 +187,7 @@ services:
     environment:
       NODE_ENV: development
       PORT: ${PORT:-5050}
-      DATABASE_URL: "Server=mssql,1433;Database=${MSSQL_DB:-EMS};User Id=sa;Password=${MSSQL_SA_PASSWORD:-YourStrong!Passw0rd};TrustServerCertificate=true;"
+      DATABASE_URL: "mssql://${MSSQL_USER:-sa}:${MSSQL_SA_PASSWORD}@mssql:1433/${MSSQL_DB_NAME:-EMS}?trustServerCertificate=true"
       ELASTICSEARCH_CLOUD_ID: ${ELASTICSEARCH_CLOUD_ID:-}
       ELASTICSEARCH_API_KEY: ${ELASTICSEARCH_API_KEY:-}
       ELASTICSEARCH_URL: ${ELASTICSEARCH_URL:-http://elasticsearch:9200}
@@ -240,55 +237,55 @@ services:
     - uploads_data_dev:/app/uploads
     networks:
     - dev-network
-  whatsapp-service:
-    build:
-      context: ./whatsapp-service
-      dockerfile: Dockerfile
-    container_name: ecssr-whatsapp-service-dev
-    restart: unless-stopped
-    environment:
-      NODE_ENV: development
-      PORT: 3001
-      WHATSAPP_AUTH_PHRASE: ${WHATSAPP_AUTH_PHRASE:-dev-change-me}
-      WHATSAPP_DEFAULT_GROUP: ${WHATSAPP_DEFAULT_GROUP:-ECSSR Events}
-    ports:
-    - 3001:3001
-    volumes:
-    - ./whatsapp-service:/app
-    - /app/node_modules
-    - ./whatsapp-service/auth_info:/app/auth_info
-    healthcheck:
-      test:
-      - CMD
-      - wget
-      - --no-verbose
-      - --tries=1
-      - --spider
-      - http://localhost:3001/health
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 20s
-    networks:
-    - dev-network
-  scraper-service:
-    build:
-      context: .
-      dockerfile: scraper-service/Dockerfile
-    container_name: ecssr-scraper-service-dev
-    restart: unless-stopped
-    environment:
-      NODE_ENV: development
-      PORT: 3002
-      SCRAPER_SERVICE_TOKEN: ${SCRAPER_SERVICE_TOKEN:-dev-change-this-scraper-token}
-      SCRAPER_SERVICE_SECRET: ${SCRAPER_SERVICE_SECRET:-dev-change-this-scraper-secret}
-    ports:
-    - 3002:3002
-    volumes:
-    - ./scraper-service:/app/scraper-service
-    - ./shared:/app/shared
-    networks:
-    - dev-network
+  # whatsapp-service:
+  #   build:
+  #     context: ./whatsapp-service
+  #     dockerfile: Dockerfile
+  #   container_name: ecssr-whatsapp-service-dev
+  #   restart: unless-stopped
+  #   environment:
+  #     NODE_ENV: development
+  #     PORT: 3001
+  #     WHATSAPP_AUTH_PHRASE: ${WHATSAPP_AUTH_PHRASE:-dev-change-me}
+  #     WHATSAPP_DEFAULT_GROUP: ${WHATSAPP_DEFAULT_GROUP:-ECSSR Events}
+  #   ports:
+  #   - 3001:3001
+  #   volumes:
+  #   - ./whatsapp-service:/app
+  #   - /app/node_modules
+  #   - ./whatsapp-service/auth_info:/app/auth_info
+  #   healthcheck:
+  #     test:
+  #     - CMD
+  #     - wget
+  #     - --no-verbose
+  #     - --tries=1
+  #     - --spider
+  #     - http://localhost:3001/health
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 20s
+  #   networks:
+  #   - dev-network
+  # scraper-service:
+  #   build:
+  #     context: .
+  #     dockerfile: scraper-service/Dockerfile
+  #   container_name: ecssr-scraper-service-dev
+  #   restart: unless-stopped
+  #   environment:
+  #     NODE_ENV: development
+  #     PORT: 3002
+  #     SCRAPER_SERVICE_TOKEN: ${SCRAPER_SERVICE_TOKEN:-dev-change-this-scraper-token}
+  #     SCRAPER_SERVICE_SECRET: ${SCRAPER_SERVICE_SECRET:-dev-change-this-scraper-secret}
+  #   ports:
+  #   - 3002:3002
+  #   volumes:
+  #   - ./scraper-service:/app/scraper-service
+  #   - ./shared:/app/shared
+  #   networks:
+  #   - dev-network
   mssql:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: ecssr-ems-mssql-dev
@@ -303,6 +300,7 @@ services:
     - ${MSSQL_PORT:-1433}:1433
     volumes:
     - mssql_data_dev:/var/opt/mssql
+    - ./mssql-init:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$${MSSQL_SA_PASSWORD}\" -Q \"SELECT 1\" -C || exit 1"]
       interval: 10s

@@ -29,7 +29,7 @@ Build a comprehensive events analytics dashboard with calendar heatmaps, event t
 ### Backend Events Analytics Service (`server/services/events-analytics.service.ts`)
 ```typescript
 import { db } from '../db';
-import { events, eventAttendees, departments, eventMedia } from '@shared/schema';
+import { events, eventAttendees, departments, eventMedia } from '@shared/schema.mssql';
 import { sql, eq, gte, lte, and, count, desc, asc } from 'drizzle-orm';
 import { elasticsearchService } from './elasticsearch.service';
 
@@ -251,7 +251,7 @@ export class EventsAnalyticsService {
           sql`DATE(${events.startDate}) = ${row.date}`,
           departmentId ? eq(events.departmentId, departmentId) : undefined
         ))
-        .limit(5);
+        .offset(5);
 
       heatmapData.push({
         date: row.date,
@@ -341,7 +341,7 @@ export class EventsAnalyticsService {
         departmentId ? eq(events.departmentId, departmentId) : undefined
       ))
       .orderBy(asc(events.startDate))
-      .limit(100);
+      .offset(100);
 
     return result.map(e => ({
       id: e.id,
@@ -375,7 +375,7 @@ export class EventsAnalyticsService {
       ))
       .groupBy(events.location)
       .orderBy(desc(count()))
-      .limit(10);
+      .offset(10);
 
     return result.map(r => ({
       location: r.location || 'Unknown',

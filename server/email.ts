@@ -1,4 +1,4 @@
-import type { Event, Stakeholder, StakeholderRequirement, Task, Update, Contact, EmailTemplate } from '@shared/schema';
+import type { Event, Stakeholder, StakeholderRequirement, Task, Update, Contact, EmailTemplate } from '@shared/schema.mssql';
 import type { AppSettings } from './services/configService';
 import { addDays, format, startOfWeek } from 'date-fns';
 import { createEmailProvider } from './emailProvider';

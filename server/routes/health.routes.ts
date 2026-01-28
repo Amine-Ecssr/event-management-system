@@ -10,7 +10,7 @@
 
 import { Router } from "express";
 import { storage } from "../storage";
-import type { Event } from "@shared/schema";
+import type { Event } from "@shared/schema.mssql";
 
 const router = Router();
 
@@ -94,7 +94,7 @@ router.get("/api/dashboard/stats", async (req, res) => {
     res.json(stats);
   } catch (error) {
     console.error('[Dashboard Stats] Error:', error);
-    res.status(500).json({ error: "Failed to fetch dashboard statistics" });
+    res.status(500).json({ error: "Failed to fetch dashboard statistics" + (error instanceof Error ? ': ' + error.message : '')});
   }
 });
 

@@ -55,7 +55,7 @@ import {
   type InsertLead,
   type InsertLeadInteraction,
   type InsertPartnershipInteraction,
-} from "@shared/schema";
+} from "@shared/schema.mssql";
 import { and, eq, inArray, isNull, like, ne, or } from "drizzle-orm";
 import { getAdminToken } from "./keycloakScriptUtils";
 import { imageGenerator } from "../services/imageGenerator";
@@ -3196,7 +3196,7 @@ async function seedPartnershipData(
         eq(partnershipAgreements.organizationId, orgId),
         eq(partnershipAgreements.title, agreementSeed.title)
       ))
-      .limit(1);
+      .offset(1);
     
     if (existing) {
       console.log(`  ℹ️  Agreement already exists: ${agreementSeed.title}`);
@@ -3240,7 +3240,7 @@ async function seedPartnershipData(
         eq(partnershipActivities.organizationId, orgId),
         eq(partnershipActivities.title, activitySeed.title)
       ))
-      .limit(1);
+      .offset(1);
     
     if (existing) {
       console.log(`  ℹ️  Activity already exists: ${activitySeed.title}`);
@@ -3291,7 +3291,7 @@ async function seedPartnershipData(
         eq(partnershipContacts.organizationId, orgId),
         eq(partnershipContacts.contactId, contactInfo.record.id)
       ))
-      .limit(1);
+      .offset(1);
     
     if (existing) {
       console.log(`  ℹ️  Partnership contact already exists: ${contactSeed.contactKey} -> ${contactSeed.organizationKey}`);
@@ -3362,7 +3362,7 @@ async function seedPartnershipData(
         eq(tasks.partnershipId, orgId),
         eq(tasks.title, taskSeed.title)
       ))
-      .limit(1);
+      .offset(1);
     
     if (existing) {
       console.log(`  ℹ️  Partnership task already exists: ${taskSeed.title}`);
@@ -3399,7 +3399,7 @@ async function seedLeads(
   for (const leadSeed of leadSeeds) {
     // Check if lead already exists by email
     const [existing] = leadSeed.email 
-      ? await db.select().from(leads).where(eq(leads.email, leadSeed.email)).limit(1)
+      ? await db.select().from(leads).where(eq(leads.email, leadSeed.email)).offset(1)
       : [];
     
     if (existing) {
@@ -3477,7 +3477,7 @@ async function seedLeads(
         eq(tasks.leadId, leadId),
         eq(tasks.title, taskSeed.title)
       ))
-      .limit(1);
+      .offset(1);
     
     if (existing) {
       console.log(`  ℹ️  Lead task already exists: ${taskSeed.title}`);
@@ -3584,7 +3584,7 @@ async function seedContacts(
     const organizationId = seed.organizationKey ? organizationMap.get(seed.organizationKey) ?? null : null;
     const positionId = seed.positionKey ? positionMap.get(seed.positionKey) ?? null : null;
 
-    const [existing] = await db.select().from(contacts).where(eq(contacts.email, seed.email)).limit(1);
+    const [existing] = await db.select().from(contacts).where(eq(contacts.email, seed.email)).offset(1);
 
     // Generate profile picture ONLY for speakers to save costs
     let profilePictureKey: string | undefined = undefined;
@@ -3680,7 +3680,7 @@ async function seedDepartments(keycloak: KeycloakSeeder) {
   
   for (const dept of departmentSeeds) {
     const group = await keycloak.ensureGroup(dept.keycloakPathSegments);
-    let existing = (await db.select().from(departments).where(eq(departments.keycloakGroupId, group.path)).limit(1))[0];
+    let existing = (await db.select().from(departments).where(eq(departments.keycloakGroupId, group.path)).offset(1))[0];
 
     if (!existing) {
       [existing] = await db
@@ -3724,7 +3724,7 @@ async function seedDepartments(keycloak: KeycloakSeeder) {
     if (!primaryEmailId && insertedEmails.length > 0) {
       const [firstEmail] = await db.select().from(departmentEmails)
         .where(eq(departmentEmails.departmentId, existing.id))
-        .limit(1);
+        .offset(1);
       primaryEmailId = firstEmail.id;
     }
 
@@ -3753,7 +3753,7 @@ async function seedDepartments(keycloak: KeycloakSeeder) {
       await keycloak.createOrUpdateUser(user, group.id);
       
       // Create or update local database user
-      let localUser = (await db.select().from(users).where(eq(users.username, user.username)).limit(1))[0];
+      let localUser = (await db.select().from(users).where(eq(users.username, user.username)).offset(1))[0];
       
       if (!localUser) {
         // Create new user with a placeholder password (they'll login via Keycloak)
@@ -3783,7 +3783,7 @@ async function seedDepartments(keycloak: KeycloakSeeder) {
             eq(departmentAccounts.userId, localUser.id),
             eq(departmentAccounts.departmentId, existing.id)
           ))
-          .limit(1))[0];
+          .offset(1))[0];
 
         if (!existingAccount) {
           await db.insert(departmentAccounts).values({

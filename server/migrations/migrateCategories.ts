@@ -1,6 +1,6 @@
 import "../config/loadEnv";
 import { db } from '../db';
-import { events, categories } from '@shared/schema';
+import { events, categories } from '@shared/schema.mssql';
 import { eq, isNotNull, sql } from 'drizzle-orm';
 
 /**
@@ -41,7 +41,7 @@ async function migrateCategories() {
         .select()
         .from(categories)
         .where(eq(categories.nameEn, nameEn))
-        .limit(1);
+        .offset(1);
 
       if (existing) {
         categoryIdMap.set(nameEn, existing.id);

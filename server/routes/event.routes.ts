@@ -10,7 +10,7 @@
 import { Router } from "express";
 import { storage } from "../storage";
 import { isAuthenticated, isAdminOrSuperAdmin, isSuperAdmin } from "../auth";
-import { insertEventSchema } from "@shared/schema";
+import { insertEventSchema } from "@shared/schema.mssql";
 import { fromError } from "zod-validation-error";
 import { agendaUpload, getAgendaFilePath, deleteAgendaFile } from "../fileUpload";
 import { emailService } from "../email";

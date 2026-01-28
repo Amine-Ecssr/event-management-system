@@ -28,7 +28,7 @@ export class ReminderRepository extends BaseRepository {
             eq(reminderQueue.reminderType, insertReminder.reminderType)
           )
         )
-        .limit(1);
+        .offset(1);
 
       return existing;
     }

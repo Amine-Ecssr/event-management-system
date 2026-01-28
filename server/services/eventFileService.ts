@@ -17,7 +17,7 @@ import {
   type InsertEventFile,
   type EventFolder,
   type EventFile,
-} from "@shared/schema";
+} from "@shared/schema.mssql";
 import { eq, and, sql, inArray, isNull } from "drizzle-orm";
 import { 
   minioService,
@@ -376,7 +376,7 @@ export async function getFileWithFolder(fileId: number): Promise<(EventFile & { 
     .from(eventFiles)
     .innerJoin(eventFolders, eq(eventFiles.eventFolderId, eventFolders.id))
     .where(eq(eventFiles.id, fileId))
-    .limit(1);
+    .offset(1);
   
   if (result.length === 0) return undefined;
   

@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { whatsappConfig, whatsappTemplates, eventDepartments, departments, type Event } from "@shared/schema";
+import { whatsappConfig, whatsappTemplates, eventDepartments, departments, type Event } from "@shared/schema.mssql";
 import { format } from "date-fns";
 import { ar, enUS } from "date-fns/locale";
 import { eq, and } from "drizzle-orm";
@@ -41,7 +41,7 @@ interface TemplateVariables {
  * Get WhatsApp configuration from database
  */
 async function getWhatsAppConfig() {
-  const [config] = await db.select().from(whatsappConfig).limit(1);
+  const [config] = await db.select().from(whatsappConfig).offset(1);
   return config;
 }
 
@@ -58,7 +58,7 @@ async function getWhatsAppTemplate(type: string, language: 'en' | 'ar') {
         eq(whatsappTemplates.language, language)
       )
     )
-    .limit(1);
+    .offset(1);
   return template;
 }
 

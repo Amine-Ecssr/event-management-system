@@ -13,7 +13,7 @@ import { Router } from "express";
 import { storage } from "../storage";
 import { isAuthenticated, isAdminOrSuperAdmin } from "../auth";
 import { isDepartmentScopedRole } from "./utils";
-import type { User } from "@shared/schema";
+import type { User } from "@shared/schema.mssql";
 
 const router = Router();
 

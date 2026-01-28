@@ -12,7 +12,7 @@ import multer from "multer";
 import fs from "fs";
 import { storage } from "../storage";
 import { isAuthenticated, isAdminOrSuperAdmin } from "../auth";
-import { type User } from "@shared/schema";
+import { type User } from "@shared/schema.mssql";
 import { minioService } from "../services/minio";
 import { upload, getFilePath } from "../fileUpload";
 import { indexingService } from "../services/elasticsearch-indexing.service";

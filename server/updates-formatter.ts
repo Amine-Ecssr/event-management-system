@@ -1,4 +1,4 @@
-import type { Update } from "@shared/schema";
+import type { Update } from "@shared/schema.mssql";
 import { addDays, format } from "date-fns";
 import { ar, enUS } from "date-fns/locale";
 

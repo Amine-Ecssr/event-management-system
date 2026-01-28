@@ -32,7 +32,7 @@ import { db } from '../db';
 import { 
   events, tasks, contacts, organizations, leads, 
   partnershipAgreements, users, departments 
-} from '@shared/schema';
+} from '@shared/schema.mssql';
 import { sql, eq, gte, lte, and, count, sum, avg, desc } from 'drizzle-orm';
 
 export interface ExecutiveDashboardData {
@@ -303,7 +303,7 @@ export class AnalyticsService {
       .from(contacts)
       .leftJoin(organizations, eq(contacts.organizationId, organizations.id))
       .groupBy(organizations.name)
-      .limit(10);
+      .offset(10);
     
     const withEmail = await db.select({ count: count() })
       .from(contacts)

@@ -476,7 +476,7 @@ router.get(
  */
 router.post("/api/updates", isAuthenticated, async (req, res) => {
   try {
-    const { insertUpdateSchema } = await import("@shared/schema");
+    const { insertUpdateSchema } = await import("@shared/schema.mssql");
 
     if (!req.user) {
       return res.status(401).json({ error: "Unauthorized" });

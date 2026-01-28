@@ -16,7 +16,7 @@ import {
   updateStakeholderSchema,
   insertStakeholderEmailSchema,
   insertStakeholderRequirementSchema,
-} from "@shared/schema";
+} from "@shared/schema.mssql";
 import { fromError } from "zod-validation-error";
 import { isDepartmentScopedRole } from "./utils";
 

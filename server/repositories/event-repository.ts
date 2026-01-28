@@ -37,7 +37,7 @@ export class EventRepository extends BaseRepository {
       .from(events)
       .leftJoin(categories, eq(events.categoryId, categories.id))
       .where(eq(events.id, id))
-      .limit(1);
+      .offset(1);
 
     if (rows.length === 0) return undefined;
 

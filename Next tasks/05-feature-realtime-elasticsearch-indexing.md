@@ -57,7 +57,7 @@ import {
   PartnershipAgreement, EventAttendee, EventInvitee,
   LeadInteraction, PartnershipActivity, PartnershipInteraction,
   ArchivedEvent, WeeklyUpdate
-} from '@shared/schema';
+} from '@shared/schema.mssql';
 
 // Transform functions - convert DB models to ES documents
 export interface ESEventDocument {

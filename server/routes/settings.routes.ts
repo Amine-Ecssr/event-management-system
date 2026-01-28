@@ -15,7 +15,7 @@ import { emailService } from "../email";
 import { fromError } from "zod-validation-error";
 import { settingsUpdateSchema } from "../services/configService";
 import { seedSampleData, resetSampleData } from "../scripts/seedSampleData";
-import type { Event } from "@shared/schema";
+import type { Event } from "@shared/schema.mssql";
 
 const router = Router();
 

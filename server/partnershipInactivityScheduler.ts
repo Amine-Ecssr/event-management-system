@@ -1,6 +1,6 @@
 import { storage } from './storage';
 import { emailService } from './email';
-import type { Organization } from '@shared/schema';
+import type { Organization } from '@shared/schema.mssql';
 import type { AppSettings } from './services/configService';
 import { format, differenceInDays, differenceInMonths } from 'date-fns';
 

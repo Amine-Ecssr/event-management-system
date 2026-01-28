@@ -1,4 +1,4 @@
-import type { Task, StakeholderRequirement } from '@shared/schema';
+import type { Task, StakeholderRequirement } from '@shared/schema.mssql';
 import type { AppSettings } from './services/configService';
 import { format } from 'date-fns';
 import { formatRequirementItem } from './email-helpers';

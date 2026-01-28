@@ -21,7 +21,7 @@ import {
   events,
   leads,
   organizations,
-} from "@shared/schema";
+} from "@shared/schema.mssql";
 import { eq, and, gte, lte, desc, asc, count, sql, lt, isNotNull, inArray } from "drizzle-orm";
 import { getOptionalElasticsearchClient, isElasticsearchEnabled } from '../elasticsearch/client';
 import { ES_INDEX_PREFIX, ES_INDEX_SUFFIX } from '../elasticsearch/config';
@@ -873,7 +873,7 @@ class TasksAnalyticsService {
       .leftJoin(departments, eq(tasks.departmentId, departments.id))
       .where(condition)
       .orderBy(asc(tasks.dueDate))
-      .limit(20);
+      .offset(20);
 
     return overdueList.map(t => {
       const dueDate = t.dueDate ? new Date(t.dueDate) : now;

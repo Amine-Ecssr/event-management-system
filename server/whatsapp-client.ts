@@ -6,7 +6,7 @@
  * without managing WhatsApp sessions directly.
  */
 
-import type { Event } from '@shared/schema';
+import type { Event } from '@shared/schema.mssql';
 
 const WHATSAPP_SERVICE_URL = process.env.WHATSAPP_SERVICE_URL || 'http://localhost:3001';
 

@@ -41,7 +41,7 @@ export class UpdateRepository extends BaseRepository {
       .from(updates)
       .where(and(eq(updates.type, type), isNull(updates.departmentId)))
       .orderBy(desc(updates.periodStart))
-      .limit(1);
+      .offset(1);
 
     return update;
   }
@@ -60,7 +60,7 @@ export class UpdateRepository extends BaseRepository {
       .from(updates)
       .where(and(eq(updates.type, type), eq(updates.departmentId, departmentId)))
       .orderBy(desc(updates.periodStart))
-      .limit(1);
+      .offset(1);
 
     return update;
   }
@@ -94,9 +94,20 @@ export class UpdateRepository extends BaseRepository {
 
   async createOrUpdateUpdate(data: InsertUpdate): Promise<Update> {
     // Check if an update already exists
+
+     // Type guard for data.type
+    if(data.type !== 'weekly' && data.type !== 'monthly') {
+        throw new Error('Invalid type: must be "weekly" or "monthly"');
+     }
+
     const existing = data.departmentId
-      ? await this.getUpdateForDepartment(data.type, new Date(data.periodStart), data.departmentId)
-      : await this.getUpdate(data.type, data.periodStart instanceof Date ? data.periodStart.toISOString() : data.periodStart);
+      ? await this.getUpdateForDepartment(data.type, new Date(data.periodStart), Number(data.departmentId))
+      : await this.getUpdate(
+          data.type,
+          typeof data.periodStart === 'string'
+            ? data.periodStart
+            : (data.periodStart as Date).toISOString()
+        );
 
     if (existing) {
       // MSSQL: update().returning() is not supported

@@ -25,7 +25,7 @@ import {
   type EventFolderPermission,
   type FolderAccessTemplate,
   type User,
-} from "@shared/schema";
+} from "@shared/schema.mssql";
 import { eq, and, sql, inArray, desc } from "drizzle-orm";
 import { eventFileService } from "./eventFileService";
 

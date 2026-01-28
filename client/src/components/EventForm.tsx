@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { insertEventSchema } from '@shared/schema';
+import { insertEventSchema } from '@shared/schema.mssql';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import {
   Form,

@@ -16,7 +16,7 @@ import { storage } from "../storage";
 import { isAuthenticated, isAdminOrSuperAdmin, isSuperAdmin } from "../auth";
 import { minioService } from "../services/minio";
 import { indexingService } from "../services/elasticsearch-indexing.service";
-import type { User } from "@shared/schema";
+import type { User } from "@shared/schema.mssql";
 
 const router = Router();
 

@@ -32,7 +32,7 @@ import { db } from '../db';
 import { 
   partnershipAgreements, organizations, contacts, 
   agreementTypes, events 
-} from '@shared/schema';
+} from '@shared/schema.mssql';
 import { sql, eq, gte, lte, and, count, sum, desc, asc } from 'drizzle-orm';
 
 export interface PartnershipsAnalyticsData {
@@ -264,7 +264,7 @@ export class PartnershipsAnalyticsService {
         .leftJoin(organizations, eq(partnershipAgreements.organizationId, organizations.id))
         .leftJoin(agreementTypes, eq(partnershipAgreements.agreementTypeId, agreementTypes.id))
         .where(eq(partnershipAgreements.status, status))
-        .limit(20);
+        .offset(20);
 
       const stage = status as keyof PipelineData;
       if (pipeline[stage]) {
@@ -301,7 +301,7 @@ export class PartnershipsAnalyticsService {
         lte(partnershipAgreements.endDate, thirtyDaysFromNow),
         gte(partnershipAgreements.endDate, now)
       ))
-      .limit(20);
+      .offset(20);
 
     pipeline.expiring = {
       count: expiring.length,
@@ -390,7 +390,7 @@ export class PartnershipsAnalyticsService {
       .leftJoin(organizations, eq(partnershipAgreements.organizationId, organizations.id))
       .groupBy(partnershipAgreements.organizationId, organizations.name)
       .orderBy(desc(count()))
-      .limit(20);
+      .offset(20);
 
     return result.map(r => ({
       organizationId: r.organizationId || 0,
@@ -456,7 +456,7 @@ export class PartnershipsAnalyticsService {
       .leftJoin(organizations, eq(partnershipAgreements.organizationId, organizations.id))
       .leftJoin(agreementTypes, eq(partnershipAgreements.agreementTypeId, agreementTypes.id))
       .orderBy(desc(partnershipAgreements.createdAt))
-      .limit(10);
+      .offset(10);
 
     return recent.map(r => ({
       id: r.id,

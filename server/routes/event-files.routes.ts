@@ -16,7 +16,7 @@ import multer from "multer";
 import { eventFileService } from "../services/eventFileService";
 import { folderPermissionService, type PermissionLevel } from "../services/folderPermissionService";
 import { minioService, MAX_FILE_SIZE } from "../services/minio";
-import type { User } from "@shared/schema";
+import type { User } from "@shared/schema.mssql";
 import { isAdminRole } from "./utils";
 
 // Extend Express Request to include user

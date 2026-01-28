@@ -1,0 +1,3 @@
+IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = 'EMS')
+BEGIN CREATE DATABASE EMS; 
+END GO

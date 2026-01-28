@@ -245,7 +245,7 @@ Test repositories with real database connection (test database).
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import { EventRepository } from '../eventRepository';
 import { db } from '../../db';
-import { events, categories } from '@shared/schema';
+import { events, categories } from '@shared/schema.mssql';
 import { sql } from 'drizzle-orm';
 
 describe('EventRepository Integration', () => {
@@ -531,7 +531,7 @@ export type {
   Department, InsertDepartment,
   Task, InsertTask, UpdateTask,
   // ... other types
-} from '@shared/schema';
+} from '@shared/schema.mssql';
 
 // Repository-specific types
 export interface IStorage {
@@ -575,7 +575,7 @@ For each repository:
 **Template**:
 ```typescript
 import { BaseRepository } from './base';
-import { users, type User, type InsertUser } from '@shared/schema';
+import { users, type User, type InsertUser } from '@shared/schema.mssql';
 import { eq } from 'drizzle-orm';
 
 export class UserRepository extends BaseRepository {
@@ -635,7 +635,7 @@ describe('UserRepository', () => {
 import { describe, it, expect, beforeEach, afterAll } from 'vitest';
 import { UserRepository } from '../userRepository';
 import { db } from '../../db';
-import { users } from '@shared/schema';
+import { users } from '@shared/schema.mssql';
 
 describe('UserRepository Integration', () => {
   let repository: UserRepository;
