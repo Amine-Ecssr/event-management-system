@@ -50,7 +50,7 @@ services:
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
       - ELASTICSEARCH_USERNAME=kibana_system
-      - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD:-kibana-dev-password-2024}
+      - ELASTICSEARCH_PASSWORD=${ELASTICSEARCH_PASSWORD:-eventcal-dev-password-2024}
       - SERVER_NAME=eventcal-kibana-dev
       - SERVER_PUBLICBASEURL=http://localhost:5601
       - XPACK_SECURITY_ENABLED=true
@@ -286,24 +286,24 @@ services:
     networks:
       - dev-network
 
-  scraper-service:
-    build:
-      context: .
-      dockerfile: scraper-service/Dockerfile
-    container_name: ecssr-scraper-service-dev
-    restart: unless-stopped
-    environment:
-      NODE_ENV: development
-      PORT: 3002
-      SCRAPER_SERVICE_TOKEN: ${SCRAPER_SERVICE_TOKEN:-dev-change-this-scraper-token}
-      SCRAPER_SERVICE_SECRET: ${SCRAPER_SERVICE_SECRET:-dev-change-this-scraper-secret}
-    ports:
-      - "3002:3002"
-    volumes:
-      - ./scraper-service:/app/scraper-service
-      - ./shared:/app/shared
-    networks:
-      - dev-network
+  # scraper-service:
+  #   build:
+  #     context: .
+  #     dockerfile: scraper-service/Dockerfile
+  #   container_name: ecssr-scraper-service-dev
+  #   restart: unless-stopped
+  #   environment:
+  #     NODE_ENV: development
+  #     PORT: 3002
+  #     SCRAPER_SERVICE_TOKEN: ${SCRAPER_SERVICE_TOKEN:-dev-change-this-scraper-token}
+  #     SCRAPER_SERVICE_SECRET: ${SCRAPER_SERVICE_SECRET:-dev-change-this-scraper-secret}
+  #   ports:
+  #     - "3002:3002"
+  #   volumes:
+  #     - ./scraper-service:/app/scraper-service
+  #     - ./shared:/app/shared
+  #   networks:
+  #     - dev-network
 
 volumes:
   postgres_data_dev:
