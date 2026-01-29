@@ -27,6 +27,7 @@ import leadRoutes from "./routes/lead.routes";
 import integrationRoutes from "./routes/integration.routes";
 import invitationRoutes from "./routes/invitation.routes";
 import workflowRoutes from "./routes/workflow.routes";
+import permissionRoutes from "./routes/permission.routes";
 import elasticsearchHealthRoutes from "./routes/elasticsearch-health.routes";
 import elasticsearchAdminRoutes from "./routes/elasticsearch-admin.routes";
 import searchRoutes from "./routes/search.routes";
@@ -102,6 +103,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Workflow management
   app.use(workflowRoutes);
+  app.use(permissionRoutes);
 
   // Create and return HTTP server
   const httpServer = createServer(app);

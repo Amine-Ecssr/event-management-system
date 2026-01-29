@@ -47,3 +47,6 @@ export { default as integrationRoutes } from './integration.routes';
 
 // Invitation routes (attendees, invitees, invitation emails)
 export { default as invitationRoutes } from './invitation.routes';
+
+// Permission management routes
+export { default as permissionRoutes } from './permission.routes';

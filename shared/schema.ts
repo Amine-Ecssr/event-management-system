@@ -8,7 +8,7 @@ export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: varchar("username", { length: 255 }).notNull().unique(),
   password: text("password"), // Nullable for Keycloak-only users
-  role: text("role").notNull().default('admin'), // 'superadmin', 'admin', 'department', 'department_admin', 'events_lead', 'division_head', 'employee', 'viewer'
+  role: text("role").notNull().default('employee'), // 'superadmin', 'admin', 'department', 'department_admin', 'events_lead', 'division_head', 'employee', 'viewer'
   keycloakId: text("keycloak_id").unique(), // Keycloak user ID (sub claim)
   email: text("email"), // Email from Keycloak
   createdAt: timestamp("created_at").defaultNow(),
@@ -17,7 +17,7 @@ export const users = pgTable("users", {
 export const insertUserSchema = createInsertSchema(users, {
   username: z.string().min(3, "Username must be at least 3 characters"),
   password: z.string().min(6, "Password must be at least 6 characters").optional(),
-  role: z.enum(['superadmin', 'admin', 'department', 'department_admin', 'events_lead', 'division_head', 'employee', 'viewer']).default('admin'),
+  role: z.enum(['superadmin', 'admin', 'department', 'department_admin', 'events_lead', 'division_head', 'employee', 'viewer']).default('employee'),
   keycloakId: z.string().optional(),
   email: z.string().email().optional(),
 }).omit({
@@ -2140,3 +2140,100 @@ export type StakeholderAccount = DepartmentAccount;
 export type InsertStakeholderAccount = InsertDepartmentAccount;
 export type EventStakeholder = EventDepartment;
 export type InsertEventStakeholder = InsertEventDepartment;
+
+// ==================== Permission Management ====================
+// Granular permission system with role-based defaults and user overrides
+
+export const permissions = pgTable("permissions", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 100 }).notNull().unique(),
+  resource: varchar("resource", { length: 50 }).notNull(),
+  action: varchar("action", { length: 50 }).notNull(),
+  description: text("description"),
+  category: varchar("category", { length: 50 }),
+  isDangerous: boolean("is_dangerous").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const rolePermissions = pgTable("role_permissions", {
+  id: serial("id").primaryKey(),
+  role: varchar("role", { length: 50 }).notNull(),
+  permissionId: integer("permission_id").references(() => permissions.id, { onDelete: 'cascade' }),
+  granted: boolean("granted").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  unique().on(table.role, table.permissionId),
+]);
+
+export const userPermissions = pgTable("user_permissions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id, { onDelete: 'cascade' }),
+  permissionId: integer("permission_id").references(() => permissions.id, { onDelete: 'cascade' }),
+  granted: boolean("granted").notNull(),
+  grantedBy: integer("granted_by").references(() => users.id),
+  reason: text("reason"),
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  unique().on(table.userId, table.permissionId),
+  index("idx_user_permissions_user").on(table.userId),
+  index("idx_user_permissions_permission").on(table.permissionId),
+]);
+
+export const permissionAuditLog = pgTable("permission_audit_log", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  permissionId: integer("permission_id").references(() => permissions.id),
+  action: varchar("action", { length: 20 }).notNull(),
+  granted: boolean("granted"),
+  grantedBy: integer("granted_by").references(() => users.id),
+  reason: text("reason"),
+  ipAddress: varchar("ip_address", { length: 45 }),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_permission_audit_user").on(table.userId),
+  index("idx_permission_audit_time").on(table.createdAt),
+]);
+
+// Zod schemas for permissions
+export const insertPermissionSchema = createInsertSchema(permissions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertRolePermissionSchema = createInsertSchema(rolePermissions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertUserPermissionSchema = createInsertSchema(userPermissions, {
+  userId: z.number().positive(),
+  permissionId: z.number().positive(),
+  granted: z.boolean(),
+  reason: z.string().optional(),
+  expiresAt: z.date().optional(),
+}).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertPermissionAuditLogSchema = createInsertSchema(permissionAuditLog).omit({
+  id: true,
+  createdAt: true,
+});
+
+// TypeScript types
+export type Permission = typeof permissions.$inferSelect;
+export type InsertPermission = z.infer<typeof insertPermissionSchema>;
+
+export type RolePermission = typeof rolePermissions.$inferSelect;
+export type InsertRolePermission = z.infer<typeof insertRolePermissionSchema>;
+
+export type UserPermission = typeof userPermissions.$inferSelect;
+export type InsertUserPermission = z.infer<typeof insertUserPermissionSchema>;
+
+export type PermissionAuditLog = typeof permissionAuditLog.$inferSelect;
+export type InsertPermissionAuditLog = z.infer<typeof insertPermissionAuditLogSchema>;

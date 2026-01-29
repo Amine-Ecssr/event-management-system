@@ -136,16 +136,16 @@ export function UserPermissionEditor({
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold">Permissions for {userName}</h3>
-          <p className="text-sm text-muted-foreground">
+          <span className="text-sm text-muted-foreground">
             Role: <Badge variant="outline">{userRole}</Badge>
-          </p>
+          </span>
         </div>
       </div>
 
       {/* Legend */}
       <Alert>
         <Info className="h-4 w-4" />
-        <AlertDescription className="flex flex-wrap gap-4 text-sm">
+        <div className="flex flex-wrap gap-4 text-sm mt-2">
           <span className="flex items-center gap-1">
             <Badge variant="secondary">📋</Badge> From Role
           </span>
@@ -155,7 +155,7 @@ export function UserPermissionEditor({
           <span className="flex items-center gap-1">
             <Badge variant="destructive">✗</Badge> Custom Deny
           </span>
-        </AlertDescription>
+        </div>
       </Alert>
 
       {/* Permissions by category */}
@@ -209,7 +209,7 @@ export function UserPermissionEditor({
                               </Label>
                               
                               {permission.isDangerous && (
-                                <AlertTriangle className="h-3 w-3 text-amber-500" title="Dangerous permission" />
+                                <AlertTriangle className="h-3 w-3 text-amber-500" aria-label="Dangerous permission" />
                               )}
                               
                               {isCustom ? (
