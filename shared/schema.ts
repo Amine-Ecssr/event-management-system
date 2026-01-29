@@ -8,7 +8,7 @@ export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: varchar("username", { length: 255 }).notNull().unique(),
   password: text("password"), // Nullable for Keycloak-only users
-  role: text("role").notNull().default('admin'), // 'superadmin', 'admin', 'department', or 'department_admin'
+  role: text("role").notNull().default('admin'), // 'superadmin', 'admin', 'department', 'department_admin', 'events_lead', 'division_head', 'employee', 'viewer'
   keycloakId: text("keycloak_id").unique(), // Keycloak user ID (sub claim)
   email: text("email"), // Email from Keycloak
   createdAt: timestamp("created_at").defaultNow(),
@@ -17,7 +17,7 @@ export const users = pgTable("users", {
 export const insertUserSchema = createInsertSchema(users, {
   username: z.string().min(3, "Username must be at least 3 characters"),
   password: z.string().min(6, "Password must be at least 6 characters").optional(),
-  role: z.enum(['superadmin', 'admin', 'department', 'department_admin']).default('admin'),
+  role: z.enum(['superadmin', 'admin', 'department', 'department_admin', 'events_lead', 'division_head', 'employee', 'viewer']).default('admin'),
   keycloakId: z.string().optional(),
   email: z.string().email().optional(),
 }).omit({

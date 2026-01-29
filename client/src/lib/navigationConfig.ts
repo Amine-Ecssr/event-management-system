@@ -27,7 +27,10 @@ import {
   ClipboardList,
 } from 'lucide-react';
 
-export type UserRole = 'superadmin' | 'admin' | 'stakeholder' | 'department' | 'department_admin';
+import { canManagePartnerships, canViewAnalytics, hasRoleLevel } from './roles';
+
+
+export type UserRole = 'superadmin' | 'admin' | 'stakeholder' | 'department' | 'department_admin' | 'events_lead' | 'division_head' | 'employee' | 'viewer';
 
 export interface NavigationItem {
   href: string;
@@ -423,4 +426,42 @@ export function saveExpandedSections(sections: string[]): void {
   } catch (e) {
     console.warn('Failed to save sidebar sections to localStorage:', e);
   }
+}
+
+
+export function getNavigationItems(userRole?: string) {
+  const items = [
+    {
+      name: 'Dashboard',
+      path: '/',
+      visible: true, // Everyone can see dashboard
+    },
+    {
+      name: 'Events',
+      path: '/events',
+      visible: true, // Everyone can view events
+    },
+    {
+      name: 'Tasks',
+      path: '/tasks',
+      visible: hasRoleLevel(userRole, 'employee'), // Employee and above
+    },
+    {
+      name: 'Partnerships',
+      path: '/partnerships',
+      visible: hasRoleLevel(userRole, 'division_head'), // Division head and above
+    },
+    {
+      name: 'Analytics',
+      path: '/analytics',
+      visible: canViewAnalytics(userRole),
+    },
+    {
+      name: 'Settings',
+      path: '/settings',
+      visible: hasRoleLevel(userRole, 'admin'), // Admin and above
+    },
+  ];
+  
+  return items.filter(item => item.visible);
 }

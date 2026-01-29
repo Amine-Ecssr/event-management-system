@@ -33,9 +33,9 @@ export class LocalAuthService implements IAuthService {
       return null;
     }
     
-    // Check if user has a password (Keycloak-only users don't)
+    // Check if user has a password
     if (!user.password) {
-      console.log('[Auth] User has no password - Keycloak-only user');
+      console.log('[Auth] User has no password set:', username);
       return null;
     }
     

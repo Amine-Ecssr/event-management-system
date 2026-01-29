@@ -34,6 +34,8 @@ import { Event, Category, Contact, EventSpeaker, EventMedia } from '@/lib/types'
 import EventSpeakersManager from '@/components/EventSpeakersManager';
 import { PrerequisiteConfirmDialog } from '@/components/workflows/PrerequisiteConfirmDialog';
 import { useToast } from '@/hooks/use-toast';
+import { canEditEvents, isReadOnly } from '@/lib/roles';
+import { useAuth } from '@/hooks/use-auth';
 
 interface StakeholderEmail {
   id: number;
@@ -131,7 +133,10 @@ export default function EventForm({ event, onSubmit, onCancel, isSubmitting = fa
   const [agendaEnFile, setAgendaEnFile] = useState<File | null>(null);
   const [agendaArFile, setAgendaArFile] = useState<File | null>(null);
   const [photoFiles, setPhotoFiles] = useState<File[]>([]);
-  
+  const { user } = useAuth();
+  const canEdit = canEditEvents(user?.role);
+  const readOnly = isReadOnly(user?.role);
+
   // Media state for live updates
   const [currentMedia, setCurrentMedia] = useState<EventMedia[]>(event?.media || []);
   const [isUploadingPhotos, setIsUploadingPhotos] = useState(false);
@@ -1490,6 +1495,9 @@ export default function EventForm({ event, onSubmit, onCancel, isSubmitting = fa
           >
             {t('common.cancel')}
           </Button>
+
+           {/* Hide save button for viewers */}
+          {!readOnly && canEdit && (
           <Button
             type="submit"
             disabled={isSubmitting}
@@ -1497,7 +1505,7 @@ export default function EventForm({ event, onSubmit, onCancel, isSubmitting = fa
           >
             {isSubmitting && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
             {event ? t('events.updateEvent') : t('events.createEvent')}
-          </Button>
+          </Button>)}
         </div>
       </form>
       

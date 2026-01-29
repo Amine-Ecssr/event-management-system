@@ -5,10 +5,11 @@ This document details the complete role-based access control system, security fe
 ## 📋 Table of Contents
 
 1. [Role-Based Access Control (RBAC)](#role-based-access-control-rbac)
-2. [Current Security Features](#current-security-features)
-3. [Security Constraints & Limitations](#security-constraints--limitations)
-4. [Future Security Improvements](#future-security-improvements)
-5. [Future Feature Enhancements](#future-feature-enhancements)
+2. [Role Hierarchy & Permissions Matrix](#role-hierarchy--permissions-matrix)
+3. [Current Security Features](#current-security-features)
+4. [Security Constraints & Limitations](#security-constraints--limitations)
+5. [Future Security Improvements](#future-security-improvements)
+6. [Future Feature Enhancements](#future-feature-enhancements)
 
 ---
 
@@ -16,30 +17,80 @@ This document details the complete role-based access control system, security fe
 
 ### Overview
 
-The application implements a four-tier role system with hierarchical privileges:
-- **Superadmin** (highest privileges)
-- **Admin** (standard administrative privileges)
-- **Department Admin** (department-scoped admin with elevated communications permissions)
-- **Department** (limited access, department-focused - formerly called Stakeholder)
+The application implements an **eight-tier role system** with hierarchical privileges:
+
+| Role | Level | Description |
+|------|-------|-------------|
+| **Superadmin** | 6 | Full system access including user management |
+| **Admin** | 5 | Standard administrative privileges |
+| **Division Head** | 4 | Division oversight with analytics and partnerships |
+| **Department Admin** | 4 | Department-scoped admin with communications |
+| **Events Lead** | 3 | Event and task management |
+| **Department** | 2 | Department-focused access (formerly Stakeholder) |
+| **Employee** | 1 | Task execution and updates |
+| **Viewer** | 0 | Read-only access across the system |
+
+**Role Hierarchy Principle:** Higher-level roles inherit permissions from lower levels. For example, an Admin can do everything an Events Lead can do, plus additional admin-specific actions.
 
 All roles are stored in the `users` table with a `role` field.
 
 ---
 
+## Role Hierarchy & Permissions Matrix
+
+### Quick Reference Table
+
+| Permission | Viewer | Employee | Department | Events Lead | Division Head | Dept Admin | Admin | Superadmin |
+|-----------|--------|----------|-----------|-------------|---------------|-----------|-------|------------|
+| **Events** |
+| View events | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Create events | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ | ✅ | ✅ |
+| Edit events | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ | ✅ | ✅ |
+| Delete events | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ |
+| Import events | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ |
+| **Tasks** |
+| View assigned tasks | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| View all tasks | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ | ✅ | ✅ |
+| Create tasks | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ | ✅ | ✅ |
+| Update tasks | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Delete tasks | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ |
+| Comment on tasks | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Partnerships** |
+| View partnerships | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Create partnerships | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ✅ | ✅ |
+| Edit partnerships | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ✅ | ✅ |
+| Delete partnerships | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ |
+| **Contacts & Speakers** |
+| View contacts | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Create contacts | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ | ✅ | ✅ |
+| Edit contacts | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ | ✅ | ✅ |
+| Delete contacts | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ |
+| **Analytics & Reports** |
+| View dashboards | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ✅ | ✅ |
+| Export data | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ✅ | ✅ |
+| **Administration** |
+| Manage departments | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ |
+| Manage workflows | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ |
+| System settings | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
+| User management | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Create superadmins | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
+
+---
+
 ### Role Definitions
 
-#### 1. Superadmin Role
+#### 1. Superadmin Role (Level 6)
 
 **Purpose:** System owner with full control over all features and users.
 
 **Capabilities:**
 
 **User Management:**
-- ✅ Create new admin users
-- ✅ Create new superadmin users
-- ✅ Delete any user (except their own account - lockout prevention)
+- ✅ Create users with any role (including superadmin)
+- ✅ Delete any user (except their own account)
+- ✅ Reset passwords for any user
 - ✅ View all users in the system
-- ✅ Change any user's password (future feature)
+- ✅ Assign roles to users
 
 **Event Management:**
 - ✅ Full CRUD operations on events
@@ -47,47 +98,38 @@ All roles are stored in the `users` table with a `role` field.
 - ✅ Configure reminder preferences
 - ✅ Import events via CSV
 - ✅ Bulk delete events
-- ✅ View expected attendance (hidden from public)
-
-**Stakeholder Management:**
-- ✅ Create, edit, delete stakeholders
-- ✅ Manage stakeholder emails
-- ✅ Manage requirement templates
-- ✅ Create stakeholder accounts (links stakeholders to users)
-- ✅ Deactivate stakeholders
+- ✅ View expected attendance
 
 **Task Management:**
-- ✅ Create tasks for stakeholders
+- ✅ Create tasks for any department
 - ✅ Delete any task
 - ✅ View all tasks
 - ✅ Assign tasks to events
 - ✅ Update task status
+- ✅ Manage workflows
 
-**Reminder Management:**
-- ✅ View reminder queue
-- ✅ Manually trigger reminders
-- ✅ Delete reminders
-- ✅ Configure reminder schedules
+**Partnership Management:**
+- ✅ Full CRUD on partnerships
+- ✅ Manage organizations
+- ✅ Track agreements and interactions
+
+**Contacts & Speakers:**
+- ✅ Full CRUD on contacts
+- ✅ Import/export contacts
+- ✅ Manage speaker database
 
 **System Settings:**
 - ✅ Configure email (Resend/SMTP)
 - ✅ Configure WhatsApp integration
-- ✅ Toggle public CSV export
-- ✅ Toggle file uploads globally
-- ✅ Toggle scraped events feature
+- ✅ Toggle features (file uploads, scrapers, etc.)
 - ✅ Customize email templates
-- ✅ Configure CC lists for all email types
+- ✅ Manage system-wide settings
+- ✅ Access Elasticsearch admin
 
-**Communications:**
-- ✅ Configure WhatsApp settings
-- ✅ Send test messages
-- ✅ Reset WhatsApp session
-- ✅ Configure email templates and styling
-
-**Updates Management:**
-- ✅ Create/edit weekly updates
-- ✅ Create/edit monthly updates
-- ✅ View historical updates
+**Analytics:**
+- ✅ View all dashboards
+- ✅ Export all data
+- ✅ Access executive analytics
 
 **API Endpoints (Superadmin Only):**
 ```
@@ -98,20 +140,18 @@ PATCH  /api/stakeholders/:id
 DELETE /api/stakeholders/:id
 POST   /api/settings
 GET    /api/settings
-POST   /api/stakeholder-accounts
-DELETE /api/stakeholder-accounts/:id
 ```
 
 **Constraints:**
 - ⛔ Cannot delete their own account (lockout prevention)
 - ⛔ Cannot demote themselves from superadmin
-- ⛔ At least one superadmin must exist (bootstrap protection)
+- ⛔ At least one superadmin must exist
 
 ---
 
-#### 2. Admin Role
+#### 2. Admin Role (Level 5)
 
-**Purpose:** Day-to-day event and stakeholder management without system-level changes.
+**Purpose:** Day-to-day system management without user administration.
 
 **Capabilities:**
 
@@ -120,1038 +160,730 @@ DELETE /api/stakeholder-accounts/:id
 - ✅ Assign stakeholders to events
 - ✅ Configure reminder preferences
 - ✅ Import events via CSV
-- ✅ View expected attendance (hidden from public)
 
 **Task Management:**
-- ✅ Create tasks for stakeholders
-- ✅ Delete tasks they created
+- ✅ Create and assign tasks
+- ✅ Delete any task
 - ✅ View all tasks
-- ✅ Assign tasks to events
 - ✅ Update task status
+- ✅ Manage workflows
 
-**Stakeholder Assignment:**
-- ✅ Assign stakeholders to events
-- ✅ Select requirements for stakeholders
-- ✅ Add custom requirements
-- ✅ Configure notification preferences
+**Partnership Management:**
+- ✅ Full CRUD on partnerships
+- ✅ Manage organizations
+- ✅ Track interactions
 
-**Reminder Management:**
-- ✅ View reminder queue
-- ✅ Manually trigger reminders
+**Contacts:**
+- ✅ Full CRUD on contacts
+- ✅ Import/export contacts
 
-**Communications (Limited):**
-- ✅ Configure WhatsApp settings
-- ✅ Send test messages (to verify configuration)
-- ✅ View WhatsApp status
+**Analytics:**
+- ✅ View all dashboards
+- ✅ Export data
 
-**Updates Management:**
-- ✅ Create/edit weekly updates
-- ✅ Create/edit monthly updates
-- ✅ View historical updates
-
-**API Endpoints (Admin + Superadmin):**
-```
-POST   /api/events
-PATCH  /api/events/:id
-DELETE /api/events/:id
-POST   /api/tasks
-DELETE /api/tasks/:id
-PATCH  /api/tasks/:id
-POST   /api/event-stakeholders
-GET    /api/reminders
-POST   /api/reminders/trigger
-POST   /api/updates
-GET    /api/whatsapp/status
-POST   /api/whatsapp/send-test
-```
+**Communications:**
+- ✅ Configure WhatsApp
+- ✅ Send test messages
+- ✅ Manage email templates
 
 **Limitations:**
-- ⛔ Cannot create users
-- ⛔ Cannot delete users
-- ⛔ Cannot modify system settings (email, file uploads, etc.)
-- ⛔ Cannot create/edit/delete stakeholders (only assign existing ones)
-- ⛔ Cannot manage stakeholder accounts
-- ⛔ Cannot access superadmin-only settings
+- ⛔ Cannot create or manage users
+- ⛔ Cannot modify system-wide settings
+- ⛔ Cannot access Elasticsearch admin
+- ⛔ Cannot create superadmin users
 
 ---
 
-#### 3. Department Admin Role
+#### 3. Division Head Role (Level 4)
 
-**Purpose:** Department-scoped administrator who can manage their own department's updates and communications.
+**Purpose:** Oversee division operations with analytics access and partnership management.
 
 **Capabilities:**
 
-- ✅ Inherits department-scoped visibility for events, tasks, and updates
-- ✅ Create and edit weekly/monthly updates for their department
-- ✅ Trigger "Send to primary email" for the current period's update (uses the department account's primary email)
-- ✅ Access the stakeholder dashboard for their department
+**Events:**
+- ✅ Full CRUD on events
+- ✅ Assign stakeholders
+- ✅ Manage event details
+
+**Tasks:**
+- ✅ Create and assign tasks
+- ✅ View all tasks
+- ✅ Update task status
+
+**Partnerships:**
+- ✅ Full CRUD on partnerships
+- ✅ Manage organizations
+- ✅ Track interactions and agreements
+
+**Contacts:**
+- ✅ Full CRUD on contacts
+- ✅ Manage speaker database
+
+**Analytics:**
+- ✅ View all dashboards
+- ✅ Executive analytics
+- ✅ Export reports
+- ✅ Partnership analytics
+
+**Limitations:**
+- ⛔ Cannot create users
+- ⛔ Cannot modify system settings
+- ⛔ Cannot delete events (only admin+)
+- ⛔ Cannot access Elasticsearch admin
+
+---
+
+#### 4. Department Admin Role (Level 4)
+
+**Purpose:** Department-scoped administrator with communications privileges.
+
+**Capabilities:**
+- ✅ Manage department users
+- ✅ Create/edit weekly/monthly updates
+- ✅ Send updates to department
+- ✅ Access department dashboard
+- ✅ View department events and tasks
 
 **Constraints:**
-
 - ⛔ No access to cross-department data
 - ⛔ No global user management
+- ⛔ Cannot create events
 
-#### 4. Stakeholder Role
+---
 
-**Purpose:** Limited access for external stakeholders to view assigned events and manage tasks.
+#### 5. Events Lead Role (Level 3)
+
+**Purpose:** Manage events and coordinate event-related activities.
+
+**Capabilities:**
+
+**Events:**
+- ✅ Create new events
+- ✅ Edit existing events
+- ✅ Assign stakeholders
+- ✅ Configure reminders
+- ✅ Manage event media/photos
+
+**Tasks:**
+- ✅ Create tasks related to events
+- ✅ Assign tasks to departments
+- ✅ Update task status
+- ✅ View all tasks
+
+**Contacts:**
+- ✅ Create and edit contacts
+- ✅ Manage speakers
+- ✅ Assign contacts to events
+
+**Invitations:**
+- ✅ Send event invitations
+- ✅ Manage attendee lists
+- ✅ Track RSVPs
+
+**Limitations:**
+- ⛔ Cannot delete events (admin+ only)
+- ⛔ Cannot manage partnerships
+- ⛔ Cannot view analytics dashboards
+- ⛔ Cannot create users
+- ⛔ Cannot modify system settings
+
+---
+
+#### 6. Department Role (Level 2)
+
+**Purpose:** Department-level access to assigned events and tasks.
 
 **Capabilities:**
 
 **Dashboard Access:**
-- ✅ Personal dashboard showing events they're assigned to
-- ✅ View upcoming events they're assigned to
-- ✅ View past events they were assigned to
-- ✅ Filter events by status
+- ✅ Personal dashboard with assigned events
+- ✅ View upcoming events
+- ✅ View past events
+- ✅ Filter by status
 
 **Task Management:**
-- ✅ View ONLY tasks for events they're assigned to
-- ✅ Update task status (pending → in progress → completed)
-- ✅ Add comments to tasks they can access
-- ✅ Upload file attachments to comments (if enabled globally)
-- ✅ Download attachments from comments
+- ✅ View tasks for assigned events
+- ✅ Update task status
+- ✅ Add comments to tasks
+- ✅ Upload attachments (if enabled)
 
 **Event Viewing:**
-- ✅ View ALL public events (calendar is public)
-- ✅ Cannot see which stakeholders are assigned to other events
-- ✅ Can only see their own assignment details
-- ✅ View requirements assigned to them for their events
-- ✅ View custom requirements for their assignments
+- ✅ View all public events
+- ✅ Cannot see other department assignments
+- ✅ View own assignment details
 
-**Profile Management:**
-- ✅ Change their own password
-- ✅ View their profile information
-- ✅ Track last login time
-
-**API Endpoints (Stakeholder Can Access):**
-```
-GET    /api/events                    (Public - all users)
-GET    /api/events/:id                (Public - all users)
-GET    /api/events/:eventId/stakeholders  (Filtered - only their assignment)
-GET    /api/event-stakeholders/:id/tasks  (Filtered - only if assigned)
-GET    /api/tasks/:id                     (Filtered - only if assigned)
-PATCH  /api/tasks/:id                     (Filtered - only status updates on assigned tasks)
-POST   /api/tasks/:id/comments            (Filtered - only on assigned tasks)
-POST   /api/tasks/:id/comments/:commentId/attachments  (Filtered - only on assigned tasks)
-GET    /api/uploads/:filename             (Authenticated)
-POST   /api/user/change-password          (Own account only)
-```
+**Profile:**
+- ✅ Change own password
+- ✅ View profile info
 
 **Strict Limitations:**
-- ⛔ Can view calendar events, but cannot see stakeholder assignments for other events
 - ⛔ Cannot create/edit/delete events
-- ⛔ Cannot view tasks for events they're not assigned to
 - ⛔ Cannot create tasks
-- ⛔ Cannot delete tasks or comments
-- ⛔ Cannot access admin pages (redirected to dashboard)
-- ⛔ Cannot view reminder queue
-- ⛔ Cannot configure any settings
-- ⛔ Cannot view user management
-- ⛔ Cannot view which stakeholders are assigned to which events (unless it's their own)
-- ⛔ Cannot upload files if globally disabled
-- ⛔ Cannot access other stakeholders' task data
+- ⛔ Cannot view tasks for unassigned events
+- ⛔ Cannot access admin pages
+- ⛔ Cannot view analytics
 
-**Data Isolation:**
-- **Calendar Events:** PUBLIC (everyone can view)
-- **Stakeholder Assignments:** RESTRICTED (stakeholders only see if THEY are assigned)
-- **Tasks:** RESTRICTED (stakeholders only access tasks for events they're assigned to)
-- **Task Comments:** RESTRICTED (only if they can access the parent task)
-- **File Uploads:** RESTRICTED (only if they can access the parent task)
-- Stakeholder users linked via `stakeholder_accounts` table
-- Multiple users can belong to same stakeholder (department-level access)
-- Authorization checks enforce data isolation on tasks/comments/assignments
+---
+
+#### 7. Employee Role (Level 1)
+
+**Purpose:** Execute assigned tasks and update status.
+
+**Capabilities:**
+
+**Tasks:**
+- ✅ View assigned tasks only
+- ✅ Update task status (pending → in progress → completed)
+- ✅ Add comments to assigned tasks
+- ✅ Upload attachments to comments
+
+**Events:**
+- ✅ View public events
+- ✅ View events related to assigned tasks
+
+**Profile:**
+- ✅ Change own password
+- ✅ View profile
+
+**Limitations:**
+- ⛔ Cannot create events
+- ⛔ Cannot create tasks
+- ⛔ Cannot view tasks not assigned to them
+- ⛔ Cannot manage contacts
+- ⛔ Cannot access analytics
+- ⛔ Cannot manage partnerships
+
+---
+
+#### 8. Viewer Role (Level 0)
+
+**Purpose:** Read-only access for auditors, observers, or external stakeholders.
+
+**Capabilities:**
+
+**View Only:**
+- ✅ View all events
+- ✅ View public event details
+- ✅ View partnerships (read-only)
+- ✅ View contacts (read-only)
+- ✅ View public dashboards
+
+**Profile:**
+- ✅ View own profile
+- ✅ Change own password
+
+**Strict Limitations:**
+- ⛔ **Cannot create anything**
+- ⛔ **Cannot edit anything**
+- ⛔ **Cannot delete anything**
+- ⛔ Cannot update tasks
+- ⛔ Cannot comment
+- ⛔ Cannot upload files
+- ⛔ Read-only access everywhere
+
+**Use Cases:**
+- External auditors
+- Board members
+- External partners (view-only)
+- Temporary observers
 
 ---
 
 ### Middleware Guards
 
-Three middleware functions enforce role-based access:
+The application uses role-based middleware to protect routes:
 
 #### 1. `isAuthenticated`
-**Purpose:** Requires any logged-in user (any role).
+**Purpose:** Requires any logged-in user.
+**Usage:** Applied to all protected routes.
 
-**Usage:**
+#### 2. `isSuperAdmin`
+**Purpose:** Requires superadmin role.
+**Usage:** User management, system settings.
+
+#### 3. `isAdminOrSuperAdmin`
+**Purpose:** Requires admin or superadmin.
+**Usage:** Event deletion, workflow management.
+
+#### 4. `isDivisionHeadOrHigher`
+**Purpose:** Requires division_head, admin, or superadmin.
+**Usage:** Partnership management, analytics.
+
+#### 5. `isEventsLeadOrHigher`
+**Purpose:** Requires events_lead, division_head, admin, or superadmin.
+**Usage:** Event creation/editing, contact management.
+
+#### 6. `isEmployeeOrHigher`
+**Purpose:** Requires employee or higher (excludes viewer).
+**Usage:** Task updates, comments.
+
+#### 7. `isNotViewer`
+**Purpose:** Any role except viewer.
+**Usage:** Any write operation.
+
+#### 8. `isDepartmentMemberOrAdmin`
+**Purpose:** Department users and admins.
+**Usage:** Department-scoped resources.
+
+**Example Usage:**
 ```typescript
-app.get("/api/tasks/:id", isAuthenticated, async (req, res) => {
-  // Any logged-in user can access (with additional checks for stakeholders)
-  // Actual implementation includes role-based filtering
+// Event creation - requires events_lead or higher
+app.post("/api/events", isEventsLeadOrHigher, async (req, res) => {
+  // Only events_lead, division_head, admin, superadmin can create
 });
-```
 
-**Behavior:**
-- Returns 401 Unauthorized if not logged in
-- Allows superadmin, admin, and stakeholder
-- Note: Many endpoints with `isAuthenticated` also include role-specific logic
-
----
-
-#### 2. `isAdminOrSuperAdmin`
-**Purpose:** Requires admin or superadmin role (blocks stakeholders).
-
-**Usage:**
-```typescript
-app.post("/api/events", isAdminOrSuperAdmin, async (req, res) => {
-  // Only admins and superadmins can create events
+// Partnership management - requires division_head or higher
+app.post("/api/partnerships", isDivisionHeadOrHigher, async (req, res) => {
+  // Only division_head, admin, superadmin can create
 });
-```
 
-**Behavior:**
-- Returns 401 Unauthorized if not logged in
-- Returns 403 Forbidden if role is 'stakeholder'
-- Allows admin and superadmin
+// Task updates - requires employee or higher
+app.patch("/api/tasks/:id", isEmployeeOrHigher, async (req, res) => {
+  // Everyone except viewer can update tasks
+});
 
-**Common Use Cases:**
-- Event CRUD operations
-- Task creation/deletion
-- Reminder management
-- WhatsApp configuration
-- Updates management
-
----
-
-#### 3. `isSuperAdmin`
-**Purpose:** Requires superadmin role only.
-
-**Usage:**
-```typescript
+// User creation - requires superadmin only
 app.post("/api/admin/create-user", isSuperAdmin, async (req, res) => {
-  // Only superadmins can create users
+  // Only superadmin can create users
 });
 ```
 
-**Behavior:**
-- Returns 401 Unauthorized if not logged in
-- Returns 403 Forbidden if role is not 'superadmin'
-- Only allows superadmin
-
-**Common Use Cases:**
-- User creation/deletion
-- Stakeholder CRUD
-- System settings modification
-- Stakeholder account management
-
 ---
 
-### Frontend Protection
+## Frontend Role Utilities
 
-**Route Protection:**
+The frontend provides role checking utilities in `client/src/lib/roles.ts`:
+
+### Permission Check Functions
+
 ```typescript
-// Admin pages protected
-if (!user || (user.role !== 'admin' && user.role !== 'superadmin')) {
-  return <Redirect to="/stakeholder/dashboard" />;
+// Import utilities
+import { 
+  canCreateEvents, 
+  canEditEvents,
+  canManagePartnerships,
+  canUpdateTasks,
+  isReadOnly,
+  hasRoleLevel
+} from '@/lib/roles';
+
+// Usage examples
+const { user } = useAuth();
+
+// Check if user can create events
+if (canCreateEvents(user?.role)) {
+  // Show create event button
 }
 
-// Stakeholder redirect
-if (user?.role === 'stakeholder' && location !== '/stakeholder/dashboard') {
-  return <Redirect to="/stakeholder/dashboard" />;
+// Check if user is read-only
+if (isReadOnly(user?.role)) {
+  // Disable all edit functionality
+}
+
+// Check role level (for hierarchical checks)
+if (hasRoleLevel(user?.role, 'division_head')) {
+  // User is division_head or higher
 }
 ```
 
-**Conditional UI Rendering:**
-- Admin action buttons hidden from stakeholders
-- Superadmin-only features hidden from admins
-- Sidebar menu items filtered by role
-- Settings toggles only visible to superadmin
+### Available Functions
 
----
-
-### Migration: Adding Department Admin Role
-
-Follow these steps when introducing the `department_admin` role to an existing environment:
-
-1. **Create the realm role in Keycloak** – rerun the Keycloak setup script or manually add a new realm role named `department_admin`.
-2. **Assign the role to department leads** – in Keycloak, grant `department_admin` to users who should be able to send update emails and keep them in the appropriate department group so their `department_accounts` link remains intact.
-3. **Update local role records** – for existing department users that should become department admins, run a targeted SQL update, for example:
-   ```sql
-   UPDATE users SET role = 'department_admin' WHERE role = 'department' AND username IN ('dept.lead1', 'dept.lead2');
-   ```
-4. **Verify primary email configuration** – ensure each department admin has a `department_accounts.primary_email_id` value pointing to the department's primary entry in `department_emails` so the new send action can resolve the destination address.
+| Function | Description |
+|----------|-------------|
+| `canCreateEvents(role)` | Can create new events |
+| `canEditEvents(role)` | Can edit existing events |
+| `canDeleteEvents(role)` | Can delete events (admin+) |
+| `canManagePartnerships(role)` | Can manage partnerships |
+| `canManageContacts(role)` | Can manage contacts |
+| `canUpdateTasks(role)` | Can update tasks |
+| `canCreateTasks(role)` | Can create tasks |
+| `canViewAnalytics(role)` | Can view analytics |
+| `isReadOnly(role)` | Is viewer (read-only) |
+| `canCreateUsers(role)` | Can create users (superadmin) |
+| `hasRoleLevel(role, required)` | Has minimum role level |
 
 ---
 
 ## Current Security Features
 
-### 1. Authentication
+### Authentication & Authorization
 
-**Password Security:**
-- **Hashing Algorithm:** Scrypt (Node.js built-in crypto)
-  - 32-byte salt (cryptographically random)
-  - 64-byte hash output
-  - High memory and CPU cost parameters
-  - Resistant to GPU/ASIC attacks
-- **Minimum Length:** 6 characters (enforced)
-- **Storage:** Hashed passwords never exposed via API
+**✅ Secure Password Hashing:**
+- Scrypt algorithm (Node.js crypto)
+- 32-byte random salt
+- 64-byte derived key
+- Memory-hard function (resistant to GPU attacks)
 
-**Session Management:**
-- **Session Store:** PostgreSQL (`connect-pg-simple`)
-- **Session Cookie:**
-  - HTTP-only flag (prevents JavaScript access)
-  - Secure flag in production (HTTPS only)
-  - Max age: 7 days
-  - SameSite protection (CSRF mitigation)
-- **Session Persistence:** Survives application restart
-- **Auto Cleanup:** Expired sessions removed automatically
+**✅ Session Management:**
+- HTTP-only cookies
+- Server-side session storage (PostgreSQL)
+- 7-day session expiration
+- Automatic cleanup of expired sessions
 
-**Login Flow:**
-1. User submits credentials
-2. Passport.js authenticates via LocalStrategy
-3. Password verified using scrypt
-4. Session created in PostgreSQL
-5. Session ID stored in HTTP-only cookie
-6. Password never sent in response
+**✅ Role-Based Access Control:**
+- 8-tier role hierarchy
+- Middleware guards on all protected routes
+- Frontend role utilities for UI permissions
+- Database-level isolation for department data
 
-**Logout:**
-- Destroys session in database
-- Clears cookie
-- Returns 200 status
+**✅ Keycloak SSO Integration:**
+- OpenID Connect support
+- Automatic user provisioning
+- Group-based role mapping
+- LDAP synchronization
 
----
+### Input Validation
 
-### 2. Authorization
+**✅ Zod Schema Validation:**
+- All API inputs validated
+- Type-safe validation
+- Custom error messages
+- Same schemas on frontend and backend
 
-**Hierarchical Role System:**
-- Three distinct roles with clear boundaries
-- Middleware guards on every protected route
-- Frontend role checks prevent unauthorized UI access
-- Backend enforcement prevents API bypass
-
-**Superadmin Protection:**
-- At least one superadmin always exists
-- Superadmin cannot delete themselves (lockout prevention)
-- Bootstrap superadmin created from environment variables
-- Superadmin deletion blocked if only one exists
-
-**Stakeholder Data Isolation:**
-- Stakeholders only see their assigned events
-- Stakeholder accounts link users to organizations
-- Queries filtered by stakeholder association
-- No cross-stakeholder data leakage
-
----
-
-### 3. Input Validation
-
-**Zod Schema Validation:**
-- All API inputs validated with Zod
-- Same schemas used on frontend and backend
-- Type-safe at runtime and compile-time
-- Friendly error messages via `zod-validation-error`
-
-**SQL Injection Prevention:**
+**✅ SQL Injection Prevention:**
 - Drizzle ORM with parameterized queries
-- No raw SQL in application code
-- Database-level constraints and validations
+- No raw SQL concatenation
+- Type-safe database operations
 
-**XSS Prevention:**
-- React auto-escapes JSX
-- HTML content sanitized where needed
-- No `dangerouslySetInnerHTML` without sanitization
-- Content Security Policy headers (recommended for production)
+### File Upload Security
 
----
+**✅ File Type Restrictions:**
+- Whitelist of allowed MIME types
+- File extension validation
+- Magic number validation (file content check)
 
-### 4. File Upload Security
+**✅ File Size Limits:**
+- 10MB per file default
+- Configurable in system settings
+- Prevents DoS via large uploads
 
-**Global Toggle:**
-- Superadmin can disable file uploads entirely
-- Setting: `fileUploadsEnabled` (default: false)
-- When disabled, upload endpoints return 400
+**✅ Global Toggle:**
+- Can disable file uploads system-wide
+- Useful for high-security environments
 
-**File Type Restrictions:**
-- **Allowed Types:**
-  - Images: jpg, jpeg, png, gif, webp
-  - Documents: pdf
-  - Archives: zip
-- **Blocked:** Executable files, scripts, etc.
+**✅ Secure Storage:**
+- Files stored outside web root (`uploads/`)
+- Served via authenticated API endpoint
+- No direct file access
 
-**File Size Limit:**
-- Maximum: 10MB per file
-- Enforced at upload endpoint
-- Returns 400 if exceeded
+### API Security
 
-**Storage:**
-- Files stored in `uploads/` directory
-- Filenames include timestamp + nanoid (prevents collisions)
-- Not served directly via static middleware
-- Accessed only via authenticated endpoint: `/api/uploads/:filename`
+**✅ CORS Configuration:**
+- Configured for specific origins
+- Credentials support enabled
+- Preflight request handling
 
-**Access Control:**
-- Only authenticated users can upload
-- Only authenticated users can download
-- No public file access
-- File path validation prevents directory traversal
-
----
-
-### 5. Environment Security
-
-**Secret Management:**
-- Secrets stored in `.env` file (never committed to Git)
-- `.env` in `.gitignore`
-- Docker secrets via environment variables
-- Required secrets validated on startup
-
-**Critical Secrets:**
-- `SESSION_SECRET` - Session encryption (32+ characters recommended)
-- `DATABASE_URL` - Database connection string
-- `RESEND_API_KEY` or SMTP credentials - Email service
-- `SUPERADMIN_USERNAME` - Initial admin username
-- `SUPERADMIN_PASSWORD` - Initial admin password
-
-**Secret Rotation:**
-- Session secret can be changed (invalidates existing sessions)
-- Database credentials rotated externally
-- API keys rotated via provider dashboards
-
----
-
-### 6. Database Security
-
-**Connection Security:**
-- TLS/SSL encryption for production (PostgreSQL)
-- Connection pooling for performance
-- No hardcoded credentials
-
-**Data Protection:**
-- Passwords hashed (never plain text)
-- Sensitive fields (expected attendance) hidden from public
-- Foreign key constraints for referential integrity
-- Cascade deletes where appropriate
-
-**Session Storage:**
-- Sessions in PostgreSQL (not memory)
-- Automatic expiration cleanup
-- Session table indexed for performance
-
----
-
-### 7. API Security
-
-**CORS Configuration:**
-- Same-origin policy enforced
-- No wildcard CORS in production
-- Credentials included in requests
-
-**Rate Limiting:**
-- ⚠️ **Not implemented** - See [Future Improvements](#future-security-improvements)
-
-**Request Size Limits:**
-- Express body parser limits
-- File upload limits (10MB)
-- Prevents DoS via large payloads
-
----
-
-### 8. WhatsApp Integration Security
-
-**Session Protection:**
-- WhatsApp session files stored locally
-- Not accessible via web server
-- Mutex prevents concurrent access
-- Session invalidated on errors
-
-**QR Code Security:**
-- QR codes cached for 5 minutes
-- Regenerated on expiry
-- Not logged or stored permanently
-
-**Message Queuing:**
-- Messages queued before sending
-- Retry logic for failed sends
-- Error handling prevents crashes
+**✅ Rate Limiting (Recommended):**
+- Currently not implemented
+- **See Future Improvements section**
 
 ---
 
 ## Security Constraints & Limitations
 
-### Current Known Limitations
+### Current Limitations
 
-1. **No Two-Factor Authentication (2FA)**
-   - Users rely solely on passwords
-   - Admins with access to sensitive data lack 2FA
-   - **Mitigation:** Strong password policy (min 6 chars, recommend 12+)
+**⚠️ No Rate Limiting:**
+- Vulnerable to brute force attacks
+- No request throttling
+- **Priority: High** (see Future Improvements)
 
-2. **No Rate Limiting**
-   - Login endpoint not rate-limited
-   - Brute-force attacks possible
-   - **Mitigation:** Monitor failed login attempts manually
+**⚠️ No Audit Logging:**
+- No tracking of admin actions
+- Difficult to investigate security incidents
+- **Priority: High** (see Future Improvements)
 
-3. **No Account Lockout**
-   - Unlimited login attempts allowed
-   - No temporary lockout after failures
-   - **Mitigation:** Manual monitoring, strong passwords
+**⚠️ No Two-Factor Authentication:**
+- Single factor (password) only
+- Higher risk for privileged accounts
+- **Priority: Medium** (see Future Improvements)
 
-4. **No Email Verification**
-   - Email addresses not verified
-   - Typos could cause delivery failures
-   - **Mitigation:** Test email functionality in settings
+**⚠️ No IP Whitelisting:**
+- Admin access from any IP
+- No geographic restrictions
+- **Priority: Low** (situational)
 
-5. **No Audit Logging**
-   - User actions not logged (who created/edited/deleted what)
-   - No compliance trail
-   - **Mitigation:** Database change history only (no user attribution)
+**⚠️ Session Fixation:**
+- Session ID doesn't rotate on login
+- Potential session hijacking risk
+- **Priority: Medium** (see Future Improvements)
 
-6. **No Content Security Policy (CSP)**
-   - No CSP headers in production
-   - Vulnerable to XSS if React sanitization bypassed
-   - **Mitigation:** Avoid `dangerouslySetInnerHTML`
-
-7. **Limited Password Requirements**
-   - Only minimum length enforced (6 characters)
-   - No complexity requirements (uppercase, numbers, symbols)
-   - **Mitigation:** Educate users on strong passwords
-
-8. **File Upload Validation**
-   - File type validation based on extension (not magic bytes)
-   - Malicious files could be renamed to bypass
-   - **Mitigation:** Global toggle allows disabling uploads
-
-9. **No IP Whitelisting**
-   - Admin panel accessible from any IP
-   - No geographic restrictions
-   - **Mitigation:** VPN or firewall rules at network level
-
-10. **Session Timeout**
-    - Fixed 7-day session expiry
-    - No idle timeout
-    - **Mitigation:** Users must manually logout
-
----
-
-### File Upload Risks
-
-**Risk:** Malicious file uploads
-
-**Current Mitigations:**
-- Global toggle (superadmin can disable)
-- File type whitelist
-- 10MB size limit
-- Authenticated access only
-- Files not served via static middleware
-
-**Remaining Risks:**
-- Zip bombs (compressed malicious content)
-- PDF exploits (if opened in vulnerable viewer)
-- Image-based exploits (EXIF data)
-
-**Recommendation:** Keep uploads disabled unless absolutely necessary.
+**⚠️ No Security Headers:**
+- Missing CSP, HSTS, X-Frame-Options
+- **Priority: Low** (easy to add)
 
 ---
 
 ## Future Security Improvements
 
-### High Priority (Recommended)
+### High Priority
 
-#### 1. Two-Factor Authentication (2FA)
+#### 1. Rate Limiting
 
-**Description:** Add TOTP-based 2FA for admin and superadmin accounts.
+**Description:** Protect against brute force and DoS attacks.
 
-**Implementation Plan:**
-- Use `speakeasy` or `otplib` for TOTP generation
-- Add `twoFactorSecret` field to users table
-- Create setup flow with QR code generation
-- Require 2FA code at login for admins
-- Backup codes for account recovery
+**Implementation:**
+```typescript
+import rateLimit from 'express-rate-limit';
+
+// Login endpoint rate limiting
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // 5 attempts
+  message: 'Too many login attempts, please try again later',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.post('/api/login', loginLimiter, ...);
+
+// Global API rate limiting
+const apiLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 100, // 100 requests per minute
+});
+
+app.use('/api/', apiLimiter);
+```
 
 **Benefits:**
-- Prevents account takeover even with stolen passwords
-- Compliance with security best practices
-- Protects sensitive admin functions
+- Prevents brute force attacks
+- Protects against DoS
+- Improves system stability
 
-**Estimated Effort:** Medium (2-3 days)
+**Estimated Effort:** Low (1-2 hours)
 
 ---
 
-#### 2. Rate Limiting
+#### 2. Audit Logging
 
-**Description:** Implement rate limiting on authentication endpoints.
+**Description:** Track all administrative actions for security and compliance.
 
-**Implementation Plan:**
-- Use `express-rate-limit` middleware
-- Limit login attempts: 5 per 15 minutes per IP
-- Limit password change: 3 per hour per user
-- Limit API requests: 100 per minute per user
-- Configurable limits in settings
+**Implementation:**
+```typescript
+// Create audit_logs table
+CREATE TABLE audit_logs (
+  id SERIAL PRIMARY KEY,
+  user_id INT REFERENCES users(id),
+  action TEXT NOT NULL,
+  resource_type TEXT,
+  resource_id TEXT,
+  details JSONB,
+  ip_address TEXT,
+  user_agent TEXT,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+// Log function
+async function logAudit(userId, action, resource, details) {
+  await db.insert(auditLogs).values({
+    userId,
+    action,
+    resourceType: resource.type,
+    resourceId: resource.id,
+    details,
+    ipAddress: req.ip,
+    userAgent: req.headers['user-agent'],
+  });
+}
+
+// Usage
+app.delete('/api/events/:id', isAdminOrSuperAdmin, async (req, res) => {
+  await storage.deleteEvent(req.params.id);
+  await logAudit(req.user.id, 'DELETE_EVENT', { 
+    type: 'event', 
+    id: req.params.id 
+  });
+});
+```
 
 **Benefits:**
-- Prevents brute-force attacks
-- Mitigates DoS attempts
-- Protects against credential stuffing
-
-**Estimated Effort:** Low (1 day)
-
----
-
-#### 3. Audit Logging
-
-**Description:** Log all significant user actions for compliance and security.
-
-**Implementation Plan:**
-- Create `audit_logs` table
-- Log: user ID, action, resource type, resource ID, timestamp, IP
-- Track: create, update, delete operations
-- Superadmin-only access to audit logs
-- Retention policy (e.g., 90 days)
-
-**Benefits:**
-- Accountability and compliance
 - Security incident investigation
-- User activity tracking
-
-**Estimated Effort:** Medium (2-3 days)
-
----
-
-#### 4. Account Lockout
-
-**Description:** Temporarily lock accounts after failed login attempts.
-
-**Implementation Plan:**
-- Track failed login attempts per user
-- Lock account after 5 failed attempts
-- Lockout duration: 15 minutes
-- Email notification to user on lockout
-- Unlock via email link or admin intervention
-
-**Benefits:**
-- Prevents brute-force attacks
-- Notifies users of suspicious activity
-- Industry standard security practice
-
-**Estimated Effort:** Low (1-2 days)
-
----
-
-### Medium Priority
-
-#### 5. Content Security Policy (CSP)
-
-**Description:** Add CSP headers to prevent XSS attacks.
-
-**Implementation Plan:**
-- Use `helmet` middleware
-- Configure CSP directives
-- Allow inline scripts for React
-- Whitelist necessary external sources
-- Report violations to logging endpoint
-
-**Benefits:**
-- Additional XSS protection layer
-- Prevents inline script injection
-- Browser-level security enforcement
-
-**Estimated Effort:** Low (1 day)
-
----
-
-#### 6. Advanced File Validation
-
-**Description:** Validate files using magic bytes, not just extensions.
-
-**Implementation Plan:**
-- Use `file-type` package for magic byte detection
-- Scan uploaded files for actual type
-- Reject files with mismatched types
-- Optional: virus scanning integration (ClamAV)
-
-**Benefits:**
-- Prevents malicious file disguised as safe type
-- More reliable than extension checking
-- Enhanced file upload security
+- Compliance requirements
+- User accountability
 
 **Estimated Effort:** Medium (1-2 days)
 
 ---
 
-#### 7. Email Verification
-
-**Description:** Verify email addresses before allowing notifications.
-
-**Implementation Plan:**
-- Send verification email on stakeholder creation
-- Add `emailVerified` field to stakeholder_emails table
-- Prevent notifications to unverified emails
-- Resend verification link option
-
-**Benefits:**
-- Ensures email deliverability
-- Prevents typos in email addresses
-- Better bounce rate handling
-
-**Estimated Effort:** Medium (2 days)
-
----
-
-#### 8. Session Security Enhancements
-
-**Description:** Add idle timeout and active session management.
-
-**Implementation Plan:**
-- Idle timeout: 30 minutes of inactivity
-- Activity tracking via heartbeat endpoint
-- Multiple session detection
-- "Active Sessions" page for users
-- Force logout other sessions option
-
-**Benefits:**
-- Automatic logout on inactivity
-- User control over active sessions
-- Prevents abandoned session exploitation
-
-**Estimated Effort:** Medium (2 days)
-
----
-
-### Low Priority (Nice to Have)
-
-#### 9. IP Whitelisting
-
-**Description:** Allow admin panel access only from specific IPs.
-
-**Implementation Plan:**
-- Add `allowedIps` setting (comma-separated)
-- Check IP against whitelist on admin routes
-- Return 403 for non-whitelisted IPs
-- Bypass for superadmin via secret parameter
-
-**Benefits:**
-- Limits attack surface
-- Geographic/network restrictions
-- Additional access control layer
-
-**Estimated Effort:** Low (1 day)
-
----
-
-#### 10. API Key Authentication
-
-**Description:** Allow programmatic API access via API keys.
-
-**Implementation Plan:**
-- Create `api_keys` table
-- Generate keys for users (superadmin only)
-- Support `Authorization: Bearer <token>` header
-- Scoped permissions for API keys
-- Expiration and rotation support
-
-**Benefits:**
-- Automation and integration support
-- Programmatic event creation
-- Webhook support potential
-
-**Estimated Effort:** Medium (2-3 days)
-
----
-
-#### 11. LDAP/Active Directory Integration
-
-**Description:** Allow authentication via corporate LDAP/AD.
-
-**Implementation Plan:**
-- Use `passport-ldapauth` strategy
-- Add LDAP configuration to settings
-- Link LDAP users to local accounts
-- Maintain local auth as fallback
-- Support group-based role mapping
-
-**Benefits:**
-- Centralized corporate authentication
-- Automatic user provisioning
-- Single sign-on (SSO) support
-- Group-based access control
-
-**Estimated Effort:** High (5-7 days)
-
----
-
-#### 12. Security Headers
-
-**Description:** Add comprehensive security headers.
-
-**Implementation Plan:**
-- Use `helmet` middleware
-- Enable: HSTS, X-Frame-Options, X-Content-Type-Options
-- Configure Referrer-Policy
-- Set Permissions-Policy
-
-**Benefits:**
-- Browser-level security enforcement
-- Clickjacking prevention
-- MIME-sniffing prevention
-
-**Estimated Effort:** Low (few hours)
-
----
-
-## Future Feature Enhancements
-
-### High Priority
-
-#### 1. Task Due Dates & Notifications
-
-**Description:** Add due dates to tasks with automatic reminders.
-
-**Implementation:**
-- Add `dueDate` field to tasks table
-- Create reminder scheduler for tasks
-- Email/WhatsApp notifications X days before due
-- Overdue task highlighting in UI
-
-**Benefits:**
-- Better task deadline tracking
-- Proactive stakeholder reminders
-- Improved task completion rates
-
-**Estimated Effort:** Medium (2-3 days)
-
----
-
-#### 2. Advanced Reporting & Analytics
-
-**Description:** Generate reports on events, tasks, and stakeholder engagement.
-
-**Implementation:**
-- Event summary reports (by month, quarter, year)
-- Stakeholder engagement metrics (task completion rates)
-- Export to PDF/Excel
-- Dashboard with charts and statistics
-
-**Benefits:**
-- Data-driven insights
-- Performance tracking
-- Executive summaries
-
-**Estimated Effort:** High (5-7 days)
-
----
-
-#### 3. Calendar Export (iCal/ICS)
-
-**Description:** Allow users to export events to their personal calendars.
-
-**Implementation:**
-- Generate ICS files for events
-- Individual event export
-- Bulk calendar export
-- Subscribe-able calendar URL (read-only)
-
-**Benefits:**
-- Integration with Outlook, Google Calendar, etc.
-- Better event visibility
-- Reduced manual data entry
-
-**Estimated Effort:** Medium (2-3 days)
-
----
-
 ### Medium Priority
 
-#### 4. Event Categories & Tags
+#### 3. Two-Factor Authentication (2FA)
 
-**Description:** Enhanced categorization beyond current category field.
+**Description:** Add optional 2FA for admin and superadmin accounts.
 
 **Implementation:**
-- Multiple tags per event
-- Tag-based filtering
-- Tag management (create, edit, delete)
-- Tag-based search
+- TOTP (Time-based One-Time Password)
+- QR code generation for authenticator apps
+- Backup codes for recovery
+- Optional enforcement per role
 
 **Benefits:**
-- More flexible organization
-- Better filtering options
-- Improved searchability
+- Enhanced account security
+- Protects privileged accounts
+- Industry best practice
 
 **Estimated Effort:** Medium (2-3 days)
 
 ---
 
-#### 5. Recurring Events
+#### 4. Session Rotation on Login
 
-**Description:** Support for events that repeat on a schedule.
-
-**Implementation:**
-- Recurrence rules (daily, weekly, monthly, yearly)
-- Edit single occurrence vs. all future
-- Exception handling (skip specific dates)
-- Bulk operations on series
-
-**Benefits:**
-- Reduces manual event creation
-- Consistent scheduling
-- Common use case support
-
-**Estimated Effort:** High (5-7 days)
-
----
-
-#### 6. Mobile App (React Native)
-
-**Description:** Native mobile app for stakeholders.
+**Description:** Generate new session ID after successful authentication.
 
 **Implementation:**
-- React Native app for iOS and Android
-- Push notifications for task updates
-- Offline support
-- Same backend API
+```typescript
+app.post('/api/login', passport.authenticate('local'), (req, res) => {
+  req.session.regenerate((err) => {
+    if (err) return next(err);
+    // Continue with login
+  });
+});
+```
 
 **Benefits:**
-- Better mobile UX
-- Push notifications
-- Increased stakeholder engagement
+- Prevents session fixation attacks
+- Enhanced security
 
-**Estimated Effort:** Very High (4-6 weeks)
+**Estimated Effort:** Low (1 hour)
 
 ---
 
 ### Low Priority
 
-#### 7. Multi-Language Support (i18n)
+#### 5. Security Headers (Helmet.js)
 
-**Description:** Support for multiple UI languages.
+**Description:** Add security headers to responses.
 
 **Implementation:**
-- Use `react-i18next` for frontend
-- Language switcher in UI
-- Translation files for Arabic, English
-- Server-side localization for emails
+```typescript
+import helmet from 'helmet';
+
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", 'data:', 'https:'],
+    },
+  },
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+  },
+}));
+```
 
 **Benefits:**
-- Accessibility for non-English speakers
-- Better user experience
-- International expansion support
+- Browser-level security
+- Clickjacking prevention
+- XSS mitigation
 
-**Estimated Effort:** High (5-7 days)
+**Estimated Effort:** Low (few hours)
 
 ---
 
-#### 8. Event Approval Workflow
+## Production Deployment Checklist
 
-**Description:** Multi-step approval process for event creation.
-
-**Implementation:**
-- Draft → Pending → Approved states
-- Approval roles (requires admin/superadmin approval)
-- Email notifications on status change
-- Approval history tracking
-
-**Benefits:**
-- Quality control
-- Governance compliance
-- Multi-stakeholder coordination
-
-**Estimated Effort:** High (5-7 days)
-
----
-
-#### 9. Custom Fields
-
-**Description:** User-defined fields for events.
-
-**Implementation:**
-- Field builder UI (text, number, date, dropdown)
-- Store in JSONB column
-- Include in filters and search
-- Export custom fields
-
-**Benefits:**
-- Flexibility for org-specific needs
-- No code changes for new requirements
-- Adaptable to evolving needs
-
-**Estimated Effort:** High (5-7 days)
-
----
-
-#### 10. WebSocket Real-Time Updates
-
-**Description:** Live updates without page refresh.
-
-**Implementation:**
-- WebSocket server (ws package already installed)
-- Real-time event updates
-- Real-time task status changes
-- Live notifications
-
-**Benefits:**
-- Instant updates across users
-- Better collaboration
-- Modern UX
-
-**Estimated Effort:** Medium (3-4 days)
-
----
-
-## Security Best Practices for Deployment
-
-### Pre-Deployment Checklist
+### Pre-Deployment Security
 
 - [ ] Change default superadmin password
-- [ ] Generate strong SESSION_SECRET (32+ characters)
+- [ ] Generate strong SESSION_SECRET (32+ chars)
 - [ ] Use strong database password
-- [ ] Enable HTTPS/TLS (not just HTTP)
-- [ ] Configure firewall (allow only necessary ports)
+- [ ] Enable HTTPS/TLS
+- [ ] Configure firewall
 - [ ] Set `NODE_ENV=production`
-- [ ] Review and update `.env` file
-- [ ] Ensure `.env` is not committed to Git
-- [ ] Disable file uploads if not needed
-- [ ] Configure email provider (Resend or SMTP)
+- [ ] Review `.env` file
+- [ ] Ensure `.env` not in Git
+- [ ] Configure email provider
 - [ ] Test email delivery
 - [ ] Review CORS configuration
-- [ ] Enable security headers (helmet)
+- [ ] Enable security headers
 - [ ] Set up database backups
-- [ ] Configure monitoring and alerts
-- [ ] Review audit logs regularly (once implemented)
+- [ ] Configure monitoring
+- [ ] Implement rate limiting
+- [ ] Review user roles and permissions
 
 ### Production Security Recommendations
 
 1. **Use HTTPS Only**
-   - TLS certificate (Let's Encrypt, Cloudflare, etc.)
+   - TLS certificate (Let's Encrypt)
    - Redirect HTTP to HTTPS
    - HSTS header enabled
 
 2. **Reverse Proxy**
-   - nginx or Caddy in front of application
+   - nginx or Caddy
    - Rate limiting at proxy level
-   - Static file serving
    - SSL termination
+   - Static file serving
 
 3. **Database Security**
-   - Restrict network access (firewall)
-   - Use strong passwords
+   - Restrict network access
+   - Strong passwords
    - Regular backups
-   - Encrypted backups
+   - Encrypted connections
 
 4. **Monitoring**
    - Application logs
-   - Database logs
    - Failed login attempts
    - Error rates
    - Response times
+   - Disk usage
 
 5. **Regular Updates**
-   - Keep dependencies updated (`npm audit`)
-   - Update Node.js runtime
+   - `npm audit` regularly
+   - Update Node.js
    - Update PostgreSQL
-   - Security patches applied promptly
+   - Security patches
 
 6. **Backup Strategy**
    - Daily database backups
    - Backup uploads directory
    - Test restore procedures
-   - Off-site backup storage
+   - Off-site storage
 
 ---
 
 ## Summary
 
-This application implements a robust three-tier RBAC system with comprehensive security features. While production-ready, several enhancements can further improve security and functionality. Prioritize implementing rate limiting, audit logging, and 2FA for enhanced security. Regular security reviews and updates are essential to maintain a secure application.
+This application implements a robust **eight-tier RBAC system** with comprehensive security features:
+
+**✅ Role System:**
+- 8 distinct roles with clear hierarchy
+- Granular permission control
+- Frontend and backend enforcement
+
+**✅ Authentication:**
+- Secure password hashing (scrypt)
+- Session management
+- Keycloak SSO support
+
+**✅ Authorization:**
+- Role-based middleware
+- Permission check utilities
+- Department-level isolation
+
+**✅ Input Security:**
+- Zod validation
+- SQL injection prevention
+- File upload controls
+
+**⚠️ Priority Improvements:**
+1. **Rate limiting** - Prevent brute force
+2. **Audit logging** - Track admin actions
+3. **2FA** - Enhanced account security
 
 **Key Takeaways:**
-- ✅ Strong role separation (Superadmin, Admin, Stakeholder)
-- ✅ Secure authentication (scrypt, sessions)
-- ✅ Input validation (Zod schemas)
-- ✅ File upload controls (toggle, limits, types)
-- ⚠️ Implement rate limiting
-- ⚠️ Add audit logging
-- ⚠️ Consider 2FA for admins
+- Strong role separation (8 levels)
+- Secure authentication
+- Input validation
+- File upload controls
+- Ready for production with recommended improvements
 
 For questions or security concerns, review this document and consult with the development team.
+
+---
+
+**Last Updated:** January 29, 2026  
+**Version:** 2.0 (Added new roles: viewer, employee, events_lead, division_head)

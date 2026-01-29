@@ -89,5 +89,15 @@
   "deleteStakeholderConfirm": "سيؤدي هذا إلى حذف حساب صاحب المصلحة نهائياً لـ",
   "cannotUndo": "لا يمكن التراجع عن هذا الإجراء.",
   "usernameEmail": "اسم المستخدم / البريد الإلكتروني",
-  "actions": "الإجراءات"
+  "actions": "الإجراءات",
+  "events_lead": "قائد الفعاليات",
+  "division_head": "رئيس القسم",
+  "employee": "موظف",
+  "viewer": "مشاهد",
+  "eventsLead": "قائد الفعاليات",
+  "divisionHead": "رئيس القسم",
+  "eventsLeadDesc": "يمكنه إدارة الفعاليات وتعيين المهام",
+  "divisionHeadDesc": "يشرف على القسم مع إمكانية الوصول إلى التحليلات",
+  "employeeDesc": "يمكنه تحديث المهام المعينة",
+  "viewerDesc": "وصول للقراءة فقط عبر النظام"
 }

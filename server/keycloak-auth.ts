@@ -358,3 +358,73 @@ export async function getUserDepartments(user: SelectUser): Promise<string[]> {
 export function getKeycloakInstance(): Keycloak.Keycloak | null {
   return keycloakInstance;
 }
+
+/**
+ * Middleware to check if user is events_lead or higher
+ */
+export function isEventsLeadOrHigher(req: Request, res: Response, next: NextFunction) {
+  if (!req.isAuthenticated && !(req as any).kauth?.grant) {
+    return res.sendStatus(401);
+  }
+  
+  const allowedRoles = ['superadmin', 'admin', 'division_head', 'events_lead'];
+  if (!allowedRoles.includes(req.user?.role || '')) {
+    return res.status(403).json({ 
+      error: 'This action requires events lead privileges or higher' 
+    });
+  }
+  
+  next();
+}
+
+/**
+ * Middleware to check if user is division_head or higher
+ */
+export function isDivisionHeadOrHigher(req: Request, res: Response, next: NextFunction) {
+  if (!req.isAuthenticated && !(req as any).kauth?.grant) {
+    return res.sendStatus(401);
+  }
+  
+  const allowedRoles = ['superadmin', 'admin', 'division_head'];
+  if (!allowedRoles.includes(req.user?.role || '')) {
+    return res.status(403).json({ 
+      error: 'This action requires division head privileges or higher' 
+    });
+  }
+  
+  next();
+}
+
+/**
+ * Middleware to check if user is employee or higher (excludes viewer)
+ */
+export function isEmployeeOrHigher(req: Request, res: Response, next: NextFunction) {
+  if (!req.isAuthenticated && !(req as any).kauth?.grant) {
+    return res.sendStatus(401);
+  }
+  
+  if (req.user?.role === 'viewer') {
+    return res.status(403).json({ 
+      error: 'Viewers cannot perform this action' 
+    });
+  }
+  
+  next();
+}
+
+/**
+ * Middleware to check if user is NOT a viewer
+ */
+export function isNotViewer(req: Request, res: Response, next: NextFunction) {
+  if (!req.isAuthenticated && !(req as any).kauth?.grant) {
+    return res.sendStatus(401);
+  }
+  
+  if (req.user?.role === 'viewer') {
+    return res.status(403).json({ 
+      error: 'Viewers have read-only access' 
+    });
+  }
+  
+  next();
+}

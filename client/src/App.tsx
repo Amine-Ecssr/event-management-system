@@ -18,6 +18,8 @@ import Contacts from "@/pages/Contacts";
 import EngagementDashboard from "@/pages/EngagementDashboard";
 import StakeholderDashboard from "@/pages/StakeholderDashboard";
 import Users from "@/pages/Users";
+import RolesInfo from "@/pages/RolesInfo";
+import RoleDescriptionExample from "@/pages/RoleDescriptionExample";
 import FilesManagement from "@/pages/FilesManagement";
 import EventFiles from "@/pages/EventFiles";
 import EventDetail from "@/pages/EventDetail";
@@ -93,6 +95,8 @@ function Router() {
       <ProtectedRoute path="/admin/updates" component={Updates} />
       <ProtectedRoute path="/admin/all-updates" component={AllUpdates} />
       <ProtectedRoute path="/admin/users" component={Users} />
+      <ProtectedRoute path="/admin/roles" component={RolesInfo} />
+      <ProtectedRoute path="/admin/roles-explanation" component={RoleDescriptionExample} />
       <ProtectedRoute path="/admin/files-management" component={FilesManagement} />
       <ProtectedRoute path="/admin/events/:eventId/files" component={EventFiles} />
       <ProtectedRoute path="/admin/events/:eventId" component={EventDetail} />

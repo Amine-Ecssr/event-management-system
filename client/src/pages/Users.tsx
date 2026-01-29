@@ -76,11 +76,12 @@ import { PageHeader } from '@/components/PageHeader';
 import { useTranslation } from 'react-i18next';
 import { ListLoadingSkeleton } from '@/components/ui/loading-state';
 import { EmptyState } from '@/components/ui/empty-state';
+import { RoleDescription } from '@/components/RoleDescription';
 
 type User = {
   id: number;
   username: string;
-  role: 'admin' | 'superadmin' | 'stakeholder';
+  role: 'admin' | 'superadmin' | 'stakeholder' | 'department' | 'department_admin' | 'events_lead' | 'division_head' | 'employee' | 'viewer';
   createdAt: string;
 };
 
@@ -104,7 +105,7 @@ type Stakeholder = {
 const createAdminSchema = z.object({
   username: z.string().min(3, 'Username must be at least 3 characters').regex(/^\S*$/, 'Username cannot contain spaces'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
-  role: z.enum(['admin', 'superadmin']),
+  role: z.enum(['admin', 'superadmin', 'events_lead', 'division_head', 'employee', 'viewer']),
 });
 
 const resetPasswordSchema = z.object({
@@ -727,11 +728,20 @@ export default function Users() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
+                        <SelectItem value="viewer">{t('users.viewer')}</SelectItem>
+                        <SelectItem value="employee">{t('users.employee')}</SelectItem>
+                        <SelectItem value="events_lead">{t('users.eventsLead')}</SelectItem>
+                        <SelectItem value="division_head">{t('users.divisionHead')}</SelectItem>
                         <SelectItem value="admin">{t('users.admin')}</SelectItem>
-                        <SelectItem value="superadmin">{t('users.superadmin')}</SelectItem>
+                        {user?.role === 'superadmin' && (
+                          <SelectItem value="superadmin">{t('users.superadmin')}</SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
                     <FormMessage />
+                    {field.value && (
+                      <RoleDescription role={field.value} className="mt-2" />
+                    )}
                   </FormItem>
                 )}
               />

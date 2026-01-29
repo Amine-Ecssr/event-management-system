@@ -77,12 +77,11 @@ services:
     env_file:
       - .env.development
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-ecssr_events_dev}
+      POSTGRES_DB: ${POSTGRES_DB:-ecssr_ems_dev}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
     volumes:
       - postgres_data_dev:/var/lib/postgresql/data
-      - ./init-keycloak-schema.sql:/docker-entrypoint-initdb.d/init-keycloak-schema.sql
     ports:
       - "5433:5432"
     healthcheck:
@@ -103,44 +102,9 @@ services:
       db:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-ecssr_events_dev}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-ecssr_ems_dev}
     command: npm run db:migrate
     restart: "no"
-    networks:
-      - dev-network
-
-
-  # Keycloak (matches production image but runs locally)
-  keycloak:
-    image: quay.io/keycloak/keycloak:23.0
-    container_name: ecssr-ems-keycloak-dev
-    restart: unless-stopped
-    command: start-dev
-    env_file:
-      - .env.development
-    environment:
-      KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-ecssr_events_dev}
-      KC_DB_USERNAME: ${POSTGRES_USER:-postgres}
-      KC_DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      KC_DB_SCHEMA: keycloak
-      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
-      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
-      KC_HOSTNAME_STRICT: "false"
-      KC_HOSTNAME_STRICT_HTTPS: "false"
-      KC_HTTP_ENABLED: "true"
-      KC_HEALTH_ENABLED: "true"
-    ports:
-      - "8080:8080"
-    depends_on:
-      db:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://127.0.0.1:8080/health/ready || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 30
-      start_period: 90s
     networks:
       - dev-network
 
@@ -181,14 +145,13 @@ services:
         condition: service_healthy
       migrate:
         condition: service_completed_successfully
-      keycloak:
-        condition: service_started
       elasticsearch:
         condition: service_healthy
     environment:
       NODE_ENV: development
+      TSX_WATCH_POLL: 1000
       PORT: ${PORT:-5050}
-      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-ecssr_events_dev}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-ecssr_ems_dev}
       
       # Elasticsearch configuration
       # For Serverless: Use ELASTICSEARCH_CLOUD_ID + ELASTICSEARCH_API_KEY
@@ -202,8 +165,6 @@ services:
       ES_INDEX_PREFIX: ${ES_INDEX_PREFIX:-eventcal}
       ES_INDEX_SUFFIX: ${ES_INDEX_SUFFIX:-dev}
       SESSION_SECRET: ${SESSION_SECRET:-dev-secret-change-in-production}
-      KEYCLOAK_URL: http://keycloak:8080
-      KEYCLOAK_REDIRECT_URI: http://localhost:5050/api/auth/callback
       # Force Docker service name for scraper (not localhost)
       SCRAPER_SERVICE_URL: http://scraper-service:3002
       SCRAPER_SERVICE_TOKEN: ${SCRAPER_SERVICE_TOKEN:-dev-change-this-scraper-token}

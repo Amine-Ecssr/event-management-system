@@ -89,5 +89,15 @@
   "deleteStakeholderConfirm": "This will permanently delete the stakeholder account for",
   "cannotUndo": "This action cannot be undone.",
   "usernameEmail": "Username / Email",
-  "actions": "Actions"
+  "actions": "Actions",
+  "events_lead": "Events Lead",
+  "division_head": "Division Head",
+  "employee": "Employee",
+  "viewer": "Viewer",
+  "eventsLead": "Events Lead",
+  "divisionHead": "Division Head",
+  "eventsLeadDesc": "Can manage events and assign tasks",
+  "divisionHeadDesc": "Oversees division with analytics access",
+  "employeeDesc": "Can update assigned tasks",
+  "viewerDesc": "Read-only access across the system"
 }

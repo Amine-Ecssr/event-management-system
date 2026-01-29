@@ -4,7 +4,6 @@
  * API endpoints for admin user management, including:
  * - User listing and CRUD operations
  * - Admin account creation and management
- * - Keycloak sync operations (department sync)
  * - User role updates and password resets
  *
  * Note: Stakeholder account routes are in stakeholder.routes.ts
@@ -20,114 +19,6 @@ import { getAuthService } from "../auth-service";
 import { fromError } from "zod-validation-error";
 
 const router = Router();
-
-// ==================== Keycloak Group Sync Routes (superadmin only) ====================
-
-/**
- * GET /api/keycloak/groups
- * Get all Keycloak groups
- */
-router.get("/api/keycloak/groups", isSuperAdmin, async (req, res) => {
-  try {
-    const { keycloakAdmin } = await import("../keycloak-admin");
-
-    if (!keycloakAdmin.isConfigured()) {
-      return res.status(503).json({
-        error: "Keycloak integration is not configured",
-      });
-    }
-
-    const groups = await keycloakAdmin.getAllGroups(false);
-    res.json({ groups });
-  } catch (error: any) {
-    console.error("[API] Failed to fetch Keycloak groups:", error);
-    res.status(500).json({
-      error: error.message || "Failed to fetch Keycloak groups",
-    });
-  }
-});
-
-/**
- * POST /api/keycloak/sync/groups
- * Sync all Keycloak groups to departments
- */
-router.post("/api/keycloak/sync/groups", isSuperAdmin, async (req, res) => {
-  try {
-    const { keycloakAdmin } = await import("../keycloak-admin");
-
-    if (!keycloakAdmin.isConfigured()) {
-      return res.status(503).json({
-        error: "Keycloak integration is not configured",
-      });
-    }
-
-    await keycloakAdmin.syncGroupsToDepartments();
-    res.json({
-      success: true,
-      message: "Keycloak groups synced successfully",
-    });
-  } catch (error: any) {
-    console.error("[API] Failed to sync Keycloak groups:", error);
-    res.status(500).json({
-      error: error.message || "Failed to sync Keycloak groups",
-    });
-  }
-});
-
-/**
- * POST /api/keycloak/sync/all
- * Sync all groups and their members
- */
-router.post("/api/keycloak/sync/all", isSuperAdmin, async (req, res) => {
-  try {
-    const { keycloakAdmin } = await import("../keycloak-admin");
-
-    if (!keycloakAdmin.isConfigured()) {
-      return res.status(503).json({
-        error: "Keycloak integration is not configured",
-      });
-    }
-
-    await keycloakAdmin.syncAllGroupsAndMembers();
-    res.json({
-      success: true,
-      message: "Keycloak groups and members synced successfully",
-    });
-  } catch (error: any) {
-    console.error("[API] Failed to sync Keycloak groups and members:", error);
-    res.status(500).json({
-      error: error.message || "Failed to sync Keycloak groups and members",
-    });
-  }
-});
-
-/**
- * POST /api/keycloak/sync/group/:groupPath
- * Sync members of a specific group
- */
-router.post("/api/keycloak/sync/group/:groupPath", isSuperAdmin, async (req, res) => {
-  try {
-    const { keycloakAdmin } = await import("../keycloak-admin");
-
-    if (!keycloakAdmin.isConfigured()) {
-      return res.status(503).json({
-        error: "Keycloak integration is not configured",
-      });
-    }
-
-    const groupPath = decodeURIComponent(req.params.groupPath);
-    await keycloakAdmin.syncGroupMembersToUsers(groupPath);
-    res.json({
-      success: true,
-      message: `Members of group ${groupPath} synced successfully`,
-    });
-  } catch (error: any) {
-    console.error("[API] Failed to sync group members:", error);
-    res.status(500).json({
-      error: error.message || "Failed to sync group members",
-    });
-  }
-});
 
 // ==================== User Management Routes (superadmin only) ====================
 

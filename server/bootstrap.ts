@@ -2,7 +2,6 @@ import { storage } from "./storage";
 import { authService } from "./auth";
 import { log } from "./vite";
 import { startScraperScheduler } from "./scraperScheduler";
-import { waitForKeycloakAndSetup } from "./keycloakSetup";
 
 /**
  * Bootstrap the default admin user from environment variables.
@@ -77,14 +76,8 @@ export async function bootstrapDefaultAdmin(): Promise<void> {
 export async function startBackgroundServices(): Promise<void> {
   log('Starting background services...');
   
-  // Bootstrap Keycloak complete setup (realm, client, roles)
-  // This waits for Keycloak to be ready and performs full configuration
-  waitForKeycloakAndSetup().catch(error => {
-    console.error('[Bootstrap] Keycloak setup failed:', error);
-  });
-  
   // Start weekly scraper for Abu Dhabi events
-  startScraperScheduler();
+  //-- startScraperScheduler();
   
   // Warm up WhatsApp session if it exists
   await warmupWhatsAppSession();

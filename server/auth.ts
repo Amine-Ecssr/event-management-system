@@ -5,14 +5,6 @@ import session from "express-session";
 import { storage } from "./storage";
 import { User as SelectUser } from "@shared/schema";
 import { getAuthService } from "./auth-service";
-import { 
-  setupKeycloakAuth, 
-  getUserFromKeycloakToken, 
-  getKeycloakInstance,
-  isAuthenticated as keycloakIsAuthenticated,
-  isSuperAdmin as keycloakIsSuperAdmin,
-  isAdminOrSuperAdmin as keycloakIsAdminOrSuperAdmin,
-} from "./keycloak-auth";
 
 declare global {
   namespace Express {
@@ -24,72 +16,6 @@ declare global {
 }
 
 export const authService = getAuthService();
-let keycloakInstance: any = null;
-
-/**
- * Authenticate user with Keycloak using Resource Owner Password Credentials flow
- * This allows the traditional username/password form to work with Keycloak
- */
-async function authenticateWithKeycloak(username: string, password: string): Promise<SelectUser | null> {
-  try {
-    const baseUrl = process.env.KEYCLOAK_URL || 'http://localhost:8080';
-    const realm = process.env.KEYCLOAK_REALM || 'ecssr-events';
-    const clientId = process.env.KEYCLOAK_CLIENT_ID || 'ecssr-events-app';
-    const clientSecret = process.env.KEYCLOAK_CLIENT_SECRET || '';
-
-    // Request token from Keycloak using password grant
-    const tokenUrl = `${baseUrl}/realms/${realm}/protocol/openid-connect/token`;
-    
-    const params = new URLSearchParams({
-      grant_type: 'password',
-      client_id: clientId,
-      client_secret: clientSecret,
-      username: username,
-      password: password,
-      scope: 'openid profile email',
-    });
-
-    const response = await fetch(tokenUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: params,
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.log('[Auth] Keycloak token request failed:', response.status, errorText);
-      return null;
-    }
-
-    const tokenData = await response.json();
-    
-    // Decode the access token to get user info
-    const tokenParts = tokenData.access_token.split('.');
-    const payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
-    
-    // Create a grant-like object for getUserFromKeycloakToken
-    const grant = {
-      access_token: {
-        content: payload,
-        token: tokenData.access_token,
-      },
-    };
-
-    // Use existing Keycloak user extraction logic
-    const user = await getUserFromKeycloakToken(grant);
-    
-    if (user) {
-      console.log(`[Auth] Keycloak authentication successful for: ${username}`);
-    }
-    
-    return user;
-  } catch (error) {
-    console.error('[Auth] Keycloak authentication error:', error);
-    return null;
-  }
-}
 
 export function setupAuth(app: Express) {
   const sessionSettings: session.SessionOptions = {
@@ -109,32 +35,6 @@ export function setupAuth(app: Express) {
 
   app.set("trust proxy", 1);
   app.use(session(sessionSettings));
-  
-  // Initialize Keycloak if configured
-  keycloakInstance = setupKeycloakAuth(app, storage.sessionStore);
-  const keycloakEnabled = !!keycloakInstance;
-  
-  if (keycloakEnabled) {
-    console.log('[Auth] Keycloak authentication enabled');
-    
-    // Add middleware to extract user from Keycloak token
-    app.use(async (req: Request, res: Response, next: NextFunction) => {
-      if ((req as any).kauth?.grant) {
-        try {
-          const user = await getUserFromKeycloakToken((req as any).kauth.grant);
-          if (user) {
-            req.user = user;
-          }
-        } catch (error) {
-          console.error('[Auth] Error extracting user from Keycloak token:', error);
-        }
-      }
-      next();
-    });
-  } else {
-    console.log('[Auth] Keycloak not configured, using local authentication only');
-  }
-  
   // Initialize Passport for local authentication (backward compatibility)
   app.use(passport.initialize());
   app.use(passport.session());
@@ -142,18 +42,6 @@ export function setupAuth(app: Express) {
   passport.use(
     new LocalStrategy(async (username, password, done) => {
       try {
-        // If Keycloak is enabled, try Keycloak authentication first
-        if (keycloakEnabled) {
-          try {
-            const keycloakUser = await authenticateWithKeycloak(username, password);
-            if (keycloakUser) {
-              return done(null, keycloakUser);
-            }
-          } catch (keycloakError) {
-            console.log('[Auth] Keycloak authentication failed, falling back to local:', keycloakError);
-          }
-        }
-        
         // Fallback to local authentication
         const user = await authService.authenticate(username, password);
         if (!user) {
@@ -306,10 +194,13 @@ export function setupAuth(app: Express) {
         return res.status(400).json({ error: "Password must be at least 6 characters" });
       }
 
-      // Validate role if provided, default to 'admin'
-      const userRole = role || 'admin';
-      if (!['admin', 'superadmin', 'department_admin', 'department'].includes(userRole)) {
-        return res.status(400).json({ error: "Role must be 'admin', 'superadmin', 'department_admin', or 'department'" });
+      // Validate role if provided, default to 'employee'
+      const userRole = role || 'employee';
+      const validRoles = ['superadmin', 'admin', 'department', 'department_admin', 'events_lead', 'division_head', 'employee', 'viewer'];
+      if (!validRoles.includes(userRole)) {
+        return res.status(400).json({ 
+          error: `Role must be one of: ${validRoles.join(', ')}` 
+        });
       }
 
       const existingUser = await authService.getUserByUsername(username);
@@ -334,11 +225,6 @@ export function setupAuth(app: Express) {
 
 // Middleware to check if user is authenticated (Keycloak or local)
 export function isAuthenticated(req: any, res: any, next: any) {
-  // Check Keycloak authentication first
-  if (keycloakInstance && req.kauth?.grant) {
-    return next();
-  }
-  
   // Fallback to local Passport authentication
   if (!req.isAuthenticated()) {
     return res.sendStatus(401);
@@ -349,7 +235,7 @@ export function isAuthenticated(req: any, res: any, next: any) {
 // Middleware to check if user is a superadmin
 export function isSuperAdmin(req: any, res: any, next: any) {
   // Check authentication first
-  const isAuth = (keycloakInstance && req.kauth?.grant) || req.isAuthenticated();
+  const isAuth =  req.isAuthenticated();
   if (!isAuth) {
     return res.sendStatus(401);
   }
@@ -363,13 +249,71 @@ export function isSuperAdmin(req: any, res: any, next: any) {
 // Middleware to check if user is admin or superadmin (blocks department users)
 export function isAdminOrSuperAdmin(req: any, res: any, next: any) {
   // Check authentication first
-  const isAuth = (keycloakInstance && req.kauth?.grant) || req.isAuthenticated();
+  const isAuth = req.isAuthenticated();
   if (!isAuth) {
     return res.sendStatus(401);
   }
   
   if (req.user?.role !== 'admin' && req.user?.role !== 'superadmin') {
     return res.status(403).json({ error: "This action requires admin or superadmin privileges" });
+  }
+  next();
+}
+
+// Middleware to check if user is events_lead or higher
+export function isEventsLeadOrHigher(req: any, res: any, next: any) {
+  if (!req.isAuthenticated()) {
+    return res.sendStatus(401);
+  }
+  
+  const allowedRoles = ['superadmin', 'admin', 'division_head', 'events_lead'];
+  if (!allowedRoles.includes(req.user?.role)) {
+    return res.status(403).json({ 
+      error: "This action requires events lead privileges or higher" 
+    });
+  }
+  next();
+}
+
+// Middleware to check if user is division_head or higher
+export function isDivisionHeadOrHigher(req: any, res: any, next: any) {
+  if (!req.isAuthenticated()) {
+    return res.sendStatus(401);
+  }
+  
+  const allowedRoles = ['superadmin', 'admin', 'division_head'];
+  if (!allowedRoles.includes(req.user?.role)) {
+    return res.status(403).json({ 
+      error: "This action requires division head privileges or higher" 
+    });
+  }
+  next();
+}
+
+// Middleware to check if user is employee or higher (excludes viewer)
+export function isEmployeeOrHigher(req: any, res: any, next: any) {
+  if (!req.isAuthenticated()) {
+    return res.sendStatus(401);
+  }
+  
+  if (req.user?.role === 'viewer') {
+    return res.status(403).json({ 
+      error: "Viewers cannot perform this action" 
+    });
+  }
+  next();
+}
+
+// Middleware to check if user is NOT a viewer (anyone except viewer can perform action)
+export function isNotViewer(req: any, res: any, next: any) {
+  if (!req.isAuthenticated()) {
+    return res.sendStatus(401);
+  }
+  
+  if (req.user?.role === 'viewer') {
+    return res.status(403).json({ 
+      error: "Viewers have read-only access" 
+    });
   }
   next();
 }

@@ -90,11 +90,7 @@ app.use((req, res, next) => {
 
   // Start the reminder scheduler
   startReminderScheduler();
-  
-  // Start Keycloak sync scheduler (if configured)
-  const { startKeycloakSyncScheduler } = await import("./keycloakSyncScheduler");
-  startKeycloakSyncScheduler();
-  
+
   // Start partnership inactivity scheduler
   const { startPartnershipInactivityScheduler } = await import("./partnershipInactivityScheduler");
   startPartnershipInactivityScheduler();
