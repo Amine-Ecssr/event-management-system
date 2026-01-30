@@ -1,7 +1,7 @@
 import { storage } from "./storage";
 import { authService } from "./auth";
 import { log } from "./vite";
-import { startScraperScheduler } from "./scraperScheduler";
+import seedTestUsers from "./scripts/seedTestUsers";
 
 /**
  * Bootstrap the default admin user from environment variables.
@@ -25,6 +25,7 @@ import { startScraperScheduler } from "./scraperScheduler";
 export async function bootstrapDefaultAdmin(): Promise<void> {
   const adminUsername = process.env.ADMIN_USERNAME;
   const adminPassword = process.env.ADMIN_PASSWORD;
+  const testUsername = process.env.TEST_USERNAME || 'divisionhead1';
 
   // Fail fast if credentials are not provided
   if (!adminUsername || !adminPassword) {
@@ -51,19 +52,29 @@ export async function bootstrapDefaultAdmin(): Promise<void> {
         await storage.updateUserRole(existingUser.id, 'superadmin');
         log(`Updated user '${adminUsername}' role from '${existingUser.role}' to 'superadmin'`);
       }
-      
       log(`Default superadmin user '${adminUsername}' credentials updated from environment variables`);
-      return;
+    }else{
+       // User doesn't exist - create the default superadmin user
+        await storage.createUser({
+          username: adminUsername,
+          password: hashedPassword,
+          role: 'superadmin',
+        });
+
+        log(`Default superadmin user '${adminUsername}' created successfully`);
     }
-
-    // User doesn't exist - create the default superadmin user
-    await storage.createUser({
-      username: adminUsername,
-      password: hashedPassword,
-      role: 'superadmin',
-    });
-
-    log(`Default superadmin user '${adminUsername}' created successfully`);
+    
+    console.log('###### checking to seed test users ######');
+    const testUsersEnabled = Boolean(process.env.SEED_TEST_USERS) || process.env.SEED_TEST_USERS;
+    if (testUsersEnabled) {
+       // Check if admin user already exists
+      const existingTestUser = await storage.getUserByUsername(testUsername);
+      if(!existingTestUser) {
+        await seedTestUsers();
+      }else{
+        log(`Test users already exist in the DB. Skipping seeding test users.`);
+      }
+    }
   } catch (error) {
     console.error('Failed to bootstrap default admin user:', error);
     process.exit(1);
