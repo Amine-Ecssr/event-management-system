@@ -80,7 +80,7 @@ export async function startBackgroundServices(): Promise<void> {
   //-- startScraperScheduler();
   
   // Warm up WhatsApp session if it exists
-  await warmupWhatsAppSession();
+  //-- await warmupWhatsAppSession();
   
   log('Background services started successfully');
 }

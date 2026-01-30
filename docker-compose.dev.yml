@@ -14,7 +14,7 @@ services:
       - cluster.name=eventcal-cluster-dev
       - discovery.type=single-node
       - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
       - xpack.security.enabled=true
       - ELASTIC_PASSWORD=${ELASTICSEARCH_PASSWORD:-eventcal-dev-password-2024}
       - xpack.security.http.ssl.enabled=false
@@ -149,7 +149,6 @@ services:
         condition: service_healthy
     environment:
       NODE_ENV: development
-      TSX_WATCH_POLL: 1000
       PORT: ${PORT:-5050}
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-ecssr_ems_dev}
       
@@ -191,7 +190,7 @@ services:
       
       # WhatsApp configuration
       WHATSAPP_ENABLED: ${WHATSAPP_ENABLED:-false}
-      WHATSAPP_SERVICE_URL: ${WHATSAPP_SERVICE_URL:-http://whatsapp-service:3001}
+      #WHATSAPP_SERVICE_URL: ${WHATSAPP_SERVICE_URL:-http://whatsapp-service:3001}
       WHATSAPP_AUTH_PHRASE: ${WHATSAPP_AUTH_PHRASE:-dev-change-me}
       WHATSAPP_DEFAULT_GROUP: ${WHATSAPP_DEFAULT_GROUP:-ECSSR Events}
       
@@ -221,31 +220,31 @@ services:
       - dev-network
 
   # WhatsApp Service (Development)
-  whatsapp-service:
-    build:
-      context: ./whatsapp-service
-      dockerfile: Dockerfile
-    container_name: ecssr-whatsapp-service-dev
-    restart: unless-stopped
-    environment:
-      NODE_ENV: development
-      PORT: 3001
-      WHATSAPP_AUTH_PHRASE: ${WHATSAPP_AUTH_PHRASE:-dev-change-me}
-      WHATSAPP_DEFAULT_GROUP: ${WHATSAPP_DEFAULT_GROUP:-ECSSR Events}
-    ports:
-      - "3001:3001"
-    volumes:
-      - ./whatsapp-service:/app
-      - /app/node_modules
-      - ./whatsapp-service/auth_info:/app/auth_info
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 20s
-    networks:
-      - dev-network
+  # whatsapp-service:
+  #   build:
+  #     context: ./whatsapp-service
+  #     dockerfile: Dockerfile
+  #   container_name: ecssr-whatsapp-service-dev
+  #   restart: unless-stopped
+  #   environment:
+  #     NODE_ENV: development
+  #     PORT: 3001
+  #     WHATSAPP_AUTH_PHRASE: ${WHATSAPP_AUTH_PHRASE:-dev-change-me}
+  #     WHATSAPP_DEFAULT_GROUP: ${WHATSAPP_DEFAULT_GROUP:-ECSSR Events}
+  #   ports:
+  #     - "3001:3001"
+  #   volumes:
+  #     - ./whatsapp-service:/app
+  #     - /app/node_modules
+  #     - ./whatsapp-service/auth_info:/app/auth_info
+  #   healthcheck:
+  #     test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 20s
+  #   networks:
+  #     - dev-network
 
   # scraper-service:
   #   build:

@@ -11,9 +11,15 @@ const router = Router();
  */
 router.get('/api/permissions', 
   isAuthenticated,
-  requirePermission('users.manage_permissions'),
   async (req: Request, res: Response) => {
     try {
+      // Allow superadmin and admin to view permissions
+      const isAdminOrSuper = req.user!.role === 'admin' || req.user!.role === 'superadmin';
+      
+      if (!isAdminOrSuper) {
+        return res.status(403).json({ error: 'Only admins can manage permissions' });
+      }
+      
       const permissions = await permissionService.getAllPermissionsGrouped();
       res.json(permissions);
     } catch (error) {
@@ -77,9 +83,14 @@ const grantPermissionSchema = z.object({
 
 router.post('/api/users/:userId/permissions',
   isAuthenticated,
-  requirePermission('users.manage_permissions'),
   async (req: Request, res: Response) => {
     try {
+      // Only admin and superadmin can manage permissions
+      const isAdminOrSuper = req.user!.role === 'admin' || req.user!.role === 'superadmin';
+      if (!isAdminOrSuper) {
+        return res.status(403).json({ error: 'Only admins can manage permissions' });
+      }
+      
       const userId = parseInt(req.params.userId);
       const body = grantPermissionSchema.parse(req.body);
       
@@ -111,9 +122,14 @@ const revokePermissionSchema = z.object({
 
 router.delete('/api/users/:userId/permissions/:permissionName',
   isAuthenticated,
-  requirePermission('users.manage_permissions'),
   async (req: Request, res: Response) => {
     try {
+      // Only admin and superadmin can manage permissions
+      const isAdminOrSuper = req.user!.role === 'admin' || req.user!.role === 'superadmin';
+      if (!isAdminOrSuper) {
+        return res.status(403).json({ error: 'Only admins can manage permissions' });
+      }
+      
       const userId = parseInt(req.params.userId);
       const { permissionName } = req.params;
       const body = revokePermissionSchema.parse(req.body);
@@ -141,9 +157,14 @@ router.delete('/api/users/:userId/permissions/:permissionName',
  */
 router.post('/api/users/:userId/permissions/:permissionName/reset',
   isAuthenticated,
-  requirePermission('users.manage_permissions'),
   async (req: Request, res: Response) => {
     try {
+      // Only admin and superadmin can manage permissions
+      const isAdminOrSuper = req.user!.role === 'admin' || req.user!.role === 'superadmin';
+      if (!isAdminOrSuper) {
+        return res.status(403).json({ error: 'Only admins can manage permissions' });
+      }
+      
       const userId = parseInt(req.params.userId);
       const { permissionName } = req.params;
       const { reason } = req.body;
