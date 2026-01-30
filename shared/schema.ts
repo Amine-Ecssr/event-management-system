@@ -14,15 +14,15 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const insertUserSchema = createInsertSchema(users, {
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+}).extend({
   username: z.string().min(3, "Username must be at least 3 characters"),
   password: z.string().min(6, "Password must be at least 6 characters").optional(),
   role: z.enum(['superadmin', 'admin', 'department', 'department_admin', 'events_lead', 'division_head', 'employee', 'viewer']).default('employee'),
   keycloakId: z.string().optional(),
   email: z.string().email().optional(),
-}).omit({
-  id: true,
-  createdAt: true,
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -74,12 +74,12 @@ export const categories = pgTable("categories", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const insertCategorySchema = createInsertSchema(categories, {
-  nameEn: z.string().min(1, "Category name (English) is required"),
-  nameAr: z.string().optional(),
-}).omit({
+export const insertCategorySchema = createInsertSchema(categories).omit({
   id: true,
   createdAt: true,
+}).extend({
+  nameEn: z.string().min(1, "Category name (English) is required"),
+  nameAr: z.string().optional(),
 });
 
 export type InsertCategory = z.infer<typeof insertCategorySchema>;
@@ -151,17 +151,17 @@ export const reminderQueue = pgTable("reminder_queue", {
   unique("unique_reminder").on(table.eventId, table.scheduledFor, table.reminderType),
 ]);
 
-export const insertEventSchema = createInsertSchema(events, {
+export const insertEventSchema = createInsertSchema(events).omit({
+  id: true,
+}).extend({
   startTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Start time must be in HH:MM format (00:00 to 23:59)").optional().nullable().or(z.literal('')),
   endTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "End time must be in HH:MM format (00:00 to 23:59)").optional().nullable().or(z.literal('')),
   agendaEnFileName: z.string().optional().nullable(),
   agendaEnStoredFileName: z.string().optional().nullable(),
   agendaArFileName: z.string().optional().nullable(),
   agendaArStoredFileName: z.string().optional().nullable(),
-}).omit({
-  id: true,
 }).refine(
-  (data) => {
+  (data: { startDate: string | number | Date; endDate: string | number | Date; }) => {
     const startDate = new Date(data.startDate);
     const endDate = new Date(data.endDate);
     return endDate >= startDate;
@@ -171,7 +171,7 @@ export const insertEventSchema = createInsertSchema(events, {
     path: ["endDate"],
   }
 ).refine(
-  (data) => {
+  (data: { startDate: string | number | Date; endDate: string | number | Date; startTime?: string | null; endTime?: string | null; }) => {
     // If dates are the same and both times are provided, validate end time > start time
     if (data.startDate === data.endDate && data.startTime && data.endTime && data.startTime.trim() && data.endTime.trim()) {
       return data.endTime > data.startTime;
@@ -518,13 +518,13 @@ export const eventCustomEmails = pgTable("event_custom_emails", {
   index("IDX_event_custom_emails_event_id").on(table.eventId),
 ]);
 
-export const insertEventCustomEmailSchema = createInsertSchema(eventCustomEmails, {
-  subject: z.string().min(1, "Subject is required"),
-  body: z.string().min(1, "Body is required"),
-}).omit({
+export const insertEventCustomEmailSchema = createInsertSchema(eventCustomEmails).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  subject: z.string().min(1, "Subject is required"),
+  body: z.string().min(1, "Body is required"),
 });
 
 export const updateEventCustomEmailSchema = z.object({
@@ -558,12 +558,12 @@ export const invitationEmailJobs = pgTable("invitation_email_jobs", {
   index("IDX_invitation_email_jobs_created_at").on(table.createdAt),
 ]);
 
-export const insertInvitationEmailJobSchema = createInsertSchema(invitationEmailJobs, {
-  waitTimeSeconds: z.number().int().min(1).max(60).default(2),
-  useCustomEmail: z.boolean().default(false),
-}).omit({
+export const insertInvitationEmailJobSchema = createInsertSchema(invitationEmailJobs).omit({
   id: true,
   createdAt: true,
+}).extend({
+  waitTimeSeconds: z.number().int().min(1).max(60).default(2),
+  useCustomEmail: z.boolean().default(false),
 });
 
 export const updateInvitationEmailJobSchema = z.object({
@@ -668,11 +668,11 @@ export const departmentEmails = pgTable("department_emails", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const insertDepartmentEmailSchema = createInsertSchema(departmentEmails, {
-  email: z.string().email("Invalid email address"),
-}).omit({
+export const insertDepartmentEmailSchema = createInsertSchema(departmentEmails).omit({
   id: true,
   createdAt: true,
+}).extend({
+  email: z.string().email("Invalid email address"),
 });
 
 export type InsertDepartmentEmail = z.infer<typeof insertDepartmentEmailSchema>;
@@ -805,7 +805,11 @@ export const tasks = pgTable(
   ],
 );
 
-export const insertTaskSchema = createInsertSchema(tasks, {
+export const insertTaskSchema = createInsertSchema(tasks).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
   status: z.enum(['pending', 'in_progress', 'completed', 'cancelled', 'waiting']).default('pending'),
   priority: z.enum(['high', 'medium', 'low']).default('medium'),
   notificationEmails: z.array(z.string().email()).optional(),
@@ -813,12 +817,8 @@ export const insertTaskSchema = createInsertSchema(tasks, {
   leadId: z.number().optional(),
   partnershipId: z.number().optional(),
   departmentId: z.number().optional(),
-}).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
 }).refine(
-  (data) => {
+  (data: { eventDepartmentId?: number; leadId?: number; partnershipId?: number; }) => {
     const hasEvent = !!data.eventDepartmentId;
     const hasLead = !!data.leadId;
     const hasPartnership = !!data.partnershipId;
@@ -982,7 +982,12 @@ export const organizations = pgTable("organizations", {
   index("IDX_organizations_last_activity").on(table.lastActivityDate),
 ]);
 
-export const insertOrganizationSchema = createInsertSchema(organizations, {
+export const insertOrganizationSchema = createInsertSchema(organizations).omit({
+  id: true,
+  createdAt: true,
+  lastActivityDate: true,
+  lastInactivityNotificationSent: true,
+}).extend({
   nameEn: z.string().min(1, "Organization name (English) is required"),
   nameAr: z.string().optional(),
   isPartner: z.boolean().default(false),
@@ -1000,11 +1005,6 @@ export const insertOrganizationSchema = createInsertSchema(organizations, {
   // Inactivity monitoring fields
   inactivityThresholdMonths: z.number().int().min(1).max(24).optional().nullable(),
   notifyOnInactivity: z.boolean().optional(),
-}).omit({
-  id: true,
-  createdAt: true,
-  lastActivityDate: true,
-  lastInactivityNotificationSent: true,
 });
 
 export const updateOrganizationSchema = z.object({
@@ -1039,12 +1039,12 @@ export const positions = pgTable("positions", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const insertPositionSchema = createInsertSchema(positions, {
-  nameEn: z.string().min(1, "Position name (English) is required"),
-  nameAr: z.string().optional(),
-}).omit({
+export const insertPositionSchema = createInsertSchema(positions).omit({
   id: true,
   createdAt: true,
+}).extend({
+  nameEn: z.string().min(1, "Position name (English) is required"),
+  nameAr: z.string().optional(),
 });
 
 export type InsertPosition = z.infer<typeof insertPositionSchema>;
@@ -1058,12 +1058,12 @@ export const partnershipTypes = pgTable("partnership_types", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const insertPartnershipTypeSchema = createInsertSchema(partnershipTypes, {
-  nameEn: z.string().min(1, "Partnership type name (English) is required"),
-  nameAr: z.string().optional(),
-}).omit({
+export const insertPartnershipTypeSchema = createInsertSchema(partnershipTypes).omit({
   id: true,
   createdAt: true,
+}).extend({
+  nameEn: z.string().min(1, "Partnership type name (English) is required"),
+  nameAr: z.string().optional(),
 });
 
 export type InsertPartnershipType = z.infer<typeof insertPartnershipTypeSchema>;
@@ -1077,12 +1077,12 @@ export const agreementTypes = pgTable("agreement_types", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const insertAgreementTypeSchema = createInsertSchema(agreementTypes, {
-  nameEn: z.string().min(1, "Agreement type name (English) is required"),
-  nameAr: z.string().optional(),
-}).omit({
+export const insertAgreementTypeSchema = createInsertSchema(agreementTypes).omit({
   id: true,
   createdAt: true,
+}).extend({
+  nameEn: z.string().min(1, "Agreement type name (English) is required"),
+  nameAr: z.string().optional(),
 });
 
 export type InsertAgreementType = z.infer<typeof insertAgreementTypeSchema>;
@@ -1122,7 +1122,11 @@ export const contacts = pgTable("contacts", {
   index("IDX_contacts_is_eligible_speaker").on(table.isEligibleSpeaker),
 ]);
 
-export const insertContactSchema = createInsertSchema(contacts, {
+export const insertContactSchema = createInsertSchema(contacts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
   nameEn: z.string().min(1, "Name (English) is required"),
   nameAr: z.string().optional(),
   title: z.string().optional(),
@@ -1135,10 +1139,6 @@ export const insertContactSchema = createInsertSchema(contacts, {
   profilePictureKey: z.string().optional(),
   profilePictureThumbnailKey: z.string().optional(),
   isEligibleSpeaker: z.boolean().default(false),
-}).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
 });
 
 export const updateContactSchema = z.object({
@@ -1175,13 +1175,13 @@ export const eventSpeakers = pgTable("event_speakers", {
   unique("unique_event_speaker").on(table.eventId, table.contactId),
 ]);
 
-export const insertEventSpeakerSchema = createInsertSchema(eventSpeakers, {
+export const insertEventSpeakerSchema = createInsertSchema(eventSpeakers).omit({
+  id: true,
+  createdAt: true,
+}).extend({
   role: z.string().optional(),
   roleAr: z.string().optional(),
   displayOrder: z.number().int().default(0),
-}).omit({
-  id: true,
-  createdAt: true,
 });
 
 export const updateEventSpeakerSchema = z.object({
@@ -1219,7 +1219,10 @@ export const archivedEventSpeakers = pgTable("archived_event_speakers", {
   index("IDX_archived_event_speakers_contact_id").on(table.contactId),
 ]);
 
-export const insertArchivedEventSpeakerSchema = createInsertSchema(archivedEventSpeakers, {
+export const insertArchivedEventSpeakerSchema = createInsertSchema(archivedEventSpeakers).omit({
+  id: true,
+  createdAt: true,
+}).extend({
   role: z.string().optional(),
   roleAr: z.string().optional(),
   displayOrder: z.number().int().default(0),
@@ -1233,9 +1236,6 @@ export const insertArchivedEventSpeakerSchema = createInsertSchema(archivedEvent
   speakerOrganizationAr: z.string().optional(),
   speakerProfilePictureKey: z.string().optional(),
   speakerProfilePictureThumbnailKey: z.string().optional(),
-}).omit({
-  id: true,
-  createdAt: true,
 });
 
 export type InsertArchivedEventSpeaker = z.infer<typeof insertArchivedEventSpeakerSchema>;
@@ -1257,11 +1257,11 @@ export const eventAttendees = pgTable("event_attendees", {
   unique("unique_event_attendee").on(table.eventId, table.contactId), // Prevent duplicate attendance records
 ]);
 
-export const insertEventAttendeeSchema = createInsertSchema(eventAttendees, {
-  notes: z.string().optional().nullable(),
-}).omit({
+export const insertEventAttendeeSchema = createInsertSchema(eventAttendees).omit({
   id: true,
   createdAt: true,
+}).extend({
+  notes: z.string().optional().nullable(),
 });
 
 export type InsertEventAttendee = z.infer<typeof insertEventAttendeeSchema>;
@@ -1291,14 +1291,14 @@ export const eventInvitees = pgTable("event_invitees", {
   unique("unique_event_invitee").on(table.eventId, table.contactId), // Prevent duplicate invitation records
 ]);
 
-export const insertEventInviteeSchema = createInsertSchema(eventInvitees, {
+export const insertEventInviteeSchema = createInsertSchema(eventInvitees).omit({
+  id: true,
+  createdAt: true,
+}).extend({
   rsvp: z.boolean().default(false),
   registered: z.boolean().default(false),
   inviteEmailSent: z.boolean().default(false),
   notes: z.string().optional().nullable(),
-}).omit({
-  id: true,
-  createdAt: true,
 });
 
 export const updateEventInviteeSchema = z.object({
@@ -1337,13 +1337,13 @@ export const updates = pgTable(
   ],
 );
 
-export const insertUpdateSchema = createInsertSchema(updates, {
-  type: z.enum(['weekly', 'monthly']),
-  content: z.string(),
-}).omit({
+export const insertUpdateSchema = createInsertSchema(updates).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  type: z.enum(['weekly', 'monthly']),
+  content: z.string(),
 });
 
 export type InsertUpdate = z.infer<typeof insertUpdateSchema>;
@@ -1549,7 +1549,11 @@ export const partnershipAgreements = pgTable(
   ],
 );
 
-export const insertPartnershipAgreementSchema = createInsertSchema(partnershipAgreements, {
+export const insertPartnershipAgreementSchema = createInsertSchema(partnershipAgreements).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
   title: z.string().min(1, "Agreement title is required"),
   titleAr: z.string().optional().nullable(),
   description: z.string().optional().nullable(),
@@ -1569,10 +1573,6 @@ export const insertPartnershipAgreementSchema = createInsertSchema(partnershipAg
   languages: z.array(z.string()).optional().nullable(),
   terminationClause: z.string().optional().nullable(),
   terminationClauseAr: z.string().optional().nullable(),
-}).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
 });
 
 export const updatePartnershipAgreementSchema = z.object({
@@ -1620,7 +1620,10 @@ export const agreementAttachments = pgTable(
   ],
 );
 
-export const insertAgreementAttachmentSchema = createInsertSchema(agreementAttachments, {
+export const insertAgreementAttachmentSchema = createInsertSchema(agreementAttachments).omit({
+  id: true,
+  uploadedAt: true,
+}).extend({
   agreementId: z.number().int().positive(),
   fileName: z.string().min(1).max(255),
   originalFileName: z.string().min(1).max(255),
@@ -1628,9 +1631,6 @@ export const insertAgreementAttachmentSchema = createInsertSchema(agreementAttac
   fileSize: z.number().int().positive(),
   mimeType: z.string().min(1).max(100),
   uploadedByUserId: z.number().int().positive().optional().nullable(),
-}).omit({
-  id: true,
-  uploadedAt: true,
 });
 
 export type InsertAgreementAttachment = z.infer<typeof insertAgreementAttachmentSchema>;
@@ -1674,7 +1674,11 @@ export const partnershipActivities = pgTable(
   ],
 );
 
-export const insertPartnershipActivitySchema = createInsertSchema(partnershipActivities, {
+export const insertPartnershipActivitySchema = createInsertSchema(partnershipActivities).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
   title: z.string().min(1, "Activity title is required"),
   titleAr: z.string().optional().nullable(),
   description: z.string().optional().nullable(),
@@ -1686,10 +1690,6 @@ export const insertPartnershipActivitySchema = createInsertSchema(partnershipAct
   outcome: z.string().optional().nullable(),
   outcomeAr: z.string().optional().nullable(),
   impactScore: z.number().int().min(1).max(5).optional().nullable(),
-}).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
 });
 
 export const updatePartnershipActivitySchema = z.object({
@@ -1729,13 +1729,13 @@ export const partnershipContacts = pgTable(
   ],
 );
 
-export const insertPartnershipContactSchema = createInsertSchema(partnershipContacts, {
+export const insertPartnershipContactSchema = createInsertSchema(partnershipContacts).omit({
+  id: true,
+  createdAt: true,
+}).extend({
   role: z.enum(['primary', 'liaison', 'technical', 'executive', 'other']).optional().nullable(),
   roleAr: z.string().optional().nullable(),
   isPrimary: z.boolean().default(false),
-}).omit({
-  id: true,
-  createdAt: true,
 });
 
 export const updatePartnershipContactSchema = z.object({
@@ -1766,13 +1766,13 @@ export const partnershipComments = pgTable(
   ],
 );
 
-export const insertPartnershipCommentSchema = createInsertSchema(partnershipComments, {
-  body: z.string().min(1, "Comment body is required"),
-  bodyAr: z.string().optional().nullable(),
-}).omit({
+export const insertPartnershipCommentSchema = createInsertSchema(partnershipComments).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  body: z.string().min(1, "Comment body is required"),
+  bodyAr: z.string().optional().nullable(),
 });
 
 export const updatePartnershipCommentSchema = z.object({
@@ -1824,7 +1824,11 @@ export const leads = pgTable(
   ],
 );
 
-export const insertLeadSchema = createInsertSchema(leads, {
+export const insertLeadSchema = createInsertSchema(leads).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
   name: z.string().min(1, "Name is required"),
   nameAr: z.string().optional().nullable(),
   email: z.string().email().optional().nullable().or(z.literal('')),
@@ -1834,10 +1838,6 @@ export const insertLeadSchema = createInsertSchema(leads, {
   organizationName: z.string().optional().nullable(),
   notes: z.string().optional().nullable(),
   notesAr: z.string().optional().nullable(),
-}).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
 });
 
 export const updateLeadSchema = z.object({
@@ -1897,16 +1897,16 @@ export const leadInteractions = pgTable(
   ],
 );
 
-export const insertLeadInteractionSchema = createInsertSchema(leadInteractions, {
+export const insertLeadInteractionSchema = createInsertSchema(leadInteractions).omit({
+  id: true,
+  createdAt: true,
+}).extend({
   type: z.enum(['email', 'phone_call', 'meeting', 'other']),
   description: z.string().min(1, "Description is required"),
   descriptionAr: z.string().optional().nullable(),
   outcome: z.string().optional().nullable(),
   outcomeAr: z.string().optional().nullable(),
   interactionDate: z.date().optional(),
-}).omit({
-  id: true,
-  createdAt: true,
 });
 
 export const updateLeadInteractionSchema = z.object({
@@ -1962,16 +1962,16 @@ export const partnershipInteractions = pgTable(
   ],
 );
 
-export const insertPartnershipInteractionSchema = createInsertSchema(partnershipInteractions, {
+export const insertPartnershipInteractionSchema = createInsertSchema(partnershipInteractions).omit({
+  id: true,
+  createdAt: true,
+}).extend({
   type: z.enum(['email', 'phone_call', 'meeting', 'document_sent', 'proposal_submitted', 'review_session', 'other']),
   description: z.string().min(1, "Description is required"),
   descriptionAr: z.string().optional().nullable(),
   outcome: z.string().optional().nullable(),
   outcomeAr: z.string().optional().nullable(),
   interactionDate: z.date().optional(),
-}).omit({
-  id: true,
-  createdAt: true,
 });
 
 export const updatePartnershipInteractionSchema = z.object({
@@ -2013,13 +2013,13 @@ export const interactionAttachments = pgTable(
   ]
 );
 
-export const insertInteractionAttachmentSchema = createInsertSchema(interactionAttachments, {
+export const insertInteractionAttachmentSchema = createInsertSchema(interactionAttachments).omit({
+  id: true,
+  uploadedAt: true,
+}).extend({
   originalFileName: z.string().min(1, "File name is required"),
   fileSize: z.number().positive("File size must be positive"),
   mimeType: z.string().min(1, "MIME type is required"),
-}).omit({
-  id: true,
-  uploadedAt: true,
 });
 
 export type InsertInteractionAttachment = z.infer<typeof insertInteractionAttachmentSchema>;
@@ -2044,12 +2044,12 @@ export const aiChatConversations = pgTable(
   ]
 );
 
-export const insertAiChatConversationSchema = createInsertSchema(aiChatConversations, {
-  title: z.string().max(255).optional(),
-}).omit({
+export const insertAiChatConversationSchema = createInsertSchema(aiChatConversations).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  title: z.string().max(255).optional(),
 });
 
 export type InsertAiChatConversation = z.infer<typeof insertAiChatConversationSchema>;
@@ -2072,7 +2072,7 @@ export const aiChatMessages = pgTable(
   ]
 );
 
-export const insertAiChatMessageSchema = createInsertSchema(aiChatMessages, {
+export const insertAiChatMessageSchema = createInsertSchema(aiChatMessages).extend({
   role: z.enum(['user', 'assistant']),
   content: z.string().min(1),
   sources: z.array(z.object({
@@ -2208,16 +2208,16 @@ export const insertRolePermissionSchema = createInsertSchema(rolePermissions).om
   createdAt: true,
 });
 
-export const insertUserPermissionSchema = createInsertSchema(userPermissions, {
+export const insertUserPermissionSchema = createInsertSchema(userPermissions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
   userId: z.number().positive(),
   permissionId: z.number().positive(),
   granted: z.boolean(),
   reason: z.string().optional(),
   expiresAt: z.date().optional(),
-}).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
 });
 
 export const insertPermissionAuditLogSchema = createInsertSchema(permissionAuditLog).omit({

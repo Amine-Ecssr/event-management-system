@@ -92,6 +92,18 @@ services:
     networks:
       - dev-network
 
+  # drizzle: 
+  #   container_name: ecssr-ems-sync-schema-dev
+  #   image: node:20-alpine 
+  #   working_dir: /app 
+  #   environment:
+  #     DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-ecssr_ems_dev}
+  #   volumes: 
+  #      - .:/app 
+  #   command: ["npx", "drizzle-kit", "push"] 
+  #   depends_on: 
+  #    - db
+
   # Database Migrations
   migrate:
     build:
